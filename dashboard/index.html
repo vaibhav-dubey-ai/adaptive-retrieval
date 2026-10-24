@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Adaptive QA — Should the AI search before answering?</title>
+<style>
+  :root { --ink:#1a2433; --sub:#5a6b82; --line:#d8dee9; --bg:#f6f8fb; --acc:#2f6fed; --ok:#1e7f4f; --bad:#b3261e; }
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, sans-serif; max-width: 1180px; margin: 24px auto; padding: 0 16px; color: var(--ink); }
+  h1 { font-size: 1.35rem; margin-bottom: 4px; } h2 { font-size: 1.05rem; margin-top: 1.5rem; } h3 { font-size: 0.95rem; }
+  .k { color: var(--sub); font-size: 0.8rem; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-top:12px; }
+  .row { display:flex; gap:8px; align-items:flex-start; flex-wrap:wrap; }
+  textarea#q { flex:1 1 480px; min-height:70px; padding:8px; font:inherit; }
+  button { padding:8px 14px; cursor:pointer; border:1px solid var(--line); border-radius:7px; background:#fff; }
+  button.primary { background:var(--acc); border-color:var(--acc); color:#fff; }
+  button.danger { color:var(--bad); }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+  table { border-collapse: collapse; width:100%; font-size:0.85rem; }
+  th, td { border:1px solid var(--line); padding:5px 8px; text-align:left; vertical-align:top; }
+  th { background:#eef1f6; }
+  pre { background:#f2f4f8; padding:8px; border-radius:6px; overflow-x:auto; font-size:0.8rem; white-space:pre-wrap; }
+  .hidden { display:none; }
+  .pill { display:inline-block; padding:2px 10px; border-radius:999px; font-size:0.8rem; border:1px solid var(--line); }
+  .pill.selected { background:#e8f0fe; border-color:var(--acc); color:var(--acc); font-weight:600; }
+  .branch { flex:1 1 420px; border:1px solid var(--line); border-radius:10px; padding:12px; min-width:380px; }
+  .branch.selected { border:2px solid var(--acc); }
+  .branch h3 { margin-top:0; }
+  .branch.err { border-color:var(--bad); }
+  .metric-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:8px; }
+  .metric { background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:8px 10px; }
+  .metric b { display:block; font-size:1.05rem; }
+  .neg { color:var(--bad); } .pos { color:var(--ok); }
+  .formula { font-size:0.78rem; color:var(--sub); }
+</style>
+</head>
+<body>
+<h1>Should the AI search before answering?</h1>
+<p class="k">Adaptive retrieval decision engine → side-by-side answers (with/without retrieval), real timings and token accounting. Reference answers and oracle labels are never available to the live decision engine.</p>
+
+<h2>1 · Answering model configuration</h2>
+<div class="card">
+  <span id="llmStatus" class="k">Checking model configuration…</span>
+  <p class="k">Configure the answering model via a real <code>.env</code> file (LLM_API_KEY, LLM_BASE_URL, LLM_MODEL — see <code>.env.example</code>). No credentials are hardcoded or echoed; only presence is shown.</p>
+</div>
+
+<h2>2 · Ask a question</h2>
+<div class="card">
+  <textarea id="q" placeholder="Type your question, then choose a mode. Uploaded documents are used only by the WITH-retrieval branch."></textarea>
+  <div class="row" style="margin-top:8px">
+    <button class="primary" onclick="runAsk('compare')">Run comparison (decision → both answers)</button>
+    <button onclick="runAsk('adaptive')">Run adaptive-only (decision → selected path only)</button>
+  </div>
+  <p id="status" class="k" style="margin:8px 0 0"></p>
+</div>
+
+<h2>3 · Documents</h2>
+<div class="card">
+  <div class="row">
+    <input type="file" id="docFile" accept=".pdf,.txt,.md,.docx"/>
+    <button onclick="uploadDoc()">Upload document</button>
+    <button onclick="refreshDocs()">Refresh list</button>
+  </div>
+  <p id="docStatus" class="k" style="margin:8px 0"></p>
+  <table id="docTable">
+    <thead><tr><th>File</th><th>Type</th><th>Pages</th><th>Chunks</th><th>Active</th><th>Actions</th><th>Note</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <p class="k">Option A never sees these documents. Option B searches only the chunks of <b>active</b> documents; toggling Active selects the collection. Duplicates are detected by content.</p>
+</div>
+
+<div id="result" class="hidden"></div>
+
+<h2>4 · Offline benchmark (HotpotQA four policies)</h2>
+<div class="card">
+  <p>
+    <button onclick="runBatch()">Run batch experiment</button>
+    <button onclick="loadSummary()">Load latest summary</button>
+    <a href="/evaluate/export?format=csv"><button>Export CSV</button></a>
+    <a href="/evaluate/export?format=json"><button>Export JSON</button></a>
+  </p>
+  <p id="batchStatus" class="k"></p>
+  <div id="summaryOut"></div>
+  <h3>Charts</h3>
+  <img id="chartQvsL" class="hidden" style="max-width:100%" alt="quality vs latency"/>
+  <img id="chartQvsC" class="hidden" style="max-width:100%" alt="quality vs cost"/>
+  <img id="chartRR" class="hidden" style="max-width:100%" alt="retrieval rate"/>
+</div>
+
+<script>
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = o => JSON.stringify(o,null,2);
+const set = (id,t)=>{document.getElementById(id).textContent=t;};
+const ms = v => (v==null?"—":Number(v).toFixed(1)+" ms");
+
+async function checkLLM(){
+  try{
+    const j = await (await fetch("/llm/config-status")).json();
+    const ok = j.api_key_set && j.model_set && j.base_url_set;
+    document.getElementById("llmStatus").innerHTML = ok
+      ? '<span style="color:var(--ok)">Answering model configured (key, base URL, model all set).</span>'
+      : '<span style="color:var(--bad)">Answering model NOT fully configured — missing: '
+        + [!j.api_key_set&&"API key",!j.model_set&&"model",!j.base_url_set&&"base URL"].filter(Boolean).join(", ")
+        + '. Set LLM_API_KEY / LLM_BASE_URL / LLM_MODEL in .env (copy .env.example) and restart the server.</span>';
+  }catch(e){ set("llmStatus","Could not read /llm/config-status: "+e); }
+}
+
+async function uploadDoc(){
+  const f = document.getElementById("docFile").files[0];
+  if(!f){ set("docStatus","Choose a file first."); return; }
+  set("docStatus","Uploading "+f.name+" …");
+  const fd = new FormData(); fd.append("file", f);
+  const r = await fetch("/documents/upload",{method:"POST",body:fd});
+  let j; try{ j = await r.json(); }catch(_){ j=null; }
+  if(!r.ok){ set("docStatus","Upload failed: "+(j&&j.detail||r.status)); }
+  else{
+    const d=j.document; let note=d.warning?" ⚠ "+d.warning:"";
+    set("docStatus", j.message+" — "+d.n_chunks+" chunks."+note);
+  }
+  refreshDocs();
+}
+
+async function refreshDocs(){
+  const j = await (await fetch("/documents")).json();
+  const tb = document.querySelector("#docTable tbody");
+  tb.innerHTML = "";
+  (j.documents||[]).forEach(d=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${esc(d.filename)}</td><td>${esc(d.kind)}</td><td>${d.n_pages||"—"}</td><td>${d.n_chunks}</td>
+      <td>${d.active?'<span class="pill selected">active</span>':'<span class="k">inactive</span>'}</td>
+      <td><button onclick="toggleDoc('${d.doc_id}',${!d.active})">Set ${d.active?'inactive':'active'}</button>
+          <button class="danger" onclick="delDoc('${d.doc_id}')">Delete</button></td>
+      <td class="k">${esc(d.warning||"")}</td>`;
+    tb.appendChild(tr);
+  });
+  if(!(j.documents||[]).length){ tb.innerHTML = '<tr><td colspan="7" class="k">No documents uploaded yet.</td></tr>'; }
+}
+
+async function toggleDoc(id, active){
+  await fetch(`/documents/${id}/active`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({active})});
+  refreshDocs();
+}
+async function delDoc(id){
+  await fetch(`/documents/${id}`,{method:"DELETE"});
+  refreshDocs();
+}
+
+let current = null;
+async function runAsk(mode){
+  const q = document.getElementById("q").value.trim();
+  if(!q){ set("status","Type a question first."); return; }
+  set("status","Running "+mode+" flow — decision first, then answering…");
+  try{
+    const r = await fetch("/ask?mode="+mode,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({question:q})});
+    const j = await r.json();
+    if(!r.ok){ set("status","Request failed: "+(j.detail||r.status)); return; }
+    current = j; renderResult(); set("status","");
+  }catch(e){ set("status","Error: "+e); }
+}
+
+function tokensLine(b){
+  if(!b.tokens) return '<span class="k">tokens: n/a (no model call)</span>';
+  return `input ${b.tokens.input_tokens} · output ${b.tokens.output_tokens} · total <b>${b.tokens.total_tokens}</b> <span class="k">(${esc(b.tokens.source)})</span>`;
+}
+
+function renderResult(){
+  const out = document.getElementById("result");
+  const r = current;
+  const sel = r.selected_branch;
+
+  let h = `
+  <h2>Result — ${esc(r.mode)} mode</h2>
+  <div class="card">
+    <p><b>Q:</b> ${esc(r.question)}</p>
+    <div id="decisionPanel"></div>
+  </div>
+  <div class="row" id="branches"></div>
+  <div class="card" id="perfPanel"></div>`;
+  out.innerHTML = h;
+  out.classList.remove("hidden");
+
+  // ---- decision panel
+  const d = r.decision;
+  let dh = `<h3 style="margin:4px 0">Adaptive decision (made FIRST — before either branch ran)</h3>
+    <p><span class="pill ${d.decision==='RETRIEVE'?'selected':''}">${esc(d.decision)}</span>
+     <span class="k">decision latency ${ms(d.decision_ms)} · score ${d.decision_score==null?"n/a":Number(d.decision_score).toFixed(3)}</span></p>`;
+  dh += `<details><summary class="k">decision features / rationale</summary><pre>${esc(fmt(d.decision_features))}</pre></details>`;
+  document.getElementById("decisionPanel").innerHTML = dh;
+
+  // ---- branches
+  const holder = document.getElementById("branches");
+  const executed = r.mode==="adaptive" ? r.executed_branch : null;
+  const branches = [
+    {label:"A", title:"Option A — without retrieval", shown:(r.mode==="adaptive" ? executed && executed.label==="A" : r.selected_branch==="A"), data:(r.mode==="adaptive"? (executed&&executed.label==="A"?executed:null) : r.branch_a)},
+    {label:"B", title:"Option B — with retrieval", shown:(r.mode==="adaptive" ? executed && executed.label==="B" : r.selected_branch==="B"), data:(r.mode==="adaptive"? (executed&&executed.label==="B"?executed:null) : r.branch_b)},
+  ];
+  let bh = "";
+  for(const br of branches){
+    const b = br.data || {label:br.label, ok:false, error:null, never_run:(r.mode==="adaptive")};
+    const title = br.title;
+    const isExecutedVariant = (r.mode==="adaptive" ? (executed && executed.label===br.label) : true);
+    bh += `<div class="branch ${b.ok?'':'err'} ${r.mode==='compare'&&r.selected_branch===br.label?'selected':''}">
+      <h3>${esc(title.split(' — ')[0])} <span class="k">${esc(title.split(' — ')[1])}</span></h3>
+      ${ (r.mode==="adaptive")
+          ? (isExecutedVariant
+             ? '<p class="pill selected">⭐ executed — selected by the decision engine</p>'
+             : '<p class="k">not executed (adaptive-only mode: the other path never ran)</p>')
+          : (r.selected_branch===br.label
+              ? '<p class="pill selected">⭐ decision engine selected this path</p>'
+              : '<p class="k">shown for comparison — NOT selected by the decision engine</p>') }
+      ${b.ok
+        ? `<p><b>Answer:</b> ${esc(b.text ?? "")}</p>`
+        : (b.never_run
+            ? `<p class="k"></p>`
+            : `<p style="color:var(--bad);font-weight:600">Branch failed: ${esc(b.error||"unknown error")}</p>`)}
+      <p class="k">Backend: ${esc(b.backend||"—")}${b.abstained?" · abstained":""}</p>
+      <table>
+        <tr><td>Performed document retrieval</td><td>${br.label==="B" ? (b.ok||!b.never_run ? "yes" : "—") : "<b>no</b> (never)"}</td></tr>`;
+    if(b.ok){
+      const t = b.tokens||null;
+      bh += `
+        <tr><td>Answer generation time</td><td>${ms(b.generation_ms)}</td></tr>
+        ${b.retrieval_ms!=null?`<tr><td>Document retrieval time</td><td>${ms(b.retrieval_ms)}</td></tr>`:""}
+        <tr><td>Total path time</td><td>${ms(b.path_total_ms)}</td></tr>
+        <tr><td>Input / output / total tokens</td>${t?`<td>${t.input_tokens} / ${t.output_tokens} / <b>${t.total_tokens}</b> <span class="k">(${esc(t.source)})</span></td>`:'<td class="k">n/a (no model call)</td>'}</tr>`;
+    }
+    bh += `</table>`;
+    if(b.retrieval_hits && b.retrieval_hits.length){
+      bh += `<details open><summary class="k">retrieved passages — source files and scores</summary>
+        <table><tr><th>#</th><th>score</th><th>source</th><th>excerpt</th></tr>`;
+      b.retrieval_hits.forEach(hit=>{
+        const src = hit.source_file ? `${esc(hit.source_file)}` + (hit.page!=null?` (page ${hit.page})`:"") : esc(hit.title||hit.doc_id);
+        bh += `<tr><td>${hit.rank}</td><td>${Number(hit.score).toFixed(3)}</td><td>${src}</td><td>${esc(hit.excerpt)}</td></tr>`;
+      });
+      bh += `</table></details>`;
+    }
+    bh += `</div>`;
+  }
+  holder.innerHTML = bh;
+
+  // ---- performance panel
+  const c = r.comparison;
+  let ph = `<h3>Performance comparison</h3>`;
+  if(r.mode==="adaptive"){
+    ph += `<p class="k">Deployed adaptive path — measured: decision ${ms(r.operations.decision_ms)}
+      ${r.operations.retrieval_ms!=null?" + retrieval "+ms(r.operations.retrieval_ms):""}
+      ${r.operations.generation_ms!=null?" + generation "+ms(r.operations.generation_ms):""}
+      = <b>total ${ms(r.adaptive_total_ms)}</b>. Only the selected branch executed.</p>
+      <p class="k">Token usage for the selected path: ${(r.token_usage.selected_branch||{}).total_tokens ?? "n/a"}
+      <span class="k">(${(r.token_usage.selected_branch||{}).source ?? "no model tokens"})</span>. Decision engine uses no LLM tokens.</p>`;
+  }else{
+    const a = r.branch_a, b = r.branch_b;
+    ph += `<div class="metric-grid">
+      <div class="metric"><span class="k">Option A total</span><b>${ms(a.path_total_ms)}</b></div>
+      <div class="metric"><span class="k">Option B total</span><b>${ms(b.path_total_ms)}</b></div>
+      <div class="metric"><span class="k">Retrieval time (B only)</span><b>${ms(b.retrieval_ms)}</b></div>
+      <div class="metric"><span class="k">Decision engine time</span><b>${ms(r.decision.decision_ms)}</b></div>
+      <div class="metric"><span class="k">Full comparison request</span><b>${ms(r.comparison_total_ms)}</b></div>
+      <div class="metric"><span class="k">Time difference (B − A)</span><b class="${(c.time_difference_ms||0)>0?'neg':''}">${ms(c.time_difference_ms)}</b></div>
+      <div class="metric"><span class="k">Option A tokens</span><b>${c.tokens_a ?? "—"}</b></div>
+      <div class="metric"><span class="k">Option B tokens</span><b>${c.tokens_b ?? "—"}</b></div>
+      <div class="metric"><span class="k">Token difference (B − A)</span><b class="${(c.token_difference||0)>0?'neg':''}">${c.token_difference ?? "—"}</b></div>
+      <div class="metric"><span class="k">% time change vs B</span><b>${c.time_saved_pct==null?"—":c.time_saved_pct+" %"}</b></div>
+      <div class="metric"><span class="k">% token change vs B</span><b>${c.token_saved_pct_when_B_used_more==null?"—":c.token_saved_pct_when_B_used_more+" %"}</b></div>
+    </div>
+    <p class="formula">Positive time/token difference ⇒ the WITH-retrieval branch cost MORE (no-retrieval "saved" that amount); negative ⇒ an increase for the no-retrieval branch. Units: milliseconds, tokens. The full-comparison wall-clock runs both branches and is NOT deployed adaptive latency — use adaptive-only mode for that.</p>`;
+  }
+  document.getElementById("perfPanel").innerHTML = ph;
+  out.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+async function runBatch(){
+  const n = prompt("Number of eval questions (max 200, recommended 50–100):","50");
+  if(!n) return;
+  set("batchStatus","Running batch experiment… (minutes)");
+  const r = await fetch("/evaluate/run",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({limit:Number(n)})});
+  const j = await r.json();
+  set("batchStatus", r.ok ? "Done — "+j.run_dir : "Failed: "+(j.detail||r.status));
+  if(r.ok) loadSummary();
+}
+
+async function loadSummary(){
+  const r = await fetch("/evaluate/summary");
+  const j = await r.json();
+  if(!r.ok){ set("batchStatus","No completed run yet."); return; }
+  let h = `<table><tr><th>policy</th><th>EM</th><th>F1</th><th>retrieval rate</th><th>mean E2E ms</th><th>median E2E ms</th><th>abstain rate</th></tr>`;
+  for(const [p,m] of Object.entries(j.policies||{})){
+    h += `<tr><td>${esc(p)}</td><td>${(m.em??0).toFixed(3)}</td><td>${(m.f1??0).toFixed(3)}</td>
+      <td>${(m.retrieval_rate??0).toFixed(2)}</td><td>${(m.latency_ms?.mean_e2e??0).toFixed(1)}</td>
+      <td>${(m.latency_ms?.median_e2e??0).toFixed(1)}</td><td>${(m.abstain_rate??0).toFixed(2)}</td></tr>`;
+  }
+  h += `</table>`;
+  document.getElementById("summaryOut").innerHTML = h;
+  for(const [id,name] of [["chartQvsL","quality_vs_latency.png"],["chartQvsC","quality_vs_cost.png"],["chartRR","retrieval_rate.png"]]){
+    const img = document.getElementById(id);
+    img.src = "/evaluate/chart/"+name; img.classList.remove("hidden");
+  }
+}
+
+refreshDocs(); checkLLM();
+</script>
+</body>
+</html>

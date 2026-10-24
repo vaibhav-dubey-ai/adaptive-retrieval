@@ -1,0 +1,114 @@
+{
+  "run": {
+    "seed": 13,
+    "tag": "local200"
+  },
+  "dataset": {
+    "name": "hotpotqa_distractor",
+    "hf_dataset": "hotpotqa/hotpot_qa",
+    "hf_config": "distractor",
+    "hf_rows_api": "https://datasets-server.huggingface.co/rows",
+    "eval_split": "train",
+    "eval_sample_n": 200,
+    "eval_offset_base": 40000,
+    "eval_sample_offset_seed": 101,
+    "eval_sample_offset_span": 2000,
+    "pretrain_split": "train",
+    "pretrain_rows_n": 6000,
+    "eval_level_filter": "easy",
+    "pretrain_offset_base": 15000,
+    "pretrain_offset_span": 5000,
+    "eval_jsonl": "data/hotpotqa_eval_sample.jsonl",
+    "pretrain_jsonl": "data/hotpotqa_pretrain_sample.jsonl"
+  },
+  "splits": {
+    "train_frac": 0.4,
+    "validation_frac": 0.3,
+    "seed": 13
+  },
+  "corpus": {
+    "retrieval_config": "distractor",
+    "jsonl_path": "data/corpus.jsonl",
+    "manifest_path": "data/corpus_manifest.json"
+  },
+  "parametric_store": {
+    "jsonl_path": "data/parametric_store.jsonl",
+    "max_snippet_tokens": 60,
+    "include_eval_gold_paragraphs": false
+  },
+  "retrieval": {
+    "retriever": "bm25",
+    "top_k": 8,
+    "bm25": {
+      "k1": 1.5,
+      "b": 0.75
+    },
+    "dense": {
+      "model_name": "all-MiniLM-L6-v2",
+      "batch_size": 32
+    }
+  },
+  "answering": {
+    "method_a_backend": "finite_engine",
+    "method_b_backend": "span_absorber",
+    "finite_engine": {
+      "knowledge_threshold": 0.5,
+      "relation_threshold": 0.35,
+      "min_title_frequency": 2
+    },    "span_absorber": {
+      "min_sentence_score": 0.35,
+      "max_context_chars": 6000
+    },
+    "openai_compatible": {
+      "base_url": null,
+      "model": null,
+      "temperature": 0.0,
+      "max_tokens": 120,
+      "timeout_s": 60,
+      "method_a_system_prompt": "Answer the question from your own knowledge only. You are not given any documents. If you are not confident the fact is in your knowledge, respond exactly: ABSTAIN.",
+      "method_b_system_prompt": "Answer the question using ONLY the provided passages. Quote the shortest exact span from a passage that answers the question. If the passages do not contain the answer, respond exactly: ABSTAIN."
+    },
+    "llm": {
+      "temperature": 0.2,
+      "max_tokens": 512,
+      "timeout_s": 90,
+      "max_retries": 3,
+      "retry_backoff_s": 2.0,
+      "closedbook_system_prompt": "",
+      "grounded_system_prompt": ""
+    }
+  },
+  "decision": {
+    "engine": "heuristic",
+    "model_path": "runs/decision_model/decision_bundle.json",
+    "heuristic": {
+      "weights": {
+        "temporal_cue": 0.6,
+        "superlative_cue": 0.2,
+        "entity_count": 0.3,
+        "unknown_familiarity": 0.5
+      },
+      "threshold": 0.6
+    },
+    "learned": {
+      "model": "gradient_boosting",
+      "n_estimators": 200,
+      "learning_rate": 0.05,
+      "max_depth": 3
+    }
+  },
+  "evaluation": {
+    "outcome_gap_threshold": 0.1,
+    "retrieve_class_threshold": 0.5
+  },
+  "experiment": {
+    "runs_dir": "runs",
+    "policy_cache_path": null,
+    "policy_names": ["never_retrieve", "always_retrieve", "adaptive", "oracle"],
+    "repeat_runs": 1,
+    "plots": true
+  },
+  "api": {
+    "dashboard_health": true
+  }
+}

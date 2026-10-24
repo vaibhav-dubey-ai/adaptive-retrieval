@@ -1,0 +1,7 @@
+[fetch] 200 easy questions from split='train' (base 40000)
+[ok] 200 eval questions -> C:\Users\HP\nlp_proj\data\hotpotqa_eval_sample.jsonl (offset 41190)
+[fetch] 6000 memory rows from split='train' (base 15000)
+[ok] 6000 pretrain rows -> C:\Users\HP\nlp_proj\data\hotpotqa_pretrain_sample.jsonl
+[ok] corpus built: 1974 docs -> data/corpus.jsonl
+[ok] evaluation-only gold manifest -> data/corpus_manifest.json
+[ok] parametric store: 36280 memory snippets -> data/parametric_store.jsonl

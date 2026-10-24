@@ -1,0 +1,12 @@
+[project]
+name = "adaptive-qa-research"
+version = "0.1.0"
+description = "Research project: should the AI search before answering? Adaptive retrieval decision-making for question answering."
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.setuptools]
+packages = ["adaptive_qa", "adaptive_qa.retrieval", "adaptive_qa.answering", "adaptive_qa.decision", "adaptive_qa.eval"]

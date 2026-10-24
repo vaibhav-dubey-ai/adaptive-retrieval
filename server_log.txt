@@ -1,0 +1,16 @@
+INFO:     Started server process [29080]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:63839 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63840 - "GET /llm/config-status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63841 - "POST /documents/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63842 - "POST /ask?mode=compare HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63843 - "POST /ask?mode=adaptive HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63845 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63846 - "GET /evaluate/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63847 - "GET /documents HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63848 - "DELETE /documents/udoc_8f9dc0d0a885 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50962 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50962 - "GET /documents HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55187 - "GET /llm/config-status HTTP/1.1" 200 OK
