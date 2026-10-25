@@ -128,7 +128,10 @@ class LLMBackend(AnsweringMethod):
             or (
                 "Answer the user's question using your own knowledge. "
                 "You have NOT been given any documents; do not pretend to have read any source. "
-                "Answer substantively and briefly (2-4 sentences). If genuinely unknown, say so plainly."
+                "Answer substantively and briefly (2-4 sentences). If genuinely unknown, say so plainly. "
+                "Output ONLY the final answer text. Do NOT include any internal reasoning, "
+                "planning, restatement of the question, or phrases like 'The user is asking' "
+                "or 'I need to'. Start directly with the answer itself."
             )
             if not self.grounded
             else (
@@ -136,7 +139,10 @@ class LLMBackend(AnsweringMethod):
                 "Prioritize evidence from them; cite which passage(s) [n] support the answer. "
                 "If passages are insufficient, supplement with general knowledge and CLEARLY MARK "
                 "that part as not document-supported. Do not fabricate document content. "
-                "Answer substantively and briefly (2-5 sentences)."
+                "Answer substantively and briefly (2-5 sentences). "
+                "Output ONLY the final answer text. Do NOT include any internal reasoning, "
+                "planning, restatement of the question, or phrases like 'The user is asking' "
+                "or 'I need to'. Start directly with the answer itself."
             )
         )
 
@@ -145,6 +151,84 @@ class LLMBackend(AnsweringMethod):
     def estimate_tokens(text: str) -> int:
         """Rough token estimate (≈ lexical tokens + punctuation); labeled estimated."""
         return len(re.findall(r"\S+", text or ""))
+
+    # ------------------------------------------------------------ response parsing
+    @staticmethod
+    def _extract_text(data: dict) -> str:
+        """Pull the visible assistant answer out of a chat-completion payload.
+
+        Handles the documented OpenAI shape (``choices[0].message.content``)
+        plus the variations actually seen on OpenAI-compatible routers
+        (OpenRouter) and reasoning models:
+
+        - ``message.content`` may be ``null``/empty while the answer sits in
+          ``message.reasoning`` (reasoning models that expose only the
+          chain-of-thought) or in ``message.reasoning_content``.
+        - ``choices[0].text`` (legacy completions-style) is accepted as a
+          last resort.
+
+        Returns a stripped string, possibly empty; callers decide whether an
+        empty result is fatal. Never returns None.
+        """
+        choices = data.get("choices") or []
+        if not choices:
+            return ""
+        ch = choices[0] or {}
+        msg = ch.get("message") or {}
+        # Prefer the visible answer field. Only fall back to reasoning when
+        # content is genuinely absent — reasoning is chain-of-thought, not the
+        # answer, so it is a last resort (callers may still reject it).
+        for key in ("content", "reasoning", "reasoning_content"):
+            val = msg.get(key)
+            if isinstance(val, str) and val.strip():
+                return val.strip()
+        # legacy text-completion style
+        txt = ch.get("text")
+        if isinstance(txt, str) and txt.strip():
+            return txt.strip()
+        return ""
+
+    @staticmethod
+    def is_non_answering_text(text: str) -> bool:
+        """True when the model's reply is a classification/marker, not an answer.
+
+        Some OpenAI-compatible routers route to specialist models that return a
+        label instead of prose (observed live: ``nvidia/nemotron-3.5-content-
+        safety:free`` returns the literal string ``"User Safety: safe"``). Such
+        output is never a usable answer, so it is treated like an empty reply:
+        retried, then surfaced as a clear provider error rather than shown as
+        the grounded answer. Deliberately conservative (whole-string, short)
+        so real answers that merely mention safety are not rejected.
+        """
+        t = (text or "").strip()
+        if not t:
+            return True
+        if len(t) > 120:
+            return False
+        lowered = t.lower()
+        return (
+            lowered.startswith("user safety")
+            or lowered.startswith("safety:")
+            or "safety classification" in lowered
+            or lowered in {"safe", "unsafe", "unsafe content", "no answer", "n/a"}
+        )
+
+    @staticmethod
+    def _finish_reason(data: dict) -> Optional[str]:
+        choices = data.get("choices") or []
+        if not choices:
+            return None
+        return (choices[0] or {}).get("finish_reason")
+
+    @staticmethod
+    def _routed_model(data: dict) -> Optional[str]:
+        """The concrete model that served the call, when the provider reports it.
+
+        OpenRouter routes aliases like ``openrouter/free`` to a concrete model
+        and returns it here; useful for reproducibility/transparency.
+        """
+        val = data.get("model")
+        return val if isinstance(val, str) and val else None
 
     def usage_dict(
         self,
@@ -172,9 +256,13 @@ class LLMBackend(AnsweringMethod):
     def _post_chat(self, model_id: str, base_url: str, api_key: str, user_msg: str) -> tuple:
         """One chat-completion request WITH transient-error retries.
 
-        Retried: timeouts, connection errors and HTTP 429/5xx (e.g. Gemini's
-        503 "model currently experiencing high demand"). Backoff grows
+        Retried: timeouts, connection errors, HTTP 429/5xx (e.g. Gemini's
+        503 "model currently experiencing high demand"), and EMPTY responses
+        (some OpenAI-compatible routers / reasoning models intermittently
+        return HTTP 200 with no usable answer text). Backoff grows
         exponentially; the final provider error is surfaced verbatim.
+
+        Returns ``(usage, text, routed_model, finish_reason)``.
         """
         url = base_url.rstrip("/") + "/chat/completions"
         attempts = 1 + self.max_retries
@@ -232,11 +320,58 @@ class LLMBackend(AnsweringMethod):
                 raise AnswerBackendError(
                     f"Provider returned HTTP {resp.status_code}: {resp.text[:200]}"
                 )
-            data = resp.json()
-            text = (data.get("choices") or [{}])[0].get("message", {}).get("content", "")
-            if not text:
-                raise AnswerBackendError("Provider returned an empty response.")
-            return (data.get("usage") or None), text.strip()
+
+            # --- parse a 2xx response into an answer -------------------------
+            try:
+                data = resp.json()
+            except ValueError as exc:
+                # Non-JSON body on a 2xx — treat as transient malformed reply.
+                last_error = f"non-JSON response body: {resp.text[:160]}"
+                if attempt + 1 < attempts:
+                    time.sleep(self.retry_backoff_s * (2 ** attempt))
+                    continue
+                raise AnswerBackendError(
+                    f"Provider returned a non-JSON body after {attempts} attempts: {last_error}"
+                ) from exc
+
+            text = self._extract_text(data)
+            routed = self._routed_model(data)
+            finish = self._finish_reason(data)
+
+            # Reject empty, reasoning-only, AND classification/marker replies
+            # (e.g. a content-safety model returning "User Safety: safe"):
+            # retry, then surface a clear error. Never fabricate a fallback
+            # answer. A reasoning fallback is accepted only when it is a
+            # substantive answer (a reasoning model whose chain-of-thought
+            # never reached a final answer must not be shown as one).
+            reasoning_only = (
+                not (data.get("choices") or [{}])[0].get("message", {}).get("content")
+            )
+            if (
+                not text
+                or self.is_non_answering_text(text)
+                or (reasoning_only and len(text.split()) < 10)
+            ):
+                detail = f"model={routed or model_id!r}, finish_reason={finish!r}"
+                if reasoning_only and text:
+                    detail += ", reply=chain-of-thought only (no final answer)"
+                elif text:
+                    detail += f", reply={text[:60]!r}"
+                last_error = f"non-answering reply on HTTP 200 ({detail})"
+                if attempt + 1 < attempts:
+                    time.sleep(self.retry_backoff_s * (2 ** attempt))
+                    continue
+                raise AnswerBackendError(
+                    f"Provider returned no usable answer after {attempts} attempts "
+                    f"(retried {self.max_retries}x). The model either produced no answer "
+                    f"text, only internal reasoning, or a non-answer classification. "
+                    f"Details: {detail}. This is typical when a routing alias (e.g. "
+                    "openrouter/free) picks a specialist model that is not a general "
+                    "assistant — pin a concrete, general-purpose model id in .env "
+                    "(LLM_MODEL)."
+                )
+
+            return (data.get("usage") or None), text, routed, finish
         # defensive: loop should always return or raise
         raise AnswerBackendError(f"Answering model call failed: {last_error}")
 
@@ -265,7 +400,9 @@ class LLMBackend(AnsweringMethod):
             user_msg = f"{self.user_prefix or ''}Question: {question}".strip()
 
         try:
-            usage, text = self._post_chat(args["model"], args["base_url"], args["api_key"], user_msg)
+            usage, text, routed, finish = self._post_chat(
+                args["model"], args["base_url"], args["api_key"], user_msg
+            )
         except requests.Timeout as exc:
             raise AnswerBackendError(
                 f"Answering model timed out after {self.timeout_s}s: {exc}"
@@ -281,6 +418,19 @@ class LLMBackend(AnsweringMethod):
             "tokens": self.usage_dict(user_msg, text, usage),
             "grounded": self.grounded,
         }
+        if routed and routed != args["model"]:
+            # Transparency: when the provider routes an alias (e.g.
+            # openrouter/free) to a concrete model, record which one actually
+            # answered so runs are reproducible and the user can pin it.
+            meta["routed_model"] = routed
+        if finish:
+            meta["finish_reason"] = finish
+            if finish == "length":
+                meta["truncated"] = True
+                meta["truncation_note"] = (
+                    "Answer hit the max_tokens limit and was truncated; raise "
+                    "answering.llm.max_tokens for longer answers."
+                )
         if self.grounded:
             meta["retrieved_passage_count"] = len(passages)
             meta["retrieved_passages_included_in_input_tokens"] = True

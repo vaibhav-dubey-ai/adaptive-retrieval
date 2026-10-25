@@ -42,7 +42,12 @@ from adaptive_qa.serve import ServeFlow
 
 app = FastAPI(title="Adaptive QA Research Dashboard", version="0.2.0")
 
-_STATE: Dict[str, Any] = {"runner": None, "eval_rows": None, "docs": None}
+_STATE: Dict[str, Any] = {
+    "runner": None,
+    "eval_rows": None,
+    "docs": None,
+    "retrievers": {},          # (method, active-doc signature) -> CollectionRetriever
+}
 
 
 def _runner() -> ExperimentRunner:
@@ -76,14 +81,45 @@ class _LLMBundle:
         return closed, grounded
 
 
-def _serve_flow() -> ServeFlow:
+def _active_signature() -> tuple:
+    """Identity of the active document collection (cache key component)."""
+    return tuple(
+        (m.get("doc_id"), bool(m.get("active")), int(m.get("n_chunks") or 0))
+        for m in _docs().list_documents()
+    )
+
+
+def _default_method() -> str:
+    return str(_runner().cfg.get("retrieval", {}).get("retriever", "bm25"))
+
+
+def _collection_retriever(method: Optional[str] = None):
+    """Cached retriever for the active collection and the requested method.
+
+    Building a dense/hybrid retriever re-reads chunk metadata and consults the
+    persistent embedding cache; caching the instance keeps repeated dashboard
+    requests fast. The cache key includes the active-document signature, so
+    uploading, deleting, activating or deactivating a document rebuilds it.
+    """
+    from adaptive_qa.retrieval import normalize_method
+
+    runner = _runner()
+    chosen = normalize_method(method or _default_method())
+    if not _docs().active_documents():
+        return None
+    key = (chosen, _active_signature())
+    if key not in _STATE["retrievers"]:
+        _STATE["retrievers"][key] = _docs().build_retriever(
+            method=chosen, retrieval_cfg=runner.cfg.get("retrieval", {})
+        )
+    return _STATE["retrievers"][key]
+
+
+def _serve_flow(retrieval_method: Optional[str] = None) -> ServeFlow:
     """Interactive flow: decision engine FIRST, real LLM backends, retrievers."""
     runner = _runner()
     closed, grounded = _LLMBundle(runner.cfg).backends()
-    collection_retriever = None
-    active = _docs().active_documents()
-    if active:
-        collection_retriever = _docs().build_retriever()
+    collection_retriever = _collection_retriever(retrieval_method)
     return ServeFlow(
         decision_engine=runner.decision_engine,
         method_a=closed,
@@ -307,7 +343,8 @@ async def upload_document(file: UploadFile = File(...)) -> JSONResponse:
         meta = _docs().save_document(file.filename or "", data)
     except DocumentUploadError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
-    # keep _STATE["docs"] ready; indexer built lazily per ask
+    # Any collection change invalidates the cached retrievers.
+    _STATE["retrievers"] = {}
     return JSONResponse(
         {
             "document": meta,
@@ -331,6 +368,7 @@ def set_document_active(doc_id: str, payload: Dict[str, Any] = None) -> JSONResp
     active = bool(((payload or {}).get("active")) or ((payload or {}).get("value")))
     if not _docs().set_active(doc_id, active):
         raise HTTPException(status_code=404, detail="document not found")
+    _STATE["retrievers"] = {}
     return JSONResponse({"doc_id": doc_id, "active": active})
 
 
@@ -338,7 +376,48 @@ def set_document_active(doc_id: str, payload: Dict[str, Any] = None) -> JSONResp
 def delete_document(doc_id: str) -> JSONResponse:
     if not _docs().delete(doc_id):
         raise HTTPException(status_code=404, detail="document not found")
+    _STATE["retrievers"] = {}
     return JSONResponse({"deleted": doc_id})
+
+
+def _collection_method(name: str) -> str:
+    """Normalise a requested retrieval method (400 on unknown names)."""
+    from adaptive_qa.retrieval import normalize_method
+
+    return normalize_method(name)
+
+
+@app.get("/retrieval/config")
+def retrieval_config() -> JSONResponse:
+    """Retrieval methods selectable from the dashboard, plus real diagnostics."""
+    from adaptive_qa.retrieval import RETRIEVAL_METHODS
+
+    cfg = _runner().cfg.get("retrieval", {})
+    try:
+        import sentence_transformers  # noqa: F401
+
+        dense_available = True
+        dense_reason = ""
+    except Exception as exc:  # pragma: no cover - environment dependent
+        dense_available = False
+        dense_reason = (
+            "sentence-transformers is not installed; run "
+            "pip install sentence-transformers to enable dense/hybrid retrieval. "
+            f"({type(exc).__name__})"
+        )
+    return JSONResponse(
+        {
+            "methods": list(RETRIEVAL_METHODS),
+            "default": _default_method(),
+            "dense": {
+                "model_name": (cfg.get("dense") or {}).get("model_name"),
+                "available": dense_available,
+                "reason": dense_reason,
+            },
+            "hybrid": cfg.get("hybrid") or {},
+            "active_collection": _active_signature(),
+        }
+    )
 
 
 @app.get("/llm/config-status")
@@ -365,12 +444,18 @@ def ask(payload: Dict[str, Any], mode: str = Query(default="adaptive")) -> JSONR
       generation.
     """
 
-    question = (payload or {}).get("question", "").strip()
+    body = payload or {}
+    question = (body.get("question", "") or "").strip()
     if not question:
         raise HTTPException(status_code=400, detail="question required")
     if mode not in ("adaptive", "compare"):
         raise HTTPException(status_code=400, detail="mode must be adaptive|compare")
-    flow = _serve_flow()
+    method = body.get("retrieval_method") or _default_method()
+    try:
+        method = _collection_method(method)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    flow = _serve_flow(retrieval_method=method)
     try:
         result = (
             flow.run_adaptive_only(question)

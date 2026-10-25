@@ -1,0 +1,4 @@
+method,n_questions,n_scored_questions,recall_at_5,mrr_at_10,ndcg_at_10,hit_rate_at_1,no_evidence_rate,build_ms,model_load_ms,cold_first_query_ms,median_query_ms,mean_query_ms,p95_query_ms
+bm25,75,67,0.9179,0.7326,0.7871,0.5821,0.125,28.043,,0.112,0.073,0.082,0.154
+dense,75,67,0.9254,0.7184,0.7704,0.597,0.0,47440.904,37156.827,46.477,44.644,50.782,74.561
+hybrid,75,67,0.9478,0.8112,0.8461,0.7313,0.0,131.243,1866.723,1908.744,38.57,47.038,76.049

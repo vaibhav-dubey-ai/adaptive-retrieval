@@ -27,8 +27,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .config import PROJECT_ROOT
-from .retrieval.bm25 import BM25Retriever
-from .types import RetrievalHit
+from .types import CorpusDoc, RetrievalHit
 
 DOCUMENT_ROOT = PROJECT_ROOT / "data" / "documents"
 
@@ -147,19 +146,24 @@ def chunk_pages(
 
     A chunk never spans page boundaries (so page numbers stay truthful);
     documents without pages (TXT/MD/DOCX) produce one logical page-less stream.
+
+    ``chunk_id`` is ``<doc_id>:<n>`` where ``n`` counts chunks across the WHOLE
+    document (not per page). This matters: per-page counters restart at zero
+    and would give every page's first chunk the same id, which breaks chunk
+    deduplication in hybrid fusion and any chunk-id based evaluation label.
     """
     if target_chars <= 0:
         raise ValueError("chunk size must be positive")
     if overlap_chars >= target_chars:
         raise ValueError("chunk overlap must be smaller than the chunk size")
     chunks: List[Dict[str, Any]] = []
+    idx = 0
     for page in pages:
         text = (page["text"] or "").replace("\x00", " ").strip()
         if not text:
             continue
         step = max(1, target_chars - overlap_chars)
         i = 0
-        idx = 0
         while i < len(text):
             piece = text[i : i + target_chars]
             if piece.strip():
@@ -271,6 +275,44 @@ class DocumentStore:
                 return {**m, "duplicate": True}
         return None
 
+    def reindex(self, doc_id: str) -> Optional[Dict[str, Any]]:
+        """Rebuild a stored document's chunks from its persisted source file.
+
+        Needed after a chunking change (e.g. globally unique chunk ids). The
+        original upload bytes are kept in ``source.bin`` precisely so this can
+        be done without asking the user to re-upload.
+        """
+        meta = self.get(doc_id)
+        if meta is None:
+            return None
+        src = self._doc_dir(doc_id) / "source.bin"
+        if not src.exists():
+            return None
+        extracted = extract_text(meta.get("filename", doc_id), src.read_bytes())
+        chunks = [c for c in chunk_pages(extracted.pages, doc_id) if c["text"]]
+        with (self._doc_dir(doc_id) / "chunks.jsonl").open("w", encoding="utf-8") as fh:
+            for c in chunks:
+                fh.write(json.dumps(c, ensure_ascii=False) + "\n")
+        meta = {
+            **meta,
+            "n_chunks": len(chunks),
+            "n_pages": len([p for p in extracted.pages if p.get("page") is not None]),
+            "total_chars": extracted.total_chars,
+        }
+        (self._doc_dir(doc_id) / "meta.json").write_text(
+            json.dumps(meta, indent=2), encoding="utf-8"
+        )
+        return meta
+
+    def reindex_all(self) -> List[Dict[str, Any]]:
+        """Re-chunk every stored document; returns the updated metadata."""
+        out: List[Dict[str, Any]] = []
+        for meta in self.list_documents():
+            updated = self.reindex(meta["doc_id"])
+            if updated is not None:
+                out.append(updated)
+        return out
+
     def delete(self, doc_id: str) -> bool:
         ddir = self._doc_dir(doc_id)
         if not ddir.exists():
@@ -310,45 +352,85 @@ class DocumentStore:
     def active_documents(self) -> List[Dict[str, Any]]:
         return [m for m in self.list_documents() if m.get("active")]
 
-    def build_retriever(self, doc_id: Optional[str] = None) -> "CollectionRetriever":
-        """BM25 over the active collection (current BM25 implementation kept)."""
+    def build_retriever(
+        self,
+        doc_id: Optional[str] = None,
+        method: str = "bm25",
+        retrieval_cfg: Optional[Dict[str, Any]] = None,
+    ) -> "CollectionRetriever":
+        """Retriever over the ACTIVE collection, using ``method``.
+
+        ``bm25`` stays the default (unchanged legacy behaviour); ``dense`` and
+        ``hybrid`` are selected per request. Only chunks of active documents
+        are loaded here, so inactive/deleted documents can never be retrieved.
+        """
+        from .retrieval import load_retriever, normalize_method
+
         chunks = self.load_chunks(doc_id)
-        bars: List[Any] = []
+        docs: List[CorpusDoc] = []
         for c in chunks:
-            bars.append(
-                type(
-                    "Chunk",
-                    (),
-                    {
-                        "doc_id": c["chunk_id"],
-                        "title": f"{self.get(c['doc_id']).get('filename', c['doc_id'])}"
-                        + (f" (page {c['page']})" if c.get("page") is not None else ""),
-                        "text": c["text"],
-                    },
+            meta = self.get(c["doc_id"]) or {}
+            title = f"{meta.get('filename', c['doc_id'])}" + (
+                f" (page {c['page']})" if c.get("page") is not None else ""
+            )
+            docs.append(
+                CorpusDoc(
+                    doc_id=c["chunk_id"],
+                    title=title,
+                    text=c["text"],
+                    sentences=(),
                 )
             )
-        inner = BM25Retriever(bars)
-        meta_map = {
-            c["chunk_id"]: c for c in chunks
-        }
+        cfg = retrieval_cfg or {}
+        chosen = normalize_method(method)
+        inner = load_retriever(
+            chosen,
+            docs,
+            bm25_kwargs=dict(cfg.get("bm25", {}) or {}),
+            dense_kwargs=dict(cfg.get("dense", {}) or {}),
+            hybrid_kwargs=dict(cfg.get("hybrid", {}) or {}),
+        )
+        meta_map = {c["chunk_id"]: c for c in chunks}
         meta_by_doc = {m["doc_id"]: m for m in self.list_documents()}
-        return CollectionRetriever(inner, meta_map, meta_by_doc, n_chunks=len(chunks))
+        return CollectionRetriever(
+            inner, meta_map, meta_by_doc, n_chunks=len(chunks), method=chosen
+        )
 
 
 class CollectionRetriever:
     """Scope-limited retriever: only the collection's own chunks are searched."""
 
-    def __init__(self, inner: BM25Retriever, meta_map: Dict[str, Any], meta_by_doc: Dict[str, Any], n_chunks: int) -> None:
+    def __init__(
+        self,
+        inner: Any,
+        meta_map: Dict[str, Any],
+        meta_by_doc: Dict[str, Any],
+        n_chunks: int,
+        method: str = "bm25",
+    ) -> None:
         self._inner = inner
         self._meta = meta_map
         self._docs = meta_by_doc
         self.n_chunks = n_chunks
+        self.method = method
 
     def retrieve(self, question: str, top_k: int) -> List[RetrievalHit]:
         # NOTE: RetrievalHit is a frozen dataclass; no replay hit subclass is
         # created. Upload-specific source info is joined in ``source_meta``
         # from ``self._meta`` using the chunk id.
         return self._inner.retrieve(question, top_k)
+
+    def retrieve_with_components(self, question: str, top_k: int):
+        """Hybrid component rankings when the inner retriever exposes them."""
+        inner = self._inner
+        if hasattr(inner, "retrieve_with_components"):
+            return inner.retrieve_with_components(question, top_k)
+        return self.retrieve(question, top_k), {}
+
+    def diagnostics(self) -> Dict[str, Any]:
+        inner = self._inner
+        info = inner.diagnostics() if hasattr(inner, "diagnostics") else {"retriever": self.method}
+        return {**info, "n_chunks": self.n_chunks, "scope": "uploaded_active_documents"}
 
     def source_meta(self, hit: RetrievalHit) -> Dict[str, Any]:
         """Join upload provenance onto a retrieval hit (for evidence display)."""

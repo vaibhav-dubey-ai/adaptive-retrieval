@@ -1,0 +1,5698 @@
+{
+  "generated_at_utc": "2026-10-25T12:33:40Z",
+  "dataset": {
+    "path": "eval_data\\retrieval_eval\\ch6_er_model_questions.jsonl",
+    "sha256": "734a82f496ff58e037d319d7f6428a3a7ed298d7bcefa1ebae594801d80319a9"
+  },
+  "metrics": {
+    "recall_k": 5,
+    "rank_k": 10
+  },
+  "comparison_table": [
+    {
+      "method": "bm25",
+      "n_questions": 75,
+      "n_scored_questions": 67,
+      "recall_at_5": 0.9179,
+      "mrr_at_10": 0.7326,
+      "ndcg_at_10": 0.7871,
+      "hit_rate_at_1": 0.5821,
+      "no_evidence_rate": 0.125,
+      "build_ms": 49.263,
+      "model_load_ms": null,
+      "cold_first_query_ms": 0.143,
+      "median_query_ms": 0.117,
+      "mean_query_ms": 0.127,
+      "p95_query_ms": 0.235
+    },
+    {
+      "method": "dense",
+      "n_questions": 75,
+      "n_scored_questions": 67,
+      "recall_at_5": 0.9254,
+      "mrr_at_10": 0.7184,
+      "ndcg_at_10": 0.7704,
+      "hit_rate_at_1": 0.597,
+      "no_evidence_rate": 0.0,
+      "build_ms": 22998.698,
+      "model_load_ms": 16548.437,
+      "cold_first_query_ms": 57.239,
+      "median_query_ms": 28.293,
+      "mean_query_ms": 36.485,
+      "p95_query_ms": 81.461
+    },
+    {
+      "method": "hybrid",
+      "n_questions": 75,
+      "n_scored_questions": 67,
+      "recall_at_5": 0.9478,
+      "mrr_at_10": 0.8112,
+      "ndcg_at_10": 0.8461,
+      "hit_rate_at_1": 0.7313,
+      "no_evidence_rate": 0.0,
+      "build_ms": 117.921,
+      "model_load_ms": 1460.651,
+      "cold_first_query_ms": 1593.03,
+      "median_query_ms": 18.787,
+      "mean_query_ms": 19.589,
+      "p95_query_ms": 25.028
+    }
+  ],
+  "methods": {
+    "bm25": {
+      "per_question": [
+        {
+          "question_id": "q01",
+          "question": "What does the initial design phase do?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0001"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0017",
+            "udoc_151a82bc49d3:0060",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0053"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.143
+        },
+        {
+          "question_id": "q02",
+          "question": "What is physical design in database design?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0002"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0060",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0053"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.117
+        },
+        {
+          "question_id": "q03",
+          "question": "Which two major pitfalls must a database schema design avoid?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0003"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0046"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.145
+        },
+        {
+          "question_id": "q04",
+          "question": "Which design approaches does the chapter discuss?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0004"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0079",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0060",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0001"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.078
+        },
+        {
+          "question_id": "q05",
+          "question": "What is an entity set?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0006"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0030"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6309297535714575,
+          "retrieval_ms": 0.163
+        },
+        {
+          "question_id": "q06",
+          "question": "Which shape represents an entity set in an ER diagram, and how are its attributes shown?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0007"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0058",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0004"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.249
+        },
+        {
+          "question_id": "q07",
+          "question": "What does a diamond represent in an ER diagram?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0010"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0005"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6309297535714575,
+          "retrieval_ms": 0.103
+        },
+        {
+          "question_id": "q08",
+          "question": "Which attribute is attached to the advisor relationship set in the worked example?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0011"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0011",
+            "udoc_151a82bc49d3:0009",
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0043"
+          ],
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.16666666666666666,
+          "ndcg": 0.3562071871080222,
+          "retrieval_ms": 0.214
+        },
+        {
+          "question_id": "q09",
+          "question": "What is a role in the entity-relationship model?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0013"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0013",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0005",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0073",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0057"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6309297535714575,
+          "retrieval_ms": 0.173
+        },
+        {
+          "question_id": "q10",
+          "question": "What makes a relationship binary?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0014"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0066",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0057"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg": 0.5,
+          "retrieval_ms": 0.11
+        },
+        {
+          "question_id": "q11",
+          "question": "What is a derived attribute and what example is given?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0016"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0033",
+            "udoc_151a82bc49d3:0011"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.104
+        },
+        {
+          "question_id": "q12",
+          "question": "What is the domain of an attribute?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0016"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0033",
+            "udoc_151a82bc49d3:0011",
+            "udoc_151a82bc49d3:0035"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.066
+        },
+        {
+          "question_id": "q13",
+          "question": "How are composite attributes described?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0017"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0017",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0063",
+            "udoc_151a82bc49d3:0007"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.09
+        },
+        {
+          "question_id": "q14",
+          "question": "Which four mapping cardinality types exist for a binary relationship set?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0019"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0066",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0020",
+            "udoc_151a82bc49d3:0021"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.177
+        },
+        {
+          "question_id": "q15",
+          "question": "How do directed and undirected lines express cardinality constraints?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0022"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0074",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0031"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.068
+        },
+        {
+          "question_id": "q16",
+          "question": "What does a double line indicate in an ER diagram?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0026"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0005"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.25,
+          "ndcg": 0.43067655807339306,
+          "retrieval_ms": 0.089
+        },
+        {
+          "question_id": "q17",
+          "question": "In the minimum-maximum notation l..h, what does a maximum value of star mean?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0027"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0069",
+            "udoc_151a82bc49d3:0070",
+            "udoc_151a82bc49d3:0072",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0043"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.067
+        },
+        {
+          "question_id": "q18",
+          "question": "Why does the notation forbid more than one arrow leaving a ternary relationship?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0028"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0056",
+            "udoc_151a82bc49d3:0023"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.141
+        },
+        {
+          "question_id": "q19",
+          "question": "What is a key for an entity?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0030"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0059",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0051"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg": 0.5,
+          "retrieval_ms": 0.118
+        },
+        {
+          "question_id": "q20",
+          "question": "How is the primary key of a relationship set formed?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0031"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0059",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0051"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6309297535714575,
+          "retrieval_ms": 0.158
+        },
+        {
+          "question_id": "q21",
+          "question": "What is the primary key of a many-to-many relationship set?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0032"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0059",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0041"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.163
+        },
+        {
+          "question_id": "q22",
+          "question": "For a one-to-one relationship, which side provides the primary key?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0032"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0059",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0019"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.143
+        },
+        {
+          "question_id": "q23",
+          "question": "What is a weak entity set?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0034"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0033",
+            "udoc_151a82bc49d3:0006"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg": 0.5,
+          "retrieval_ms": 0.134
+        },
+        {
+          "question_id": "q24",
+          "question": "What is a strong entity set?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0035"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0030"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.25,
+          "ndcg": 0.43067655807339306,
+          "retrieval_ms": 0.13
+        },
+        {
+          "question_id": "q25",
+          "question": "How is a weak entity set drawn in an ER diagram?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0036"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0047"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg": 0.5,
+          "retrieval_ms": 0.168
+        },
+        {
+          "question_id": "q26",
+          "question": "Why is the dept_name attribute of student considered redundant?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0037"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0033",
+            "udoc_151a82bc49d3:0011",
+            "udoc_151a82bc49d3:0017",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0076"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.11
+        },
+        {
+          "question_id": "q27",
+          "question": "How is an ER design turned into relation schemas?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0040"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0039",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0060",
+            "udoc_151a82bc49d3:0005",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0071"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6309297535714575,
+          "retrieval_ms": 0.096
+        },
+        {
+          "question_id": "q28",
+          "question": "What happens to a weak entity set when it is reduced to a table?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0041"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0033",
+            "udoc_151a82bc49d3:0006"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.145
+        },
+        {
+          "question_id": "q29",
+          "question": "How are composite attributes flattened into a relation schema?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0042"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0017",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0051"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.152
+        },
+        {
+          "question_id": "q30",
+          "question": "How is a multivalued attribute represented in the relational model?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0043"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0059"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.117
+        },
+        {
+          "question_id": "q31",
+          "question": "What schema represents a many-to-many relationship set?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0044"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0058",
+            "udoc_151a82bc49d3:0021",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0059"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.167
+        },
+        {
+          "question_id": "q32",
+          "question": "How can a many-to-one relationship that is total on the many side avoid its own schema?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0045"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0023",
+            "udoc_151a82bc49d3:0024",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0022"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.184
+        },
+        {
+          "question_id": "q33",
+          "question": "What problem can appear when a relationship schema is replaced by an extra attribute on a partially participating many side?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0046"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0064"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.2
+        },
+        {
+          "question_id": "q34",
+          "question": "Why is the schema for the relationship between a weak entity set and its identifying strong entity set redundant?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0047"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0059",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0033",
+            "udoc_151a82bc49d3:0044"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.251
+        },
+        {
+          "question_id": "q35",
+          "question": "What is specialization in the extended ER model?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0049"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0005",
+            "udoc_151a82bc49d3:0048",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0050",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0071"
+          ],
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg": 0.0,
+          "retrieval_ms": 0.086
+        },
+        {
+          "question_id": "q36",
+          "question": "What examples illustrate overlapping and disjoint specialization?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0050"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0050",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0057",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0049"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.057
+        },
+        {
+          "question_id": "q37",
+          "question": "What is the drawback of the first method for representing specialization as schemas?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0051"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0017",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0050",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0039"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6309297535714575,
+          "retrieval_ms": 0.093
+        },
+        {
+          "question_id": "q38",
+          "question": "What is the drawback of the second method for representing specialization as schemas?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0052"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0050",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0039",
+            "udoc_151a82bc49d3:0010"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.081
+        },
+        {
+          "question_id": "q39",
+          "question": "What is generalization?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0053"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0054",
+            "udoc_151a82bc49d3:0068"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6309297535714575,
+          "retrieval_ms": 0.033
+        },
+        {
+          "question_id": "q40",
+          "question": "What does a completeness constraint specify?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0054"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0054",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0074",
+            "udoc_151a82bc49d3:0028"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6309297535714575,
+          "retrieval_ms": 0.038
+        },
+        {
+          "question_id": "q41",
+          "question": "How is a total generalization shown in an ER diagram?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0055"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0054",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0022"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.098
+        },
+        {
+          "question_id": "q42",
+          "question": "What does aggregation accomplish in an ER diagram?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0057"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0058",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0057",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0056",
+            "udoc_151a82bc49d3:0005",
+            "udoc_151a82bc49d3:0059"
+          ],
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.16666666666666666,
+          "ndcg": 0.3562071871080222,
+          "retrieval_ms": 0.078
+        },
+        {
+          "question_id": "q43",
+          "question": "How is aggregation reduced to relational schemas?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0059"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0059",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0058",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0057",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0056",
+            "udoc_151a82bc49d3:0039",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0068"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.067
+        },
+        {
+          "question_id": "q44",
+          "question": "Why might phone be modelled as an entity instead of an attribute?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0063"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0063",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0033"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6309297535714575,
+          "retrieval_ms": 0.152
+        },
+        {
+          "question_id": "q45",
+          "question": "What guideline helps decide whether a concept should be an entity set or a relationship set?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0064"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0054",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0044"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6309297535714575,
+          "retrieval_ms": 0.211
+        },
+        {
+          "question_id": "q46",
+          "question": "Why can modelling parents as two binary relationships beat one ternary relationship?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0065"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0066",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0024"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.181
+        },
+        {
+          "question_id": "q47",
+          "question": "How can any non-binary relationship be replaced by binary relationships?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0066"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0066",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0057",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0019"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg": 0.5,
+          "retrieval_ms": 0.154
+        },
+        {
+          "question_id": "q48",
+          "question": "What is the main limitation of converting a non-binary relationship into binary form?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0067"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0066",
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0052"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.25,
+          "ndcg": 0.43067655807339306,
+          "retrieval_ms": 0.142
+        },
+        {
+          "question_id": "q49",
+          "question": "Which design decisions are listed for ER modelling?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0068"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0060",
+            "udoc_151a82bc49d3:0005",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0071",
+            "udoc_151a82bc49d3:0077"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6309297535714575,
+          "retrieval_ms": 0.088
+        },
+        {
+          "question_id": "q50",
+          "question": "What is UML and how do its class diagrams relate to ER diagrams?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0073"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0074",
+            "udoc_151a82bc49d3:0073",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0061",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0062"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.25,
+          "ndcg": 0.43067655807339306,
+          "retrieval_ms": 0.1
+        },
+        {
+          "question_id": "q51",
+          "question": "How are binary relationship sets drawn in UML class diagrams?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0076"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0073",
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0074",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0010"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.193
+        },
+        {
+          "question_id": "q52",
+          "question": "What is a relationship set, stated mathematically?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0008"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0022"
+          ],
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.14285714285714285,
+          "ndcg": 0.3333333333333333,
+          "retrieval_ms": 0.159
+        },
+        {
+          "question_id": "q53",
+          "question": "In a one-to-many advisor relationship between instructor and student, how many advisors can a student have?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0023"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0023",
+            "udoc_151a82bc49d3:0024",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0025",
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0009",
+            "udoc_151a82bc49d3:0011"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.216
+        },
+        {
+          "question_id": "q54",
+          "question": "Which three cases of primary key choice does the chapter consider?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0029"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0059",
+            "udoc_151a82bc49d3:0079",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0000"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg": 0.5,
+          "retrieval_ms": 0.122
+        },
+        {
+          "question_id": "q55",
+          "question": "Why is the information in the sec_course relationship redundant for sections?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0033"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0033",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0013",
+            "udoc_151a82bc49d3:0059",
+            "udoc_151a82bc49d3:0035"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.185
+        },
+        {
+          "question_id": "q56",
+          "question": "Which chapter of Database System Concepts covers database design using the E-R model?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0000"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0066",
+            "udoc_151a82bc49d3:0073",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0068"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.345
+        },
+        {
+          "question_id": "q57",
+          "question": "Which ternary relationship example does the chapter use to discuss degree?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0015"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0079",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0031"
+          ],
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.1111111111111111,
+          "ndcg": 0.3010299956639812,
+          "retrieval_ms": 0.16
+        },
+        {
+          "question_id": "q58",
+          "question": "Which other aspects of database design close the chapter?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0078"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0079",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0073"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.101
+        },
+        {
+          "question_id": "q59",
+          "question": "What difference in cardinality depiction is noted between ER diagrams and UML class diagrams?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0074"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0074",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0073",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0061",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0027"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.111
+        },
+        {
+          "question_id": "q60",
+          "question": "What are composite attributes and how are they flattened when an entity set is reduced to a relation schema?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0017",
+            "udoc_151a82bc49d3:0042"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0017",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0051"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 0.8772153153380493,
+          "retrieval_ms": 0.244
+        },
+        {
+          "question_id": "q61",
+          "question": "What is a multivalued attribute and how is it represented relationally?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0043"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0066",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0007"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.108
+        },
+        {
+          "question_id": "q62",
+          "question": "How is the primary key of a relationship set determined and how does the mapping cardinality change that choice?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0032"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0059",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0041"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.213
+        },
+        {
+          "question_id": "q63",
+          "question": "How is a weak entity set drawn in an ER diagram, and what columns does its table have after reduction?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0041"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0018"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6240505200038379,
+          "retrieval_ms": 0.23
+        },
+        {
+          "question_id": "q64",
+          "question": "What is specialization and what is the drawback of representing it with one schema per entity set?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0051"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0019"
+          ],
+          "recall_at_k": 0.5,
+          "reciprocal_rank": 1.0,
+          "ndcg": 0.6131471927654584,
+          "retrieval_ms": 0.196
+        },
+        {
+          "question_id": "q65",
+          "question": "How do total and partial participation differ and how can they be written with minimum-maximum constraints?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0027"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0050",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0054",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0022"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 0.149
+        },
+        {
+          "question_id": "q66",
+          "question": "Why is aggregation introduced, and what schema does it produce?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0057",
+            "udoc_151a82bc49d3:0059"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0059",
+            "udoc_151a82bc49d3:0058",
+            "udoc_151a82bc49d3:0057",
+            "udoc_151a82bc49d3:0056",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0046"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 0.9197207891481876,
+          "retrieval_ms": 0.08
+        },
+        {
+          "question_id": "q67",
+          "question": "What is generalization and which completeness constraints can apply to it?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0054"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0054",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0027"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6934264036172708,
+          "retrieval_ms": 0.069
+        },
+        {
+          "question_id": "q68",
+          "question": "What is the average salary of the instructors in the university database?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0038",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0025",
+            "udoc_151a82bc49d3:0009",
+            "udoc_151a82bc49d3:0024",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0078"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 0.068
+        },
+        {
+          "question_id": "q69",
+          "question": "How many students are currently enrolled at IIITDM Kurnool?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0025",
+            "udoc_151a82bc49d3:0023",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0021",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0024"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 0.072
+        },
+        {
+          "question_id": "q70",
+          "question": "What is the capital of France?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 0.012
+        },
+        {
+          "question_id": "q71",
+          "question": "What is the time complexity of insertion in a B+ tree index?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0020",
+            "udoc_151a82bc49d3:0021",
+            "udoc_151a82bc49d3:0066",
+            "udoc_151a82bc49d3:0067"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 0.039
+        },
+        {
+          "question_id": "q72",
+          "question": "Who won the 2022 FIFA World Cup?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0068"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 0.019
+        },
+        {
+          "question_id": "q73",
+          "question": "What does the chapter say about NoSQL document databases?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0079",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0000"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 0.028
+        },
+        {
+          "question_id": "q74",
+          "question": "How do you configure a PostgreSQL connection string?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0002"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 0.024
+        },
+        {
+          "question_id": "q75",
+          "question": "What is the definition of third normal form?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0066"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 0.041
+        }
+      ],
+      "aggregate": {
+        "n_questions": 75,
+        "n_scored_questions": 67,
+        "n_unanswerable_questions": 8,
+        "recall_at_5": 0.9179,
+        "mrr_at_10": 0.7326,
+        "ndcg_at_10": 0.7871,
+        "hit_rate_at_1": 0.5821,
+        "no_evidence_rate": 0.125,
+        "mean_relevant_chunks": 1.119,
+        "metrics_note": "Binary relevance against hand-verified chunk ids. Questions with no labelled evidence (unanswerable) are excluded from Recall/MRR/nDCG and reported separately via no_evidence_rate.",
+        "by_category": {
+          "definition": {
+            "n_questions": 22,
+            "n_scored_questions": 22,
+            "recall_at_5": 0.8636,
+            "mrr_at_10": 0.5823,
+            "ndcg_at_10": 0.6744,
+            "no_evidence_rate": null
+          },
+          "exact_terminology": {
+            "n_questions": 19,
+            "n_scored_questions": 19,
+            "recall_at_5": 0.8947,
+            "mrr_at_10": 0.7471,
+            "ndcg_at_10": 0.8079,
+            "no_evidence_rate": null
+          },
+          "multi_passage": {
+            "n_questions": 8,
+            "n_scored_questions": 8,
+            "recall_at_5": 0.9375,
+            "mrr_at_10": 0.875,
+            "ndcg_at_10": 0.8409,
+            "no_evidence_rate": null
+          },
+          "paraphrase": {
+            "n_questions": 18,
+            "n_scored_questions": 18,
+            "recall_at_5": 1.0,
+            "mrr_at_10": 0.838,
+            "ndcg_at_10": 0.8791,
+            "no_evidence_rate": null
+          },
+          "unanswerable": {
+            "n_questions": 8,
+            "n_scored_questions": 0,
+            "recall_at_5": null,
+            "mrr_at_10": null,
+            "ndcg_at_10": null,
+            "no_evidence_rate": 0.125
+          }
+        }
+      },
+      "latency": {
+        "cold_first_query_ms": 0.143,
+        "steady_state": {
+          "n": 74,
+          "mean_ms": 0.127,
+          "median_ms": 0.117,
+          "min_ms": 0.012,
+          "max_ms": 0.345,
+          "p95_ms": 0.235
+        }
+      },
+      "settings": {
+        "top_k": 10,
+        "k_recall": 5,
+        "k_rank": 10,
+        "repeat": 1
+      },
+      "method": "bm25",
+      "n_chunks": 80,
+      "build_ms": 49.263,
+      "diagnostics": {
+        "retriever": "bm25",
+        "n_chunks": 80,
+        "scope": "uploaded_active_documents"
+      }
+    },
+    "dense": {
+      "per_question": [
+        {
+          "question_id": "q01",
+          "question": "What does the initial design phase do?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0001"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0038",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0060",
+            "udoc_151a82bc49d3:0073"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 57.239
+        },
+        {
+          "question_id": "q02",
+          "question": "What is physical design in database design?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0002"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0060",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0051"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 29.959
+        },
+        {
+          "question_id": "q03",
+          "question": "Which two major pitfalls must a database schema design avoid?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0003"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0052"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 26.903
+        },
+        {
+          "question_id": "q04",
+          "question": "Which design approaches does the chapter discuss?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0004"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0060",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0038"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6309297535714575,
+          "retrieval_ms": 24.261
+        },
+        {
+          "question_id": "q05",
+          "question": "What is an entity set?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0006"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0063",
+            "udoc_151a82bc49d3:0036"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 23.15
+        },
+        {
+          "question_id": "q06",
+          "question": "Which shape represents an entity set in an ER diagram, and how are its attributes shown?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0007"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0038"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 34.818
+        },
+        {
+          "question_id": "q07",
+          "question": "What does a diamond represent in an ER diagram?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0010"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0038",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0074"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 24.936
+        },
+        {
+          "question_id": "q08",
+          "question": "Which attribute is attached to the advisor relationship set in the worked example?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0011"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0009",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0011",
+            "udoc_151a82bc49d3:0012",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0037"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.2,
+          "ndcg": 0.38685280723454163,
+          "retrieval_ms": 29.215
+        },
+        {
+          "question_id": "q09",
+          "question": "What is a role in the entity-relationship model?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0013"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0013",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0009",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0068"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 31.747
+        },
+        {
+          "question_id": "q10",
+          "question": "What makes a relationship binary?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0014"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0066",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0032"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg": 0.5,
+          "retrieval_ms": 25.113
+        },
+        {
+          "question_id": "q11",
+          "question": "What is a derived attribute and what example is given?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0016"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0017",
+            "udoc_151a82bc49d3:0012",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0006"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 24.373
+        },
+        {
+          "question_id": "q12",
+          "question": "What is the domain of an attribute?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0016"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0012",
+            "udoc_151a82bc49d3:0017",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0063"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 25.567
+        },
+        {
+          "question_id": "q13",
+          "question": "How are composite attributes described?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0017"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0017",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0012",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0030"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 21.843
+        },
+        {
+          "question_id": "q14",
+          "question": "Which four mapping cardinality types exist for a binary relationship set?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0019"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0020",
+            "udoc_151a82bc49d3:0021",
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0066",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0032"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 25.317
+        },
+        {
+          "question_id": "q15",
+          "question": "How do directed and undirected lines express cardinality constraints?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0022"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0074",
+            "udoc_151a82bc49d3:0020",
+            "udoc_151a82bc49d3:0021",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0067"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6309297535714575,
+          "retrieval_ms": 24.663
+        },
+        {
+          "question_id": "q16",
+          "question": "What does a double line indicate in an ER diagram?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0026"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0071",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0061",
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0072",
+            "udoc_151a82bc49d3:0062",
+            "udoc_151a82bc49d3:0076"
+          ],
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg": 0.0,
+          "retrieval_ms": 24.219
+        },
+        {
+          "question_id": "q17",
+          "question": "In the minimum-maximum notation l..h, what does a maximum value of star mean?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0027"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0070",
+            "udoc_151a82bc49d3:0069",
+            "udoc_151a82bc49d3:0072",
+            "udoc_151a82bc49d3:0071",
+            "udoc_151a82bc49d3:0054",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0079",
+            "udoc_151a82bc49d3:0074"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 33.245
+        },
+        {
+          "question_id": "q18",
+          "question": "Why does the notation forbid more than one arrow leaving a ternary relationship?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0028"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0056",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0019"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 29.276
+        },
+        {
+          "question_id": "q19",
+          "question": "What is a key for an entity?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0030"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0063",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0004"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 22.365
+        },
+        {
+          "question_id": "q20",
+          "question": "How is the primary key of a relationship set formed?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0031"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0009",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0015"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg": 0.5,
+          "retrieval_ms": 23.94
+        },
+        {
+          "question_id": "q21",
+          "question": "What is the primary key of a many-to-many relationship set?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0032"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0009",
+            "udoc_151a82bc49d3:0015"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 28.723
+        },
+        {
+          "question_id": "q22",
+          "question": "For a one-to-one relationship, which side provides the primary key?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0032"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0024",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0023"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 41.315
+        },
+        {
+          "question_id": "q23",
+          "question": "What is a weak entity set?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0034"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0033",
+            "udoc_151a82bc49d3:0030"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.2,
+          "ndcg": 0.38685280723454163,
+          "retrieval_ms": 24.589
+        },
+        {
+          "question_id": "q24",
+          "question": "What is a strong entity set?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0035"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0049"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg": 0.5,
+          "retrieval_ms": 31.93
+        },
+        {
+          "question_id": "q25",
+          "question": "How is a weak entity set drawn in an ER diagram?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0036"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0022"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 32.872
+        },
+        {
+          "question_id": "q26",
+          "question": "Why is the dept_name attribute of student considered redundant?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0037"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0033",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0050",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0052"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 29.965
+        },
+        {
+          "question_id": "q27",
+          "question": "How is an ER design turned into relation schemas?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0040"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0039"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg": 0.5,
+          "retrieval_ms": 28.432
+        },
+        {
+          "question_id": "q28",
+          "question": "What happens to a weak entity set when it is reduced to a table?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0041"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0033",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0040"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6309297535714575,
+          "retrieval_ms": 40.546
+        },
+        {
+          "question_id": "q29",
+          "question": "How are composite attributes flattened into a relation schema?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0042"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0012",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0039",
+            "udoc_151a82bc49d3:0017",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0049"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg": 0.5,
+          "retrieval_ms": 24.876
+        },
+        {
+          "question_id": "q30",
+          "question": "How is a multivalued attribute represented in the relational model?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0043"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0012",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0031"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 27.72
+        },
+        {
+          "question_id": "q31",
+          "question": "What schema represents a many-to-many relationship set?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0044"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0009",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0014"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 23.187
+        },
+        {
+          "question_id": "q32",
+          "question": "How can a many-to-one relationship that is total on the many side avoid its own schema?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0045"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0024",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0057",
+            "udoc_151a82bc49d3:0025",
+            "udoc_151a82bc49d3:0039",
+            "udoc_151a82bc49d3:0023"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 30.354
+        },
+        {
+          "question_id": "q33",
+          "question": "What problem can appear when a relationship schema is replaced by an extra attribute on a partially participating many side?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0046"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0033",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0012",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0039"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 30.798
+        },
+        {
+          "question_id": "q34",
+          "question": "Why is the schema for the relationship between a weak entity set and its identifying strong entity set redundant?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0047"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0033",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0045"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 28.473
+        },
+        {
+          "question_id": "q35",
+          "question": "What is specialization in the extended ER model?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0049"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0005",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0071",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0007"
+          ],
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg": 0.0,
+          "retrieval_ms": 22.652
+        },
+        {
+          "question_id": "q36",
+          "question": "What examples illustrate overlapping and disjoint specialization?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0050"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0050",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0058",
+            "udoc_151a82bc49d3:0057",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0068"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 21.633
+        },
+        {
+          "question_id": "q37",
+          "question": "What is the drawback of the first method for representing specialization as schemas?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0051"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0002"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 25.388
+        },
+        {
+          "question_id": "q38",
+          "question": "What is the drawback of the second method for representing specialization as schemas?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0052"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0002"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6309297535714575,
+          "retrieval_ms": 28.491
+        },
+        {
+          "question_id": "q39",
+          "question": "What is generalization?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0053"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0057",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0027"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 21.186
+        },
+        {
+          "question_id": "q40",
+          "question": "What does a completeness constraint specify?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0054"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0054",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0039",
+            "udoc_151a82bc49d3:0057"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 22.119
+        },
+        {
+          "question_id": "q41",
+          "question": "How is a total generalization shown in an ER diagram?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0055"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0071",
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0005",
+            "udoc_151a82bc49d3:0074"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 22.867
+        },
+        {
+          "question_id": "q42",
+          "question": "What does aggregation accomplish in an ER diagram?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0057"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0058",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0038",
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0005",
+            "udoc_151a82bc49d3:0068"
+          ],
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg": 0.0,
+          "retrieval_ms": 26.76
+        },
+        {
+          "question_id": "q43",
+          "question": "How is aggregation reduced to relational schemas?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0059"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0059",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0039",
+            "udoc_151a82bc49d3:0057",
+            "udoc_151a82bc49d3:0058",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0056",
+            "udoc_151a82bc49d3:0037"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 25.029
+        },
+        {
+          "question_id": "q44",
+          "question": "Why might phone be modelled as an entity instead of an attribute?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0063"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0063",
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0052"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 24.409
+        },
+        {
+          "question_id": "q45",
+          "question": "What guideline helps decide whether a concept should be an entity set or a relationship set?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0064"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0009",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0031"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 28.154
+        },
+        {
+          "question_id": "q46",
+          "question": "Why can modelling parents as two binary relationships beat one ternary relationship?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0065"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0066",
+            "udoc_151a82bc49d3:0056",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0019"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 29.032
+        },
+        {
+          "question_id": "q47",
+          "question": "How can any non-binary relationship be replaced by binary relationships?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0066"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0066",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0010"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg": 0.5,
+          "retrieval_ms": 26.649
+        },
+        {
+          "question_id": "q48",
+          "question": "What is the main limitation of converting a non-binary relationship into binary form?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0067"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0066",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0068"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.2,
+          "ndcg": 0.38685280723454163,
+          "retrieval_ms": 44.864
+        },
+        {
+          "question_id": "q49",
+          "question": "Which design decisions are listed for ER modelling?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0068"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0005",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0073",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0000"
+          ],
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg": 0.0,
+          "retrieval_ms": 23.643
+        },
+        {
+          "question_id": "q50",
+          "question": "What is UML and how do its class diagrams relate to ER diagrams?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0073"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0073",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0074",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0004"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6309297535714575,
+          "retrieval_ms": 31.201
+        },
+        {
+          "question_id": "q51",
+          "question": "How are binary relationship sets drawn in UML class diagrams?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0076"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0074",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0073",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0007"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 25.098
+        },
+        {
+          "question_id": "q52",
+          "question": "What is a relationship set, stated mathematically?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0008"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0009",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0012",
+            "udoc_151a82bc49d3:0040"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 68.209
+        },
+        {
+          "question_id": "q53",
+          "question": "In a one-to-many advisor relationship between instructor and student, how many advisors can a student have?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0023"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0024",
+            "udoc_151a82bc49d3:0023",
+            "udoc_151a82bc49d3:0025",
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0009",
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0011"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6309297535714575,
+          "retrieval_ms": 145.192
+        },
+        {
+          "question_id": "q54",
+          "question": "Which three cases of primary key choice does the chapter consider?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0029"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0054",
+            "udoc_151a82bc49d3:0068"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg": 0.5,
+          "retrieval_ms": 74.449
+        },
+        {
+          "question_id": "q55",
+          "question": "Why is the information in the sec_course relationship redundant for sections?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0033"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0033",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0013",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0011",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0014"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 225.242
+        },
+        {
+          "question_id": "q56",
+          "question": "Which chapter of Database System Concepts covers database design using the E-R model?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0000"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0038",
+            "udoc_151a82bc49d3:0048",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0005",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0003"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 120.645
+        },
+        {
+          "question_id": "q57",
+          "question": "Which ternary relationship example does the chapter use to discuss degree?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0015"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0056",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0013",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0022"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.25,
+          "ndcg": 0.43067655807339306,
+          "retrieval_ms": 31.167
+        },
+        {
+          "question_id": "q58",
+          "question": "Which other aspects of database design close the chapter?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0078"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0060",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0046"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.2,
+          "ndcg": 0.38685280723454163,
+          "retrieval_ms": 48.568
+        },
+        {
+          "question_id": "q59",
+          "question": "What difference in cardinality depiction is noted between ER diagrams and UML class diagrams?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0074"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0074",
+            "udoc_151a82bc49d3:0073",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0036"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg": 0.5,
+          "retrieval_ms": 48.963
+        },
+        {
+          "question_id": "q60",
+          "question": "What are composite attributes and how are they flattened when an entity set is reduced to a relation schema?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0017",
+            "udoc_151a82bc49d3:0042"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0012",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0039",
+            "udoc_151a82bc49d3:0045"
+          ],
+          "recall_at_k": 0.5,
+          "reciprocal_rank": 0.25,
+          "ndcg": 0.2640681225725909,
+          "retrieval_ms": 49.337
+        },
+        {
+          "question_id": "q61",
+          "question": "What is a multivalued attribute and how is it represented relationally?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0043"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0012",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0017"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 38.041
+        },
+        {
+          "question_id": "q62",
+          "question": "How is the primary key of a relationship set determined and how does the mapping cardinality change that choice?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0032"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0012",
+            "udoc_151a82bc49d3:0021",
+            "udoc_151a82bc49d3:0015"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg": 0.5706417189553201,
+          "retrieval_ms": 56.806
+        },
+        {
+          "question_id": "q63",
+          "question": "How is a weak entity set drawn in an ER diagram, and what columns does its table have after reduction?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0041"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0022"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 0.9197207891481876,
+          "retrieval_ms": 94.483
+        },
+        {
+          "question_id": "q64",
+          "question": "What is specialization and what is the drawback of representing it with one schema per entity set?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0051"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0006"
+          ],
+          "recall_at_k": 0.5,
+          "reciprocal_rank": 1.0,
+          "ndcg": 0.8315546295836225,
+          "retrieval_ms": 37.756
+        },
+        {
+          "question_id": "q65",
+          "question": "How do total and partial participation differ and how can they be written with minimum-maximum constraints?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0027"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0050",
+            "udoc_151a82bc49d3:0058",
+            "udoc_151a82bc49d3:0054",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0049"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 29.279
+        },
+        {
+          "question_id": "q66",
+          "question": "Why is aggregation introduced, and what schema does it produce?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0057",
+            "udoc_151a82bc49d3:0059"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0058",
+            "udoc_151a82bc49d3:0059",
+            "udoc_151a82bc49d3:0057",
+            "udoc_151a82bc49d3:0056",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0040"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg": 0.5706417189553201,
+          "retrieval_ms": 23.351
+        },
+        {
+          "question_id": "q67",
+          "question": "What is generalization and which completeness constraints can apply to it?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0054"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0054",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0057",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0039"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6934264036172708,
+          "retrieval_ms": 30.115
+        },
+        {
+          "question_id": "q68",
+          "question": "What is the average salary of the instructors in the university database?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0025",
+            "udoc_151a82bc49d3:0050",
+            "udoc_151a82bc49d3:0024",
+            "udoc_151a82bc49d3:0023",
+            "udoc_151a82bc49d3:0011",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0058",
+            "udoc_151a82bc49d3:0009"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 22.318
+        },
+        {
+          "question_id": "q69",
+          "question": "How many students are currently enrolled at IIITDM Kurnool?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0025",
+            "udoc_151a82bc49d3:0050",
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0011",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0013",
+            "udoc_151a82bc49d3:0024",
+            "udoc_151a82bc49d3:0023",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0027"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 30.787
+        },
+        {
+          "question_id": "q70",
+          "question": "What is the capital of France?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0017",
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0070",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0071",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0038"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 22.518
+        },
+        {
+          "question_id": "q71",
+          "question": "What is the time complexity of insertion in a B+ tree index?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0020",
+            "udoc_151a82bc49d3:0021",
+            "udoc_151a82bc49d3:0079",
+            "udoc_151a82bc49d3:0038",
+            "udoc_151a82bc49d3:0071",
+            "udoc_151a82bc49d3:0048",
+            "udoc_151a82bc49d3:0072",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0005",
+            "udoc_151a82bc49d3:0074"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 28.145
+        },
+        {
+          "question_id": "q72",
+          "question": "Who won the 2022 FIFA World Cup?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0059",
+            "udoc_151a82bc49d3:0013",
+            "udoc_151a82bc49d3:0039",
+            "udoc_151a82bc49d3:0011",
+            "udoc_151a82bc49d3:0056",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0073"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 23.015
+        },
+        {
+          "question_id": "q73",
+          "question": "What does the chapter say about NoSQL document databases?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0079",
+            "udoc_151a82bc49d3:0060",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0063",
+            "udoc_151a82bc49d3:0048",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0068"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 21.977
+        },
+        {
+          "question_id": "q74",
+          "question": "How do you configure a PostgreSQL connection string?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0009",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0079",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0013",
+            "udoc_151a82bc49d3:0001"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 29.841
+        },
+        {
+          "question_id": "q75",
+          "question": "What is the definition of third normal form?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0070",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0056"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 21.856
+        }
+      ],
+      "aggregate": {
+        "n_questions": 75,
+        "n_scored_questions": 67,
+        "n_unanswerable_questions": 8,
+        "recall_at_5": 0.9254,
+        "mrr_at_10": 0.7184,
+        "ndcg_at_10": 0.7704,
+        "hit_rate_at_1": 0.597,
+        "no_evidence_rate": 0.0,
+        "mean_relevant_chunks": 1.119,
+        "metrics_note": "Binary relevance against hand-verified chunk ids. Questions with no labelled evidence (unanswerable) are excluded from Recall/MRR/nDCG and reported separately via no_evidence_rate.",
+        "by_category": {
+          "definition": {
+            "n_questions": 22,
+            "n_scored_questions": 22,
+            "recall_at_5": 0.9091,
+            "mrr_at_10": 0.7061,
+            "ndcg_at_10": 0.7568,
+            "no_evidence_rate": null
+          },
+          "exact_terminology": {
+            "n_questions": 19,
+            "n_scored_questions": 19,
+            "recall_at_5": 0.8947,
+            "mrr_at_10": 0.6833,
+            "ndcg_at_10": 0.7351,
+            "no_evidence_rate": null
+          },
+          "multi_passage": {
+            "n_questions": 8,
+            "n_scored_questions": 8,
+            "recall_at_5": 0.875,
+            "mrr_at_10": 0.6771,
+            "ndcg_at_10": 0.7313,
+            "no_evidence_rate": null
+          },
+          "paraphrase": {
+            "n_questions": 18,
+            "n_scored_questions": 18,
+            "recall_at_5": 1.0,
+            "mrr_at_10": 0.7889,
+            "ndcg_at_10": 0.8416,
+            "no_evidence_rate": null
+          },
+          "unanswerable": {
+            "n_questions": 8,
+            "n_scored_questions": 0,
+            "recall_at_5": null,
+            "mrr_at_10": null,
+            "ndcg_at_10": null,
+            "no_evidence_rate": 0.0
+          }
+        }
+      },
+      "latency": {
+        "cold_first_query_ms": 57.239,
+        "steady_state": {
+          "n": 74,
+          "mean_ms": 36.485,
+          "median_ms": 28.293,
+          "min_ms": 21.186,
+          "max_ms": 225.242,
+          "p95_ms": 81.461
+        }
+      },
+      "settings": {
+        "top_k": 10,
+        "k_recall": 5,
+        "k_rank": 10,
+        "repeat": 1
+      },
+      "method": "dense",
+      "n_chunks": 80,
+      "build_ms": 22998.698,
+      "diagnostics": {
+        "retriever": "dense",
+        "model_name": "sentence-transformers/all-MiniLM-L6-v2",
+        "embedding_dim": 384,
+        "n_documents": 80,
+        "encode_ms": 22646.135,
+        "model_load_ms": 16548.437,
+        "vectors_reused_from_cache": 0,
+        "cache": {
+          "path": "C:\\Users\\HP\\nlp_proj\\data\\embeddings\\sentence-transformers__all-MiniLM-L6-v2\\default.npz",
+          "entries": 80,
+          "hits": 0,
+          "misses": 80,
+          "model_name": "sentence-transformers/all-MiniLM-L6-v2"
+        },
+        "n_chunks": 80,
+        "scope": "uploaded_active_documents"
+      }
+    },
+    "hybrid": {
+      "per_question": [
+        {
+          "question_id": "q01",
+          "question": "What does the initial design phase do?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0001"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0060",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0049"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 1593.03
+        },
+        {
+          "question_id": "q02",
+          "question": "What is physical design in database design?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0002"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0060",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0053"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 51.571
+        },
+        {
+          "question_id": "q03",
+          "question": "Which two major pitfalls must a database schema design avoid?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0003"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0047"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 20.294
+        },
+        {
+          "question_id": "q04",
+          "question": "Which design approaches does the chapter discuss?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0004"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0060",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0053"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 28.818
+        },
+        {
+          "question_id": "q05",
+          "question": "What is an entity set?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0006"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0076"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 16.54
+        },
+        {
+          "question_id": "q06",
+          "question": "Which shape represents an entity set in an ER diagram, and how are its attributes shown?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0007"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0029"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 21.917
+        },
+        {
+          "question_id": "q07",
+          "question": "What does a diamond represent in an ER diagram?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0010"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0005",
+            "udoc_151a82bc49d3:0038"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 15.206
+        },
+        {
+          "question_id": "q08",
+          "question": "Which attribute is attached to the advisor relationship set in the worked example?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0011"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0009",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0011",
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0022"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.2,
+          "ndcg": 0.38685280723454163,
+          "retrieval_ms": 19.337
+        },
+        {
+          "question_id": "q09",
+          "question": "What is a role in the entity-relationship model?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0013"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0013",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0031"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 16.721
+        },
+        {
+          "question_id": "q10",
+          "question": "What makes a relationship binary?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0014"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0066",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0010"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg": 0.5,
+          "retrieval_ms": 15.305
+        },
+        {
+          "question_id": "q11",
+          "question": "What is a derived attribute and what example is given?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0016"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0011",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0064"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 16.825
+        },
+        {
+          "question_id": "q12",
+          "question": "What is the domain of an attribute?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0016"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0045"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 15.715
+        },
+        {
+          "question_id": "q13",
+          "question": "How are composite attributes described?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0017"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0017",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0012",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0063",
+            "udoc_151a82bc49d3:0006"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 14.283
+        },
+        {
+          "question_id": "q14",
+          "question": "Which four mapping cardinality types exist for a binary relationship set?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0019"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0020",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0066",
+            "udoc_151a82bc49d3:0021",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0031"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 16.642
+        },
+        {
+          "question_id": "q15",
+          "question": "How do directed and undirected lines express cardinality constraints?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0022"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0074",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0020",
+            "udoc_151a82bc49d3:0021"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 17.804
+        },
+        {
+          "question_id": "q16",
+          "question": "What does a double line indicate in an ER diagram?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0026"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0071",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0072",
+            "udoc_151a82bc49d3:0055"
+          ],
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg": 0.0,
+          "retrieval_ms": 16.978
+        },
+        {
+          "question_id": "q17",
+          "question": "In the minimum-maximum notation l..h, what does a maximum value of star mean?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0027"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0069",
+            "udoc_151a82bc49d3:0070",
+            "udoc_151a82bc49d3:0072",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0071",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0054"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 19.933
+        },
+        {
+          "question_id": "q18",
+          "question": "Why does the notation forbid more than one arrow leaving a ternary relationship?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0028"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0056",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0070"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 21.813
+        },
+        {
+          "question_id": "q19",
+          "question": "What is a key for an entity?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0030"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0068"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 13.225
+        },
+        {
+          "question_id": "q20",
+          "question": "How is the primary key of a relationship set formed?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0031"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0007"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6309297535714575,
+          "retrieval_ms": 13.534
+        },
+        {
+          "question_id": "q21",
+          "question": "What is the primary key of a many-to-many relationship set?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0032"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0024",
+            "udoc_151a82bc49d3:0025"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 19.302
+        },
+        {
+          "question_id": "q22",
+          "question": "For a one-to-one relationship, which side provides the primary key?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0032"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0024",
+            "udoc_151a82bc49d3:0023",
+            "udoc_151a82bc49d3:0022"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 17.429
+        },
+        {
+          "question_id": "q23",
+          "question": "What is a weak entity set?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0034"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0033",
+            "udoc_151a82bc49d3:0049"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.25,
+          "ndcg": 0.43067655807339306,
+          "retrieval_ms": 16.139
+        },
+        {
+          "question_id": "q24",
+          "question": "What is a strong entity set?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0035"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0076"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.25,
+          "ndcg": 0.43067655807339306,
+          "retrieval_ms": 22.503
+        },
+        {
+          "question_id": "q25",
+          "question": "How is a weak entity set drawn in an ER diagram?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0036"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0034"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 22.069
+        },
+        {
+          "question_id": "q26",
+          "question": "Why is the dept_name attribute of student considered redundant?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0037"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0033",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0017",
+            "udoc_151a82bc49d3:0011",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0052"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 26.633
+        },
+        {
+          "question_id": "q27",
+          "question": "How is an ER design turned into relation schemas?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0040"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0039",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0068"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 23.324
+        },
+        {
+          "question_id": "q28",
+          "question": "What happens to a weak entity set when it is reduced to a table?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0041"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0033",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0040"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 23.129
+        },
+        {
+          "question_id": "q29",
+          "question": "How are composite attributes flattened into a relation schema?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0042"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0017",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0039",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0044"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 19.092
+        },
+        {
+          "question_id": "q30",
+          "question": "How is a multivalued attribute represented in the relational model?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0043"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0045"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 22.155
+        },
+        {
+          "question_id": "q31",
+          "question": "What schema represents a many-to-many relationship set?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0044"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0025",
+            "udoc_151a82bc49d3:0024",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0076"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 21.463
+        },
+        {
+          "question_id": "q32",
+          "question": "How can a many-to-one relationship that is total on the many side avoid its own schema?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0045"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0024",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0023",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0047"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 24.163
+        },
+        {
+          "question_id": "q33",
+          "question": "What problem can appear when a relationship schema is replaced by an extra attribute on a partially participating many side?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0046"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0033",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0065"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 23.13
+        },
+        {
+          "question_id": "q34",
+          "question": "Why is the schema for the relationship between a weak entity set and its identifying strong entity set redundant?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0047"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0033",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0045"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 19.831
+        },
+        {
+          "question_id": "q35",
+          "question": "What is specialization in the extended ER model?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0049"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0005",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0071",
+            "udoc_151a82bc49d3:0050",
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0072",
+            "udoc_151a82bc49d3:0048",
+            "udoc_151a82bc49d3:0051"
+          ],
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.0,
+          "ndcg": 0.0,
+          "retrieval_ms": 18.212
+        },
+        {
+          "question_id": "q36",
+          "question": "What examples illustrate overlapping and disjoint specialization?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0050"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0050",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0057",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0058"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 17.539
+        },
+        {
+          "question_id": "q37",
+          "question": "What is the drawback of the first method for representing specialization as schemas?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0051"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0039"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 21.279
+        },
+        {
+          "question_id": "q38",
+          "question": "What is the drawback of the second method for representing specialization as schemas?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0052"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0039",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0046"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6309297535714575,
+          "retrieval_ms": 20.423
+        },
+        {
+          "question_id": "q39",
+          "question": "What is generalization?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0053"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0054",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0057"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 14.299
+        },
+        {
+          "question_id": "q40",
+          "question": "What does a completeness constraint specify?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0054"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0054",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0074",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0019"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 16.118
+        },
+        {
+          "question_id": "q41",
+          "question": "How is a total generalization shown in an ER diagram?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0055"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0071",
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0005",
+            "udoc_151a82bc49d3:0072"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 16.304
+        },
+        {
+          "question_id": "q42",
+          "question": "What does aggregation accomplish in an ER diagram?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0057"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0058",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0057",
+            "udoc_151a82bc49d3:0005",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0077"
+          ],
+          "recall_at_k": 0.0,
+          "reciprocal_rank": 0.16666666666666666,
+          "ndcg": 0.3562071871080222,
+          "retrieval_ms": 16.654
+        },
+        {
+          "question_id": "q43",
+          "question": "How is aggregation reduced to relational schemas?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0059"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0059",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0058",
+            "udoc_151a82bc49d3:0057",
+            "udoc_151a82bc49d3:0039",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0056",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0046"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 18.073
+        },
+        {
+          "question_id": "q44",
+          "question": "Why might phone be modelled as an entity instead of an attribute?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0063"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0063",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0037"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 17.347
+        },
+        {
+          "question_id": "q45",
+          "question": "What guideline helps decide whether a concept should be an entity set or a relationship set?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0064"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0006"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 19.563
+        },
+        {
+          "question_id": "q46",
+          "question": "Why can modelling parents as two binary relationships beat one ternary relationship?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0065"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0066",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0056",
+            "udoc_151a82bc49d3:0022"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 18.44
+        },
+        {
+          "question_id": "q47",
+          "question": "How can any non-binary relationship be replaced by binary relationships?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0066"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0066",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0057",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0029"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg": 0.5,
+          "retrieval_ms": 17.788
+        },
+        {
+          "question_id": "q48",
+          "question": "What is the main limitation of converting a non-binary relationship into binary form?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0067"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0066",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0057"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.2,
+          "ndcg": 0.38685280723454163,
+          "retrieval_ms": 21.012
+        },
+        {
+          "question_id": "q49",
+          "question": "Which design decisions are listed for ER modelling?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0068"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0005",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0071"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.2,
+          "ndcg": 0.38685280723454163,
+          "retrieval_ms": 16.429
+        },
+        {
+          "question_id": "q50",
+          "question": "What is UML and how do its class diagrams relate to ER diagrams?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0073"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0073",
+            "udoc_151a82bc49d3:0074",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0061",
+            "udoc_151a82bc49d3:0005"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg": 0.5,
+          "retrieval_ms": 18.482
+        },
+        {
+          "question_id": "q51",
+          "question": "How are binary relationship sets drawn in UML class diagrams?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0076"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0073",
+            "udoc_151a82bc49d3:0074",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0036"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 17.382
+        },
+        {
+          "question_id": "q52",
+          "question": "What is a relationship set, stated mathematically?",
+          "category": "definition",
+          "relevant": [
+            "udoc_151a82bc49d3:0008"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0009",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0019"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 16.619
+        },
+        {
+          "question_id": "q53",
+          "question": "In a one-to-many advisor relationship between instructor and student, how many advisors can a student have?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0023"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0023",
+            "udoc_151a82bc49d3:0024",
+            "udoc_151a82bc49d3:0025",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0009",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0011",
+            "udoc_151a82bc49d3:0008"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 20.627
+        },
+        {
+          "question_id": "q54",
+          "question": "Which three cases of primary key choice does the chapter consider?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0029"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0051"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.3333333333333333,
+          "ndcg": 0.5,
+          "retrieval_ms": 16.591
+        },
+        {
+          "question_id": "q55",
+          "question": "Why is the information in the sec_course relationship redundant for sections?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0033"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0033",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0013",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0006"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 20.028
+        },
+        {
+          "question_id": "q56",
+          "question": "Which chapter of Database System Concepts covers database design using the E-R model?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0000"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0073",
+            "udoc_151a82bc49d3:0038",
+            "udoc_151a82bc49d3:0048"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 20.26
+        },
+        {
+          "question_id": "q57",
+          "question": "Which ternary relationship example does the chapter use to discuss degree?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0015"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0065",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0056",
+            "udoc_151a82bc49d3:0008",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0064",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0009"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.25,
+          "ndcg": 0.43067655807339306,
+          "retrieval_ms": 17.047
+        },
+        {
+          "question_id": "q58",
+          "question": "Which other aspects of database design close the chapter?",
+          "category": "exact_terminology",
+          "relevant": [
+            "udoc_151a82bc49d3:0078"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0060",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0053"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6309297535714575,
+          "retrieval_ms": 15.933
+        },
+        {
+          "question_id": "q59",
+          "question": "What difference in cardinality depiction is noted between ER diagrams and UML class diagrams?",
+          "category": "paraphrase",
+          "relevant": [
+            "udoc_151a82bc49d3:0074"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0074",
+            "udoc_151a82bc49d3:0077",
+            "udoc_151a82bc49d3:0075",
+            "udoc_151a82bc49d3:0073",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0061",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0007"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 23.0
+        },
+        {
+          "question_id": "q60",
+          "question": "What are composite attributes and how are they flattened when an entity set is reduced to a relation schema?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0017",
+            "udoc_151a82bc49d3:0042"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0017",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0049"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 0.8772153153380493,
+          "retrieval_ms": 33.567
+        },
+        {
+          "question_id": "q61",
+          "question": "What is a multivalued attribute and how is it represented relationally?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0043"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0043",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0064"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 20.945
+        },
+        {
+          "question_id": "q62",
+          "question": "How is the primary key of a relationship set determined and how does the mapping cardinality change that choice?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0032"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0031",
+            "udoc_151a82bc49d3:0032",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0021",
+            "udoc_151a82bc49d3:0020",
+            "udoc_151a82bc49d3:0028"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6934264036172708,
+          "retrieval_ms": 19.867
+        },
+        {
+          "question_id": "q63",
+          "question": "How is a weak entity set drawn in an ER diagram, and what columns does its table have after reduction?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0041"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0036",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0007",
+            "udoc_151a82bc49d3:0035",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0034"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 22.678
+        },
+        {
+          "question_id": "q64",
+          "question": "What is specialization and what is the drawback of representing it with one schema per entity set?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0051"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0045"
+          ],
+          "recall_at_k": 0.5,
+          "reciprocal_rank": 1.0,
+          "ndcg": 0.8065735963827293,
+          "retrieval_ms": 21.668
+        },
+        {
+          "question_id": "q65",
+          "question": "How do total and partial participation differ and how can they be written with minimum-maximum constraints?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0027"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0050",
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0046",
+            "udoc_151a82bc49d3:0054",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0049",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0053"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 1.0,
+          "retrieval_ms": 22.747
+        },
+        {
+          "question_id": "q66",
+          "question": "Why is aggregation introduced, and what schema does it produce?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0057",
+            "udoc_151a82bc49d3:0059"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0059",
+            "udoc_151a82bc49d3:0058",
+            "udoc_151a82bc49d3:0057",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0056",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0001"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 1.0,
+          "ndcg": 0.9197207891481876,
+          "retrieval_ms": 17.513
+        },
+        {
+          "question_id": "q67",
+          "question": "What is generalization and which completeness constraints can apply to it?",
+          "category": "multi_passage",
+          "relevant": [
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0054"
+          ],
+          "retrieved": [
+            "udoc_151a82bc49d3:0055",
+            "udoc_151a82bc49d3:0054",
+            "udoc_151a82bc49d3:0053",
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0019",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0049"
+          ],
+          "recall_at_k": 1.0,
+          "reciprocal_rank": 0.5,
+          "ndcg": 0.6934264036172708,
+          "retrieval_ms": 21.366
+        },
+        {
+          "question_id": "q68",
+          "question": "What is the average salary of the instructors in the university database?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0025",
+            "udoc_151a82bc49d3:0024",
+            "udoc_151a82bc49d3:0009",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0038",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0040",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0078"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 17.341
+        },
+        {
+          "question_id": "q69",
+          "question": "How many students are currently enrolled at IIITDM Kurnool?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0025",
+            "udoc_151a82bc49d3:0023",
+            "udoc_151a82bc49d3:0024",
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0022",
+            "udoc_151a82bc49d3:0045",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0009",
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0044"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 19.622
+        },
+        {
+          "question_id": "q70",
+          "question": "What is the capital of France?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0017",
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0042",
+            "udoc_151a82bc49d3:0044",
+            "udoc_151a82bc49d3:0070",
+            "udoc_151a82bc49d3:0041",
+            "udoc_151a82bc49d3:0071",
+            "udoc_151a82bc49d3:0037",
+            "udoc_151a82bc49d3:0038"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 15.829
+        },
+        {
+          "question_id": "q71",
+          "question": "What is the time complexity of insertion in a B+ tree index?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0020",
+            "udoc_151a82bc49d3:0021",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0066",
+            "udoc_151a82bc49d3:0067",
+            "udoc_151a82bc49d3:0079",
+            "udoc_151a82bc49d3:0038",
+            "udoc_151a82bc49d3:0071",
+            "udoc_151a82bc49d3:0048",
+            "udoc_151a82bc49d3:0072"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 20.889
+        },
+        {
+          "question_id": "q72",
+          "question": "Who won the 2022 FIFA World Cup?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0068",
+            "udoc_151a82bc49d3:0026",
+            "udoc_151a82bc49d3:0059",
+            "udoc_151a82bc49d3:0013",
+            "udoc_151a82bc49d3:0039",
+            "udoc_151a82bc49d3:0011",
+            "udoc_151a82bc49d3:0056",
+            "udoc_151a82bc49d3:0014",
+            "udoc_151a82bc49d3:0034",
+            "udoc_151a82bc49d3:0035"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 15.531
+        },
+        {
+          "question_id": "q73",
+          "question": "What does the chapter say about NoSQL document databases?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0079",
+            "udoc_151a82bc49d3:0000",
+            "udoc_151a82bc49d3:0004",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0001",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0060",
+            "udoc_151a82bc49d3:0003",
+            "udoc_151a82bc49d3:0063",
+            "udoc_151a82bc49d3:0048"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 15.886
+        },
+        {
+          "question_id": "q74",
+          "question": "How do you configure a PostgreSQL connection string?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0029",
+            "udoc_151a82bc49d3:0002",
+            "udoc_151a82bc49d3:0076",
+            "udoc_151a82bc49d3:0078",
+            "udoc_151a82bc49d3:0009",
+            "udoc_151a82bc49d3:0047",
+            "udoc_151a82bc49d3:0015",
+            "udoc_151a82bc49d3:0079",
+            "udoc_151a82bc49d3:0010",
+            "udoc_151a82bc49d3:0013"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 19.838
+        },
+        {
+          "question_id": "q75",
+          "question": "What is the definition of third normal form?",
+          "category": "unanswerable",
+          "relevant": [],
+          "retrieved": [
+            "udoc_151a82bc49d3:0027",
+            "udoc_151a82bc49d3:0051",
+            "udoc_151a82bc49d3:0066",
+            "udoc_151a82bc49d3:0030",
+            "udoc_151a82bc49d3:0006",
+            "udoc_151a82bc49d3:0052",
+            "udoc_151a82bc49d3:0028",
+            "udoc_151a82bc49d3:0018",
+            "udoc_151a82bc49d3:0016",
+            "udoc_151a82bc49d3:0070"
+          ],
+          "recall_at_k": null,
+          "reciprocal_rank": null,
+          "ndcg": null,
+          "retrieval_ms": 16.047
+        }
+      ],
+      "aggregate": {
+        "n_questions": 75,
+        "n_scored_questions": 67,
+        "n_unanswerable_questions": 8,
+        "recall_at_5": 0.9478,
+        "mrr_at_10": 0.8112,
+        "ndcg_at_10": 0.8461,
+        "hit_rate_at_1": 0.7313,
+        "no_evidence_rate": 0.0,
+        "mean_relevant_chunks": 1.119,
+        "metrics_note": "Binary relevance against hand-verified chunk ids. Questions with no labelled evidence (unanswerable) are excluded from Recall/MRR/nDCG and reported separately via no_evidence_rate.",
+        "by_category": {
+          "definition": {
+            "n_questions": 22,
+            "n_scored_questions": 22,
+            "recall_at_5": 0.9091,
+            "mrr_at_10": 0.7652,
+            "ndcg_at_10": 0.8113,
+            "no_evidence_rate": null
+          },
+          "exact_terminology": {
+            "n_questions": 19,
+            "n_scored_questions": 19,
+            "recall_at_5": 0.9474,
+            "mrr_at_10": 0.7623,
+            "ndcg_at_10": 0.8071,
+            "no_evidence_rate": null
+          },
+          "multi_passage": {
+            "n_questions": 8,
+            "n_scored_questions": 8,
+            "recall_at_5": 0.9375,
+            "mrr_at_10": 0.875,
+            "ndcg_at_10": 0.8738,
+            "no_evidence_rate": null
+          },
+          "paraphrase": {
+            "n_questions": 18,
+            "n_scored_questions": 18,
+            "recall_at_5": 1.0,
+            "mrr_at_10": 0.8907,
+            "ndcg_at_10": 0.9177,
+            "no_evidence_rate": null
+          },
+          "unanswerable": {
+            "n_questions": 8,
+            "n_scored_questions": 0,
+            "recall_at_5": null,
+            "mrr_at_10": null,
+            "ndcg_at_10": null,
+            "no_evidence_rate": 0.0
+          }
+        }
+      },
+      "latency": {
+        "cold_first_query_ms": 1593.03,
+        "steady_state": {
+          "n": 74,
+          "mean_ms": 19.589,
+          "median_ms": 18.787,
+          "min_ms": 13.225,
+          "max_ms": 51.571,
+          "p95_ms": 25.028
+        }
+      },
+      "settings": {
+        "top_k": 10,
+        "k_recall": 5,
+        "k_rank": 10,
+        "repeat": 1
+      },
+      "method": "hybrid",
+      "n_chunks": 80,
+      "build_ms": 117.921,
+      "diagnostics": {
+        "retriever": "hybrid",
+        "rrf_k": 60,
+        "candidate_k": 50,
+        "n_documents": 80,
+        "components": {
+          "bm25": {
+            "retriever": "bm25"
+          },
+          "dense": {
+            "retriever": "dense",
+            "model_name": "sentence-transformers/all-MiniLM-L6-v2",
+            "embedding_dim": 384,
+            "n_documents": 80,
+            "encode_ms": 0.0,
+            "model_load_ms": 1460.651,
+            "vectors_reused_from_cache": 80,
+            "cache": {
+              "path": "C:\\Users\\HP\\nlp_proj\\data\\embeddings\\sentence-transformers__all-MiniLM-L6-v2\\default.npz",
+              "entries": 80,
+              "hits": 80,
+              "misses": 0,
+              "model_name": "sentence-transformers/all-MiniLM-L6-v2"
+            }
+          }
+        },
+        "n_chunks": 80,
+        "scope": "uploaded_active_documents"
+      }
+    }
+  },
+  "corpus": {
+    "n_chunks": 80,
+    "document_ids": [
+      "udoc_151a82bc49d3"
+    ]
+  },
+  "label_validation": {
+    "ok": true,
+    "n_available_chunks": 80,
+    "unknown_chunk_ids": []
+  },
+  "config_retrieval": {
+    "retriever": "bm25",
+    "top_k": 8,
+    "bm25": {
+      "k1": 1.5,
+      "b": 0.75
+    },
+    "dense": {
+      "model_name": "sentence-transformers/all-MiniLM-L6-v2",
+      "batch_size": 32,
+      "include_title": true,
+      "device": null,
+      "cache_dir": "data/embeddings",
+      "namespace": "default"
+    },
+    "hybrid": {
+      "k": 60,
+      "candidate_k": 50
+    }
+  }
+}

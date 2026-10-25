@@ -44,8 +44,16 @@
       "b": 0.75
     },
     "dense": {
-      "model_name": "all-MiniLM-L6-v2",
-      "batch_size": 32
+      "model_name": "sentence-transformers/all-MiniLM-L6-v2",
+      "batch_size": 32,
+      "include_title": true,
+      "device": null,
+      "cache_dir": "data/embeddings",
+      "namespace": "default"
+    },
+    "hybrid": {
+      "k": 60,
+      "candidate_k": 50
     }
   },
   "answering": {
@@ -70,7 +78,7 @@
     },
     "llm": {
       "temperature": 0.2,
-      "max_tokens": 512,
+      "max_tokens": 2048,
       "timeout_s": 90,
       "max_retries": 3,
       "retry_backoff_s": 2.0,

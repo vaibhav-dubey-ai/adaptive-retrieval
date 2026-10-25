@@ -168,7 +168,8 @@ def test_api_compare_and_adaptive_modes_with_mocks(monkeypatch):
                              method_b=MethodB(), benchmark_retriever=Retr())
         def decide_first(self, question): return super().decide_first(question)
 
-    monkeypatch.setattr(api_main, "_serve_flow", lambda: FakeFlow())
+    # the flow factory now takes an optional retrieval_method; the fake ignores it
+    monkeypatch.setattr(api_main, "_serve_flow", lambda **kw: FakeFlow())
     client = TestClient(api_main.app)
 
     rec = client.post("/ask?mode=compare", json={"question": "Where is the lab?"})

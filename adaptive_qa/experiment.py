@@ -26,7 +26,7 @@ from .config import load_config, resolve_path
 from .corpus import load_corpus
 from .dataset import load_records_jsonl, to_question_records
 from .pipeline import Pipeline, QuestionRunRecord
-from .retrieval import load_retriever
+from .retrieval import build_retriever_from_config
 from .types import Decision, QuestionRecord
 from .eval.outcome import label_outcome
 from .eval import metrics as M
@@ -43,7 +43,7 @@ class ExperimentRunner:
         self.cfg = cfg
         self.top_k = int(cfg["retrieval"].get("top_k", 8))
         docs = load_corpus(cfg["corpus"]["jsonl_path"])
-        self.retriever = load_retriever(cfg["retrieval"]["retriever"], docs, **cfg["retrieval"].get("bm25", {}))
+        self.retriever = build_retriever_from_config(cfg, docs)
         from .answering import build_method_a, build_method_b
 
         self.method_a = build_method_a(cfg)

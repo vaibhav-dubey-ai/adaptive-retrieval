@@ -1,0 +1,890 @@
+{
+  "generated_at_utc": "2026-10-25T11:39:28Z",
+  "model": "openrouter/free",
+  "base_url": "https://openrouter.ai/api/v1",
+  "dataset": "eval_data/retrieval_eval/ch6_er_model_questions.jsonl",
+  "top_k": 5,
+  "notes": [
+    "F1 and EM are lexical (SQuAD normalization) and blind to paraphrase; low EM is expected for free-form answers.",
+    "evidence_coverage is lexical overlap with retrieved passages, NOT entailment or faithfulness.",
+    "retrieval latency excludes generation; total_ms includes retrieval for retrieval conditions."
+  ],
+  "summary": {
+    "closed_book": {
+      "n_questions": 6,
+      "n_succeeded": 6,
+      "n_failed": 0,
+      "mean_f1": 0.2176,
+      "mean_em": 0.0,
+      "mean_evidence_coverage": null,
+      "mean_retrieval_ms": null,
+      "mean_generation_ms": 6434.821,
+      "mean_total_ms": 6434.853,
+      "mean_total_tokens": 589.2,
+      "token_sources": [
+        "provider-reported"
+      ],
+      "retriever_build_ms": null
+    },
+    "bm25": {
+      "n_questions": 6,
+      "n_succeeded": 6,
+      "n_failed": 0,
+      "mean_f1": 0.5538,
+      "mean_em": 0.0,
+      "mean_evidence_coverage": 0.8183,
+      "mean_retrieval_ms": 1.012,
+      "mean_generation_ms": 5871.902,
+      "mean_total_ms": 5872.965,
+      "mean_total_tokens": 1055.0,
+      "token_sources": [
+        "provider-reported"
+      ],
+      "retriever_build_ms": 111.746
+    },
+    "dense": {
+      "n_questions": 6,
+      "n_succeeded": 6,
+      "n_failed": 0,
+      "mean_f1": 0.4131,
+      "mean_em": 0.0,
+      "mean_evidence_coverage": 0.6677,
+      "mean_retrieval_ms": 6681.243,
+      "mean_generation_ms": 9651.189,
+      "mean_total_ms": 16332.519,
+      "mean_total_tokens": 1158.8,
+      "token_sources": [
+        "provider-reported"
+      ],
+      "retriever_build_ms": 760.276
+    },
+    "hybrid": {
+      "n_questions": 6,
+      "n_succeeded": 6,
+      "n_failed": 0,
+      "mean_f1": 0.4431,
+      "mean_em": 0.0,
+      "mean_evidence_coverage": 0.7394,
+      "mean_retrieval_ms": 393.556,
+      "mean_generation_ms": 6447.474,
+      "mean_total_ms": 6841.079,
+      "mean_total_tokens": 1132.7,
+      "token_sources": [
+        "provider-reported"
+      ],
+      "retriever_build_ms": 47.139
+    }
+  },
+  "per_question": [
+    {
+      "question_id": "q01",
+      "question": "What does the initial design phase do?",
+      "condition": "closed_book",
+      "reference_answer": "It characterizes fully the data needs of the prospective database users.",
+      "retrieval_ms": null,
+      "retrieved_chunk_ids": [],
+      "ok": true,
+      "answer": "The initial design phase establishes the foundational vision and requirements for a project by defining its scope, objectives, and key constraints. It involves researching user needs, exploring conceptual approaches, and creating early prototypes or mockups to validate ideas before detailed development begins. This phase sets the direction for subsequent design and implementation work.",
+      "backend": "llm_closedbook",
+      "model": "openrouter/free",
+      "routed_model": "poolside/laguna-s-2.1:free",
+      "generation_ms": 6575.346,
+      "total_ms": 6575.393,
+      "tokens": {
+        "input_tokens": 117,
+        "output_tokens": 62,
+        "total_tokens": 179,
+        "source": "provider-reported"
+      },
+      "f1": 0.069,
+      "em": 0.0,
+      "evidence_coverage": null
+    },
+    {
+      "question_id": "q01",
+      "question": "What does the initial design phase do?",
+      "condition": "bm25",
+      "reference_answer": "It characterizes fully the data needs of the prospective database users.",
+      "retrieval_ms": 0.332,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0017",
+        "udoc_151a82bc49d3:0060"
+      ],
+      "retrieval_scores": [
+        9.7134,
+        6.533,
+        3.1699,
+        3.1452,
+        2.8711
+      ],
+      "ok": true,
+      "answer": "The initial design phase characterizes fully the data needs of the prospective database users. [1]",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+      "generation_ms": 4604.593,
+      "total_ms": 4605.0,
+      "tokens": {
+        "input_tokens": 732,
+        "output_tokens": 81,
+        "total_tokens": 813,
+        "source": "provider-reported"
+      },
+      "f1": 0.7619,
+      "em": 0.0,
+      "evidence_coverage": 0.8182
+    },
+    {
+      "question_id": "q01",
+      "question": "What does the initial design phase do?",
+      "condition": "dense",
+      "reference_answer": "It characterizes fully the data needs of the prospective database users.",
+      "retrieval_ms": 38845.537,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0004",
+        "udoc_151a82bc49d3:0068",
+        "udoc_151a82bc49d3:0000"
+      ],
+      "retrieval_scores": [
+        0.3413,
+        0.3291,
+        0.3133,
+        0.3011,
+        0.2939
+      ],
+      "ok": true,
+      "answer": "The initial design phase is devoted to **characterizing fully the data needs of the prospective database users** (see passage\u202f[1]).",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "cohere/north-mini-code:free",
+      "generation_ms": 4440.482,
+      "total_ms": 43286.087,
+      "tokens": {
+        "input_tokens": 719,
+        "output_tokens": 104,
+        "total_tokens": 823,
+        "source": "provider-reported"
+      },
+      "f1": 0.5385,
+      "em": 0.0,
+      "evidence_coverage": 0.7143
+    },
+    {
+      "question_id": "q01",
+      "question": "What does the initial design phase do?",
+      "condition": "hybrid",
+      "reference_answer": "It characterizes fully the data needs of the prospective database users.",
+      "retrieval_ms": 1551.77,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0068",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0004"
+      ],
+      "retrieval_scores": [
+        0.0328,
+        0.0323,
+        0.0308,
+        0.0301,
+        0.03
+      ],
+      "ok": true,
+      "answer": "The initial design phase characterizes fully the data needs of the prospective database users. [1]",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "xingchen-agi/xing4.0-29b-a4b:free",
+      "generation_ms": 11776.077,
+      "total_ms": 13327.906,
+      "tokens": {
+        "input_tokens": 818,
+        "output_tokens": 463,
+        "total_tokens": 1281,
+        "source": "provider-reported"
+      },
+      "f1": 0.7619,
+      "em": 0.0,
+      "evidence_coverage": 0.8182
+    },
+    {
+      "question_id": "q02",
+      "question": "What is physical design in database design?",
+      "condition": "closed_book",
+      "reference_answer": "Physical design is deciding on the physical layout of the database.",
+      "retrieval_ms": null,
+      "retrieved_chunk_ids": [],
+      "ok": true,
+      "answer": "Physical design in database design refers to the implementation of the logical database schema on actual storage media, focusing on how data is physically organized, stored, and accessed. It involves decisions about indexing strategies, data partitioning, storage structures, and optimization techniques to ensure efficient query performance and resource utilization. This phase comes after logical design and involves translating abstract schema definitions into concrete database structures that can be executed by the database management system.",
+      "backend": "llm_closedbook",
+      "model": "openrouter/free",
+      "routed_model": "liquid/lfm-2.5-2.6b:free",
+      "generation_ms": 4107.971,
+      "total_ms": 4107.996,
+      "tokens": {
+        "input_tokens": 116,
+        "output_tokens": 155,
+        "total_tokens": 271,
+        "source": "provider-reported"
+      },
+      "f1": 0.15,
+      "em": 0.0,
+      "evidence_coverage": null
+    },
+    {
+      "question_id": "q02",
+      "question": "What is physical design in database design?",
+      "condition": "bm25",
+      "reference_answer": "Physical design is deciding on the physical layout of the database.",
+      "retrieval_ms": 0.691,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0001"
+      ],
+      "retrieval_scores": [
+        12.7708,
+        6.1373,
+        5.4234,
+        5.1587,
+        5.0443
+      ],
+      "ok": true,
+      "answer": "Physical design in database design refers to deciding on the physical layout of the database [1, p.3].",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "nvidia/nemotron-3.5-lightning:free",
+      "generation_ms": 8858.509,
+      "total_ms": 8859.246,
+      "tokens": {
+        "input_tokens": 723,
+        "output_tokens": 1088,
+        "total_tokens": 1811,
+        "source": "provider-reported"
+      },
+      "f1": 0.6667,
+      "em": 0.0,
+      "evidence_coverage": 0.6667
+    },
+    {
+      "question_id": "q02",
+      "question": "What is physical design in database design?",
+      "condition": "dense",
+      "reference_answer": "Physical design is deciding on the physical layout of the database.",
+      "retrieval_ms": 165.431,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0068"
+      ],
+      "retrieval_scores": [
+        0.6255,
+        0.5529,
+        0.5511,
+        0.5228,
+        0.4759
+      ],
+      "ok": true,
+      "answer": "Physical design is the phase in database design where you decide on the physical layout of the database, such as storage structures, indexing, access paths, and allocation of data across storage media. It translates the logical schema into a concrete implementation that determines how data will be stored, retrieved, and managed at the hardware level. This includes choices about file organization, indexing strategies, and partitioning to optimize performance, concurrency, and storage efficiency. (Passage\u202f[1]\u202fp.\u202f3)",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "cohere/north-mini-code:free",
+      "generation_ms": 6429.887,
+      "total_ms": 6595.57,
+      "tokens": {
+        "input_tokens": 726,
+        "output_tokens": 155,
+        "total_tokens": 881,
+        "source": "provider-reported"
+      },
+      "f1": 0.2025,
+      "em": 0.0,
+      "evidence_coverage": 0.2653
+    },
+    {
+      "question_id": "q02",
+      "question": "What is physical design in database design?",
+      "condition": "hybrid",
+      "reference_answer": "Physical design is deciding on the physical layout of the database.",
+      "retrieval_ms": 51.095,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0003"
+      ],
+      "retrieval_scores": [
+        0.0328,
+        0.032,
+        0.0313,
+        0.0313,
+        0.0312
+      ],
+      "ok": true,
+      "answer": "Physical design is the phase in which the abstract data model is transformed into a concrete implementation by deciding on the **physical layout of the database**\u2014including storage structures, access methods, indexing, partitioning, and other low\u2011level details that determine how data will be stored and retrieved efficiently.\u202f[1]",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "cohere/north-mini-code:free",
+      "generation_ms": 5849.014,
+      "total_ms": 5900.138,
+      "tokens": {
+        "input_tokens": 642,
+        "output_tokens": 148,
+        "total_tokens": 790,
+        "source": "provider-reported"
+      },
+      "f1": 0.3137,
+      "em": 0.0,
+      "evidence_coverage": 0.4333
+    },
+    {
+      "question_id": "q03",
+      "question": "Which two major pitfalls must a database schema design avoid?",
+      "condition": "closed_book",
+      "reference_answer": "Redundancy, where repeated information can lead to inconsistency, and incompleteness, where some aspects of the enterprise become difficult or impossible to model.",
+      "retrieval_ms": null,
+      "retrieved_chunk_ids": [],
+      "ok": true,
+      "answer": "The two major pitfalls a database schema design must avoid are data redundancy and the resulting inconsistency or update anomalies. Redundancy occurs when data is unnecessarily duplicated, and inconsistency can arise when duplicate copies are not kept synchronized; normalization and integrity constraints help prevent these issues.",
+      "backend": "llm_closedbook",
+      "model": "openrouter/free",
+      "routed_model": "recursive/flint-v1.0:free",
+      "generation_ms": 13126.092,
+      "total_ms": 13126.126,
+      "tokens": {
+        "input_tokens": 105,
+        "output_tokens": 1664,
+        "total_tokens": 1769,
+        "source": "provider-reported"
+      },
+      "f1": 0.1562,
+      "em": 0.0,
+      "evidence_coverage": null
+    },
+    {
+      "question_id": "q03",
+      "question": "Which two major pitfalls must a database schema design avoid?",
+      "condition": "bm25",
+      "reference_answer": "Redundancy, where repeated information can lead to inconsistency, and incompleteness, where some aspects of the enterprise become difficult or impossible to model.",
+      "retrieval_ms": 0.501,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0000"
+      ],
+      "retrieval_scores": [
+        18.1225,
+        8.9399,
+        7.3571,
+        7.1538,
+        6.1373
+      ],
+      "ok": true,
+      "answer": "The two major pitfalls a database schema design must avoid are **redundancy** and **incompleteness** [1]. Redundancy can lead to repeated information and data inconsistency, while incompleteness may make certain aspects of the enterprise difficult or impossible to model [1].",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "recursive/flint-v1.0:free",
+      "generation_ms": 4146.386,
+      "total_ms": 4146.93,
+      "tokens": {
+        "input_tokens": 648,
+        "output_tokens": 163,
+        "total_tokens": 811,
+        "source": "provider-reported"
+      },
+      "f1": 0.5965,
+      "em": 0.0,
+      "evidence_coverage": 0.8462
+    },
+    {
+      "question_id": "q03",
+      "question": "Which two major pitfalls must a database schema design avoid?",
+      "condition": "dense",
+      "reference_answer": "Redundancy, where repeated information can lead to inconsistency, and incompleteness, where some aspects of the enterprise become difficult or impossible to model.",
+      "retrieval_ms": 944.284,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0004"
+      ],
+      "retrieval_scores": [
+        0.6903,
+        0.6207,
+        0.565,
+        0.5514,
+        0.5057
+      ],
+      "ok": true,
+      "answer": "A database schema design must avoid two major pitfalls: redundancy and incompleteness. Redundancy can cause data inconsistency, while incompleteness may make it impossible to model certain aspects of the enterprise [1].",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "dots-studio/dots-3-note-preview:free",
+      "generation_ms": 24794.113,
+      "total_ms": 25738.513,
+      "tokens": {
+        "input_tokens": 751,
+        "output_tokens": 606,
+        "total_tokens": 1357,
+        "source": "provider-reported"
+      },
+      "f1": 0.44,
+      "em": 0.0,
+      "evidence_coverage": 0.8636
+    },
+    {
+      "question_id": "q03",
+      "question": "Which two major pitfalls must a database schema design avoid?",
+      "condition": "hybrid",
+      "reference_answer": "Redundancy, where repeated information can lead to inconsistency, and incompleteness, where some aspects of the enterprise become difficult or impossible to model.",
+      "retrieval_ms": 589.606,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0046"
+      ],
+      "retrieval_scores": [
+        0.0328,
+        0.0323,
+        0.0315,
+        0.0315,
+        0.0294
+      ],
+      "ok": true,
+      "answer": "Redundancy and incompleteness. [1]",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "nvidia/nemotron-3.5-super-vl:free",
+      "generation_ms": 4609.607,
+      "total_ms": 5199.268,
+      "tokens": {
+        "input_tokens": 805,
+        "output_tokens": 89,
+        "total_tokens": 894,
+        "source": "provider-reported"
+      },
+      "f1": 0.24,
+      "em": 0.0,
+      "evidence_coverage": 0.6667
+    },
+    {
+      "question_id": "q04",
+      "question": "Which design approaches does the chapter discuss?",
+      "condition": "closed_book",
+      "reference_answer": "The entity-relationship model, which models an enterprise as entities and relationships, and normalization theory, which formalizes what designs are bad and tests for them.",
+      "retrieval_ms": null,
+      "retrieved_chunk_ids": [],
+      "ok": true,
+      "answer": "I don\u2019t have enough information to determine which design approaches the chapter discusses. The specific approaches covered are not provided in the available context.",
+      "backend": "llm_closedbook",
+      "model": "openrouter/free",
+      "routed_model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+      "generation_ms": 6784.33,
+      "total_ms": 6784.364,
+      "tokens": {
+        "input_tokens": 117,
+        "output_tokens": 193,
+        "total_tokens": 310,
+        "source": "provider-reported"
+      },
+      "f1": 0.093,
+      "em": 0.0,
+      "evidence_coverage": null
+    },
+    {
+      "question_id": "q04",
+      "question": "Which design approaches does the chapter discuss?",
+      "condition": "bm25",
+      "reference_answer": "The entity-relationship model, which models an enterprise as entities and relationships, and normalization theory, which formalizes what designs are bad and tests for them.",
+      "retrieval_ms": 1.192,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0004",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0079",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0003"
+      ],
+      "retrieval_scores": [
+        9.98,
+        6.2595,
+        4.36,
+        3.4887,
+        3.1699
+      ],
+      "ok": true,
+      "answer": "The chapter discusses two design approaches: the Entity Relationship Model (covered in this chapter) and Normalization Theory (covered in Chapter\u202f7) [1].",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "dots-studio/dots-3-note-preview:free",
+      "generation_ms": 5096.389,
+      "total_ms": 5097.644,
+      "tokens": {
+        "input_tokens": 663,
+        "output_tokens": 306,
+        "total_tokens": 969,
+        "source": "provider-reported"
+      },
+      "f1": 0.1905,
+      "em": 0.0,
+      "evidence_coverage": 0.875
+    },
+    {
+      "question_id": "q04",
+      "question": "Which design approaches does the chapter discuss?",
+      "condition": "dense",
+      "reference_answer": "The entity-relationship model, which models an enterprise as entities and relationships, and normalization theory, which formalizes what designs are bad and tests for them.",
+      "retrieval_ms": 46.48,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0004",
+        "udoc_151a82bc49d3:0068",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0060"
+      ],
+      "retrieval_scores": [
+        0.4109,
+        0.4108,
+        0.3445,
+        0.3304,
+        0.3293
+      ],
+      "ok": true,
+      "answer": "The chapter discusses two design approaches: the Entity-Relationship Model and Normalization Theory [2]. These approaches provide ways to model an enterprise and to evaluate the quality of a database design.",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "dots-studio/dots-3-note-preview:free",
+      "generation_ms": 10528.017,
+      "total_ms": 10574.53,
+      "tokens": {
+        "input_tokens": 658,
+        "output_tokens": 795,
+        "total_tokens": 1453,
+        "source": "provider-reported"
+      },
+      "f1": 0.2979,
+      "em": 0.0,
+      "evidence_coverage": 0.65
+    },
+    {
+      "question_id": "q04",
+      "question": "Which design approaches does the chapter discuss?",
+      "condition": "hybrid",
+      "reference_answer": "The entity-relationship model, which models an enterprise as entities and relationships, and normalization theory, which formalizes what designs are bad and tests for them.",
+      "retrieval_ms": 19.027,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0004",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0068",
+        "udoc_151a82bc49d3:0060"
+      ],
+      "retrieval_scores": [
+        0.0325,
+        0.032,
+        0.0318,
+        0.0308,
+        0.0305
+      ],
+      "ok": true,
+      "answer": "The chapter discusses the Entity Relationship Model and Normalization Theory as its primary design approaches [1], and elaborates on detailed E-R Design Decisions including entity/relationship representation, strong/weak entity sets, and specialization/generalization [4].",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "nvidia/nemotron-3.5-lightning:free",
+      "generation_ms": 8109.431,
+      "total_ms": 8128.537,
+      "tokens": {
+        "input_tokens": 702,
+        "output_tokens": 1301,
+        "total_tokens": 2003,
+        "source": "provider-reported"
+      },
+      "f1": 0.3077,
+      "em": 0.0,
+      "evidence_coverage": 0.6786
+    },
+    {
+      "question_id": "q05",
+      "question": "What is an entity set?",
+      "condition": "closed_book",
+      "reference_answer": "An entity set is a set of entities of the same type that share the same properties, for example the set of all persons or all companies.",
+      "retrieval_ms": null,
+      "retrieved_chunk_ids": [],
+      "ok": true,
+      "answer": "An entity set is a collection of entities of the same type that share the same attributes and key attributes in a database or ER model. It represents a logical grouping of data, such as all employees or all customers, and serves as the fundamental structure for organizing and querying relational databases.",
+      "backend": "llm_closedbook",
+      "model": "openrouter/free",
+      "routed_model": "nvidia/nemotron-3.5-lightning:free",
+      "generation_ms": 5238.041,
+      "total_ms": 5238.064,
+      "tokens": {
+        "input_tokens": 115,
+        "output_tokens": 717,
+        "total_tokens": 832,
+        "source": "provider-reported"
+      },
+      "f1": 0.4776,
+      "em": 0.0,
+      "evidence_coverage": null
+    },
+    {
+      "question_id": "q05",
+      "question": "What is an entity set?",
+      "condition": "bm25",
+      "reference_answer": "An entity set is a set of entities of the same type that share the same properties, for example the set of all persons or all companies.",
+      "retrieval_ms": 2.026,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0035",
+        "udoc_151a82bc49d3:0006",
+        "udoc_151a82bc49d3:0036",
+        "udoc_151a82bc49d3:0049",
+        "udoc_151a82bc49d3:0068"
+      ],
+      "retrieval_scores": [
+        2.7973,
+        2.4925,
+        2.4917,
+        2.3957,
+        2.3625
+      ],
+      "ok": true,
+      "answer": "An entity set is a set of entities of the same type that share the same properties [2]. Each entity is represented by a set of attributes, and a subset of these attributes forms a primary key that uniquely identifies each member of the entity set [2].",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "recursive/flint-v1.0:free",
+      "generation_ms": 11176.734,
+      "total_ms": 11178.8,
+      "tokens": {
+        "input_tokens": 888,
+        "output_tokens": 222,
+        "total_tokens": 1110,
+        "source": "provider-reported"
+      },
+      "f1": 0.4918,
+      "em": 0.0,
+      "evidence_coverage": 0.88
+    },
+    {
+      "question_id": "q05",
+      "question": "What is an entity set?",
+      "condition": "dense",
+      "reference_answer": "An entity set is a set of entities of the same type that share the same properties, for example the set of all persons or all companies.",
+      "retrieval_ms": 43.958,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0006",
+        "udoc_151a82bc49d3:0030",
+        "udoc_151a82bc49d3:0068",
+        "udoc_151a82bc49d3:0007",
+        "udoc_151a82bc49d3:0035"
+      ],
+      "retrieval_scores": [
+        0.7201,
+        0.6316,
+        0.6245,
+        0.6087,
+        0.5758
+      ],
+      "ok": true,
+      "answer": "An entity set is a collection of entities of the same type that share the same properties, such as the set of all persons or companies [1]. Each entity in the set is uniquely identified by a primary key, a subset of attributes that distinguishes it from others [2]. For example, an instructor entity set might include attributes like ID, name, and salary, with ID as the primary key [1].",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "poolside/laguna-xs-2.1:free",
+      "generation_ms": 4667.682,
+      "total_ms": 4711.669,
+      "tokens": {
+        "input_tokens": 932,
+        "output_tokens": 448,
+        "total_tokens": 1380,
+        "source": "provider-reported"
+      },
+      "f1": 0.5122,
+      "em": 0.0,
+      "evidence_coverage": 0.7632
+    },
+    {
+      "question_id": "q05",
+      "question": "What is an entity set?",
+      "condition": "hybrid",
+      "reference_answer": "An entity set is a set of entities of the same type that share the same properties, for example the set of all persons or all companies.",
+      "retrieval_ms": 50.453,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0006",
+        "udoc_151a82bc49d3:0035",
+        "udoc_151a82bc49d3:0068",
+        "udoc_151a82bc49d3:0030",
+        "udoc_151a82bc49d3:0036"
+      ],
+      "retrieval_scores": [
+        0.0325,
+        0.0318,
+        0.0313,
+        0.0304,
+        0.0302
+      ],
+      "ok": true,
+      "answer": "An entity set is a set of entities of the same type that share the same properties, where each entity is represented by a set of attributes (descriptive properties). A subset of these attributes forms a primary key that uniquely identifies each member of the entity set [1].",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "poolside/laguna-s-2.1:free",
+      "generation_ms": 2673.894,
+      "total_ms": 2724.385,
+      "tokens": {
+        "input_tokens": 980,
+        "output_tokens": 55,
+        "total_tokens": 1035,
+        "source": "provider-reported"
+      },
+      "f1": 0.4839,
+      "em": 0.0,
+      "evidence_coverage": 0.9231
+    },
+    {
+      "question_id": "q06",
+      "question": "Which shape represents an entity set in an ER diagram, and how are its attributes shown?",
+      "condition": "closed_book",
+      "reference_answer": "Rectangles represent entity sets, attributes are listed inside the rectangle, and primary key attributes are underlined.",
+      "retrieval_ms": null,
+      "retrieved_chunk_ids": [],
+      "ok": true,
+      "answer": "In an ER diagram, an entity set is represented by a rectangle, and its attributes are shown as ovals connected to that rectangle by lines. Each oval is labeled with the attribute's name, and key attributes are typically underlined.",
+      "backend": "llm_closedbook",
+      "model": "openrouter/free",
+      "routed_model": "poolside/laguna-s-2.1:free",
+      "generation_ms": 2777.145,
+      "total_ms": 2777.177,
+      "tokens": {
+        "input_tokens": 127,
+        "output_tokens": 47,
+        "total_tokens": 174,
+        "source": "provider-reported"
+      },
+      "f1": 0.36,
+      "em": 0.0,
+      "evidence_coverage": null
+    },
+    {
+      "question_id": "q06",
+      "question": "Which shape represents an entity set in an ER diagram, and how are its attributes shown?",
+      "condition": "bm25",
+      "reference_answer": "Rectangles represent entity sets, attributes are listed inside the rectangle, and primary key attributes are underlined.",
+      "retrieval_ms": 1.333,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0007",
+        "udoc_151a82bc49d3:0018",
+        "udoc_151a82bc49d3:0058",
+        "udoc_151a82bc49d3:0055",
+        "udoc_151a82bc49d3:0075"
+      ],
+      "retrieval_scores": [
+        7.0889,
+        6.6864,
+        6.4434,
+        5.6004,
+        5.2954
+      ],
+      "ok": true,
+      "answer": "In an ER diagram, entity sets are represented by rectangles. Attributes are listed inside the entity rectangle, with primary key attributes indicated by underlining them [1].",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "liquid/lfm-2.5-2.6b:free",
+      "generation_ms": 1348.803,
+      "total_ms": 1350.169,
+      "tokens": {
+        "input_tokens": 630,
+        "output_tokens": 186,
+        "total_tokens": 816,
+        "source": "provider-reported"
+      },
+      "f1": 0.6154,
+      "em": 0.0,
+      "evidence_coverage": 0.8235
+    },
+    {
+      "question_id": "q06",
+      "question": "Which shape represents an entity set in an ER diagram, and how are its attributes shown?",
+      "condition": "dense",
+      "reference_answer": "Rectangles represent entity sets, attributes are listed inside the rectangle, and primary key attributes are underlined.",
+      "retrieval_ms": 41.767,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0007",
+        "udoc_151a82bc49d3:0018",
+        "udoc_151a82bc49d3:0010",
+        "udoc_151a82bc49d3:0036",
+        "udoc_151a82bc49d3:0075"
+      ],
+      "retrieval_scores": [
+        0.8428,
+        0.7574,
+        0.655,
+        0.5927,
+        0.5918
+      ],
+      "ok": true,
+      "answer": "In an ER diagram, entity sets are represented by rectangles, with attributes listed inside the rectangle. A underline within the rectangle indicates a primary key attribute, as stated in the textbook [1].",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "nvidia/nemotron-3.5-lightning:free",
+      "generation_ms": 7046.95,
+      "total_ms": 7088.747,
+      "tokens": {
+        "input_tokens": 546,
+        "output_tokens": 513,
+        "total_tokens": 1059,
+        "source": "provider-reported"
+      },
+      "f1": 0.4878,
+      "em": 0.0,
+      "evidence_coverage": 0.75
+    },
+    {
+      "question_id": "q06",
+      "question": "Which shape represents an entity set in an ER diagram, and how are its attributes shown?",
+      "condition": "hybrid",
+      "reference_answer": "Rectangles represent entity sets, attributes are listed inside the rectangle, and primary key attributes are underlined.",
+      "retrieval_ms": 99.387,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0007",
+        "udoc_151a82bc49d3:0018",
+        "udoc_151a82bc49d3:0075",
+        "udoc_151a82bc49d3:0022",
+        "udoc_151a82bc49d3:0004"
+      ],
+      "retrieval_scores": [
+        0.0328,
+        0.0323,
+        0.0308,
+        0.0296,
+        0.029
+      ],
+      "ok": true,
+      "answer": "Rectangles represent entity sets in an ER diagram, with attributes listed inside the entity rectangle [1].",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "generation_ms": 5666.818,
+      "total_ms": 5766.239,
+      "tokens": {
+        "input_tokens": 646,
+        "output_tokens": 147,
+        "total_tokens": 793,
+        "source": "provider-reported"
+      },
+      "f1": 0.5517,
+      "em": 0.0,
+      "evidence_coverage": 0.9167
+    }
+  ]
+}

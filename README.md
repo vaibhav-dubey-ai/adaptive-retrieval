@@ -6,36 +6,56 @@ external retrieval will help a QA system, and does adaptive retrieval beat
 always/never retrieving on the quality–latency–cost trade-off?**
 
 The system is a *deterministic, locally reproducible* QA research pipeline, not
-a chat demo: BM25 retrieval over a local HotpotQA corpus, two answering methods
-(a closed-book span/extraction engine over a simulated parametric memory, and a
-retrieval-grounded extraction engine), a pre-retrieval decision engine
-(heuristic policy + learned scikit-learn classifier), and a cross-verification
-evaluation harness with an offline oracle.
+a chat demo: three interchangeable retrievers (BM25, dense sentence embeddings,
+and hybrid Reciprocal Rank Fusion), two answering methods (a closed-book
+span/extraction engine over a simulated parametric memory, and a
+grounded/extractive reader), a pre-retrieval decision engine (heuristic policy +
+learned scikit-learn classifier), and a cross-verification evaluation harness
+with an offline oracle.
+
+Retrieval quality is measured separately from answer quality: a hand-labelled
+75-question set over a real 80-chunk document corpus drives Recall@5, MRR@10 and
+nDCG@10 for all three retrievers, with machine-readable results under
+`results/retrieval_eval/`. Measured outcome on that corpus: **hybrid RRF is best
+on all three ranking metrics** (see [Measured retrieval results](#measured-retrieval-results)),
+at the cost of a dense query per search.
 
 ## Quick start
 
-```bash
-# 0) environment (Python 3.10+; tested with Anaconda on Windows)
-pip install requests scikit-learn fastapi uvicorn matplotlib pytest httpx \
-    pypdf python-docx python-multipart
+```powershell
+# 0) environment (Python 3.10+; verified here on 3.13, Windows 11)
+.\.venv\Scripts\python.exe -m pip install requests scikit-learn fastapi uvicorn `
+    matplotlib pytest httpx pypdf python-docx python-multipart `
+    sentence-transformers
+# sentence-transformers pulls PyTorch (~2.5 GB on CPU wheels). It is only needed
+# for the dense and hybrid retrievers; BM25 works without it.
 
-# 1) build the dataset + corpus + parametric memory (~180 MB downloads, HF datasets-server)
-python scripts/build_dataset.py --force            # cached/partial rebuilds survive interruptions
+# 1) (optional) HotpotQA benchmark dataset + corpus + simulated memory
+.\.venv\Scripts\python.exe scripts\build_dataset.py --force
 
-# 2) train + tune the learned decision engine (train split → tune on validation)
-python scripts/train_decision.py --config configs/default.json
-#    writes models/decision_classifier.json + models/decision_report.json
+# 2) (optional) train + tune the learned decision engine
+.\.venv\Scripts\python.exe scripts\train_decision.py --config configs\default.json
 
-# 3) run the four-policy experiment on the held-out TEST split
-python scripts/run_experiment.py --config configs/default.json --limit 60
-#    writes runs/<timestamp>/  per_question.jsonl, summary.json, charts/*.png
+# 3) (optional) four-policy experiment on the held-out TEST split
+.\.venv\Scripts\python.exe scripts\run_experiment.py --config configs\default.json --limit 60
 
-# 4) optional dashboard
-uvicorn api.main:app --port 8000
-#    http://127.0.0.1:8000            (side-by-side comparison + documents + batch + export)
+# 4) retrieval evaluation (this is the new experiment)
+.\.venv\Scripts\python.exe scripts\eval_retrieval.py --methods bm25,dense,hybrid --top-k 10 --repeat 3
+
+# 5) downstream QA evaluation (needs a configured LLM, costs provider calls)
+.\.venv\Scripts\python.exe scripts\eval_downstream.py --limit 6 --top-k 5
+
+# 6) tests
+.\.venv\Scripts\python.exe -m pytest tests -q
+
+# 7) dashboard
+.\.venv\Scripts\python.exe -m uvicorn api.main:app --port 8000
+#    http://127.0.0.1:8000
 ```
 
-Every step works from the CLI; the web UI is optional. No paid API is required.
+Every step works from the CLI; the web UI is optional. The retrieval evaluation
+needs no API key and no paid service. (Bash users: identical commands with
+forward slashes and no backticks.)
 
 ## Interactive comparison + uploaded documents (dashboard v2)
 
@@ -73,9 +93,179 @@ Document upload supports **PDF / TXT / Markdown / DOCX** (via the dashboard
 section 3 or `POST /documents/upload`): type/size validation, text extraction
 with PDF page numbers, overlapping chunking, persistent storage under
 `data/documents/` (survives restarts), content-hash deduplication, a clear
-warning for text-less scanned PDFs (OCR is future work), and a BM25 index scoped
-to the toggle-selected active collection. Uploaded documents never mix with
-the HotpotQA benchmark corpus.
+warning for text-less scanned PDFs (OCR is future work), and a retrieval index
+scoped to the toggle-selected active collection. Uploaded documents never mix
+with the HotpotQA benchmark corpus.
+
+## Retrieval methods: BM25, dense and hybrid
+
+Option B's retriever is selectable per request from the dashboard, and defaults
+to the configured value (`retrieval.retriever`, `bm25` for backward
+compatibility, so existing API clients behave exactly as before).
+
+| Method | What it does | Implementation |
+|---|---|---|
+| `bm25` | lexical Okapi BM25 (k1=1.5, b=0.75, title boost) — the baseline | `adaptive_qa/retrieval/bm25.py` (in-repo, no dependency) |
+| `dense` | cosine similarity between the query embedding and every chunk embedding | `adaptive_qa/retrieval/dense.py` |
+| `hybrid` | Reciprocal Rank Fusion of both rankings, `RRF(d) = Σ 1/(60 + rank_i(d))` | `adaptive_qa/retrieval/hybrid.py` |
+
+**Pretrained model actually used:**
+`sentence-transformers/all-MiniLM-L6-v2` (384-dimensional, CPU). It is loaded
+through the real `sentence_transformers.SentenceTransformer` API — there is no
+simulated or hashed embedding path in production code. Verify it yourself:
+
+```powershell
+.\.venv\Scripts\python.exe -c "import sentence_transformers as st; m=st.SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2', device='cpu'); print(m.get_embedding_dimension(), m.encode(['complex attributes']).shape)"
+# -> 384 (1, 384)
+```
+
+`GET /retrieval/config` reports the embedding model name, whether the package is
+installed, and the method list; each `/ask` response reports the method that
+Option B actually used together with retrieval diagnostics (dimension, RRF k,
+model, cache statistics).
+
+Selection rules:
+
+- **Failure is loud.** If `sentence-transformers` is missing or the weights cannot
+  be loaded, `EmbeddingModelError` is raised with an actionable message. There is
+  deliberately **no silent fallback to BM25** — that would invalidate every
+  BM25-vs-dense comparison.
+- **Scope.** Dense and hybrid search exactly the same chunk set as BM25: only the
+  chunks of *active* uploaded documents. Inactive or deleted documents cannot be
+  retrieved by any method.
+- **Dense never returns "nothing".** It ranks all chunks, so an unanswerable
+  question still gets k passages (some with near-zero similarity). BM25 can and
+  does return an empty list. This asymmetry explains the `no_evidence_rate`
+  column in the results below.
+
+### Embedding cache (why the second run is fast)
+
+Vectors are cached at `data/embeddings/<model>/<namespace>.npz` (float32,
+L2-normalised, keyed by `sha256(model | include_title | chunk_text)`):
+
+- an **unchanged** chunk is never re-encoded — a rebuild with the same corpus
+  makes zero embedding calls (asserted by `tests/test_dense_retrieval.py`);
+- an **edited or re-chunked** document produces different chunk text, therefore
+  different keys, therefore fresh vectors — stale vectors can never be served;
+- switching the model uses a different cache file, so vectors from two models are
+  never mixed;
+- a corrupt cache file is ignored and re-encoded instead of crashing;
+- `--clear-embedding-cache` (or deleting `data/embeddings/`) forces a cold
+  rebuild. `data/` is gitignored: no model weights or vectors are committed.
+
+## Retrieval evaluation (BM25 vs dense vs hybrid)
+
+`scripts/eval_retrieval.py` runs all three retrievers over the *same* corpus and
+the *same* labelled questions, and writes JSON + CSV. Retrieval latency is
+measured here and **nowhere else in the pipeline**: answer generation is excluded
+so a "retrieval costs X ms" claim cannot be contaminated by LLM time.
+
+### Labelled set
+
+`eval_data/retrieval_eval/ch6_er_model_questions.jsonl` — 75 questions
+(67 answerable, 8 unanswerable) over the 80 extracted slides of
+*Database System Concepts* ch. 6 (ER model), with 19 exact-terminology,
+18 paraphrase, 22 definition, 8 multi-passage and 8 unanswerable questions.
+Every chunk was read in full before a question was written; a question answered
+by two passages carries both chunk ids. See
+[`eval_data/retrieval_eval/README.md`](eval_data/retrieval_eval/README.md) for the
+full labelling protocol, the corpus fingerprint, and the honest caveats.
+
+### Metrics (definitions used in code)
+
+With binary relevance (a chunk is relevant iff its id is in the label list):
+
+```
+Recall@5 = |relevant ∩ retrieved[:5]| / |relevant|
+MRR@10   = mean over questions of 1/rank(first relevant hit in top 10), 0 if none
+nDCG@10  = DCG@10 / IDCG@10,
+           DCG  = Σ rel_i / log2(i+1),
+           IDCG = Σ_{i=1..min(|relevant|,10)} 1 / log2(i+1)
+```
+
+`hit_rate_at_1` (top-1 is relevant) and `no_evidence_rate` (share of unanswerable
+questions for which nothing was returned) are reported too. Questions with no
+labelled evidence have undefined Recall/MRR/nDCG and are excluded from those
+means, exactly as documented in `adaptive_qa/eval/retrieval_metrics.py`.
+
+### Measured retrieval results
+
+Corpus: 80 chunks. Questions: 75 (67 scored). `--top-k 10 --repeat 3`, CPU,
+Windows 11, Python 3.13, `all-MiniLM-L6-v2` fetched from the Hugging Face hub.
+
+| Method | Recall@5 | MRR@10 | nDCG@10 | hit@1 | no-evidence | median query | cold build |
+|---|---|---|---|---|---|---|---|
+| bm25 | 0.918 | 0.733 | 0.787 | 0.582 | 0.125 | 0.07 ms | 0.03 s |
+| dense | 0.925 | 0.718 | 0.770 | 0.597 | 0.000 | 44.6 ms | 47.4 s (37.2 s model load) |
+| hybrid | **0.948** | **0.811** | **0.846** | **0.731** | 0.000 | 38.6 ms | 0.13 s (warm cache) |
+
+Reading these numbers honestly:
+
+- **Lexical BM25 is already strong here** (slides reuse the question's wording),
+  so this corpus cannot show the usual dense-retrieval advantage. That is a
+  property of the corpus, not of the methods.
+- **Dense is slightly better on Recall@5 but worse on MRR@10 and nDCG@10** than
+  BM25: it finds the evidence somewhere in the top 10, but ranks it less
+  precisely. It also *always* returns k passages, so it never signals "nothing
+  found".
+- **Hybrid RRF is best on every ranking metric** (Recall +0.03, nDCG +0.06 over
+  BM25), which is the expected effect of fusing a precise lexical ranking with a
+  broader semantic one.
+- **A dense query costs ~44 ms on CPU versus ~0.1 ms for BM25** — roughly 500×.
+  Whether the ranking gain justifies that is an application decision, not a
+  research claim.
+- **67 questions is a small sample.** The gaps between BM25 and dense are within
+  noise; only the hybrid-vs-BM25 nDCG/MRR gap looks systematic, and even that is
+  descriptive. No p-value or confidence interval is claimed here.
+
+Per-question rows, per-category breakdowns and the full settings are in
+`results/retrieval_eval/<timestamp>/retrieval_metrics.json`.
+
+### Output files
+
+```
+results/retrieval_eval/<timestamp>/
+  retrieval_metrics.json       aggregate + per-question + settings + label validation
+  summary.csv                  one row per method (the table above)
+  per_question.csv             method × question: retrieved ids, Recall, RR, nDCG, latency
+```
+
+## Downstream QA evaluation (does retrieval *help the answer*?)
+
+`scripts/eval_downstream.py` compares four conditions on the same questions with
+the same LLM and settings: `closed_book` (no passages at all), plus `bm25`,
+`dense` and `hybrid` retrieval feeding the grounded prompt. It records retrieval
+latency, generation latency, total latency, tokens (provider-reported or
+estimated), token-F1 / EM against the reference answer, and `evidence_coverage`
+(lexical overlap between the answer and the retrieved passages).
+
+`evidence_coverage` is a **grounding proxy, not a faithfulness or entailment
+measure** — a wrong answer that copies passage words can score high. EM is
+normalized exact match and is ~0 for free-form answers; token-F1 is the usable
+signal, and it is paraphrase-blind. A manual rubric review of a sample is the
+honest way to grade this set, and that is listed as follow-up work.
+
+A six-question live run (real provider: OpenRouter with the `openrouter/free`
+routing alias, so the backend model varies per call) gave:
+
+| Condition | succeeded | mean token-F1 | mean total tokens |
+|---|---|---|---|
+| closed_book | 6/6 | 0.218 | 589 |
+| bm25 | 6/6 | **0.554** | 1055 |
+| hybrid | 6/6 | 0.443 | 1133 |
+| dense | 6/6 | 0.413 | 1159 |
+
+**n = 6 is a smoke test, not a result**, and this is the weakest evidence in the
+project. Two later runs of the same script were dominated by HTTP 429 rate
+limits from the free tier (14 of 24 and 15 of 16 calls failed); the script
+recorded each failure with its provider message and kept going instead of
+fabricating an answer, which is the behaviour we want but leaves the numbers
+unusable. For a reportable table: pin a concrete `LLM_MODEL`, wait out the rate
+limit, and run `--limit 0` (all 67 answerable questions).
+
+Retrieval latency in a downstream run is reported after a one-off warm-up
+(`retriever_warmup_ms` in the JSON), because the dense model is loaded lazily;
+without it, the first question absorbs ~37 s of model loading.
 
 Comparison math shown in the UI (all times per branch measured separately,
 monotonic clock):
@@ -120,6 +310,13 @@ Key modules:
 |---|---|
 | `adaptive_qa/dataset.py` | deterministic HotpotQA sampling via HF datasets-server, level filter, question-level splits |
 | `adaptive_qa/corpus.py` | local BM25-indexed corpus (distractor paragraphs of eval questions; disjoint from memory) |
+| `adaptive_qa/retrieval/__init__.py` | retriever factory: `bm25` / `dense` / `hybrid`, config-driven with per-request override |
+| `adaptive_qa/retrieval/dense.py` | dense semantic retrieval + persistent content-hashed embedding cache |
+| `adaptive_qa/retrieval/hybrid.py` | Reciprocal Rank Fusion of BM25 and dense rankings |
+| `adaptive_qa/eval/retrieval_metrics.py` | Recall@5, MRR@10, nDCG@10, latency statistics |
+| `adaptive_qa/eval/retrieval_eval.py` | labelled-set loader, label validation, multi-method harness, CSV/JSON writer |
+| `scripts/eval_retrieval.py` | CLI: retrieval evaluation over the labelled set |
+| `scripts/eval_downstream.py` | CLI: closed-book vs bm25/dense/hybrid answer generation |
 | `adaptive_qa/answering/parametric_store.py` | gold-paragraph-only "simulated LLM memory" (train-split snippets, never eval gold docs) |
 | `adaptive_qa/answering/finite_engine.py` | Method A — closed-book answering over the parametric store |
 | `adaptive_qa/answering/span_absorber.py` | Method B — retrieval-grounded answering (BM25 + rank-fusion extraction) |
@@ -131,9 +328,9 @@ Key modules:
 | `adaptive_qa/eval/metrics.py` | four-policy aggregate: EM/F1, P/R/F1 for RETRIEVE, latency percentiles, cost |
 | `adaptive_qa/eval/charts.py` | quality-vs-latency, quality-vs-cost, decision quality charts (matplotlib) |
 | `adaptive_qa/experiment.py` | batch runner; per-question JSONL + summary.json + run artifacts |
-| `api/main.py` | FastAPI dashboard backend: `/ask` (compare/adaptive), `/ask/benchmark` (legacy cross-verify), `/documents/*`, `/evaluate/*` |
-| `dashboard/index.html` | single-page research dashboard |
-| `tests/` | 50+ pytest tests: leakage, boundaries, timings, policy selection, BM25, EM/F1, dataset |
+| `api/main.py` | FastAPI backend: `/ask` (compare/adaptive, `retrieval_method`), `/retrieval/config`, `/ask/benchmark` (legacy cross-verify), `/documents/*`, `/evaluate/*` |
+| `dashboard/index.html` | single-page research dashboard with a retrieval-method selector |
+| `tests/` | 167 pytest tests: leakage, timings, policy selection, BM25, dense, hybrid, metrics, documents |
 
 ## Experimental design (what makes the comparison fair)
 
@@ -215,11 +412,34 @@ models/                trained decision classifier + validation report
 
 ## Testing
 
-```bash
-python -m pytest tests/ -q
+```powershell
+.\.venv\Scripts\python.exe -m pytest tests -q
 ```
 
-92 tests (50 pre-existing + 42 new). The pre-existing suite covers:
+**168 tests, all passing** (105 before this retrieval work + 63 new). No test
+needs network access or API credits: dense-model inference is replaced by an
+injected deterministic embedder, and every LLM call is mocked.
+
+Beyond the mocked suite, the real pretrained model was exercised live through
+the HTTP layer: `POST /ask?mode=compare` with `retrieval_method=dense` over the
+80-chunk corpus returned `sentence-transformers/all-MiniLM-L6-v2`, 384 dims, 80/80
+vectors reused from cache, and top hits `ch6.pdf (page 18)` (the *Composite
+Attributes* slide), `page 43`, `page 17` for "what is a composite attribute?" —
+while `Option A` produced its own closed-book answer. In the same call the
+provider rate-limited Option B (HTTP 429): Branch B showed the provider error and
+Branch A's answer stayed visible, confirming live branch isolation.
+
+The new suite adds:
+
+| File | Covers |
+|---|---|
+| `tests/test_dense_retrieval.py` (13) | vector dimensions/normalisation, cosine ranking, metadata, deterministic tie-break, cache write/reuse (zero re-encoding), invalidation on changed text, corrupt cache, missing package / unloadable model raising `EmbeddingModelError` instead of falling back |
+| `tests/test_hybrid_retrieval.py` (12) | RRF formula against hand-computed scores, dedupe by chunk id, single-ranking members, tie-break, component ranks/scores, fused score reproducible from components, empty corpus, determinism |
+| `tests/test_retrieval_metrics.py` (18) | Recall@k, MRR@k, nDCG@k against hand-calculated values, k truncation, undefined-without-labels, unanswerable exclusion and `no_evidence_rate`, category breakdown, latency percentiles |
+| `tests/test_retrieval_eval.py` (9) | shipped dataset schema/balance, loader validation errors, label/corpus mismatch detection, harness metrics and latency sampling, CSV/JSON artifacts |
+| `tests/test_retrieval_selection.py` (11) | method normalisation, config default/override, BM25 kwargs never leaking into the dense constructor, dense & hybrid scoped to active documents, unique document-wide chunk ids, reindex preserving activation, diagnostics collected after the query, `/retrieval/config`, unknown method → 400, requested method reaching Option B with both answers still returned |
+
+The pre-existing suite covers:
 tokenizer/BM25 correctness, EM/F1 edge cases, span extraction, heuristic +
 learned decision engine (including persistence round-trip), pipeline
 adaptive-vs-cross semantics, plan/decision boundaries, timing-category
@@ -262,8 +482,52 @@ active/delete plus compare/adaptive/benchmark routes.
   explicitly enabled — flagged as weak labels in that case.
 - Cost is modeled in retrievals, not dollars, because retrieval is local.
   Substituting a hosted LLM/QA API would give real costs via `cost.py`.
+- **Routing aliases hurt reproducibility.** Setting `LLM_MODEL` to a routing
+  alias (e.g. OpenRouter's `openrouter/free`) makes every call land on a
+  *different* backend model, so answer quality, latency and token usage vary
+  run-to-run; some routed models return only internal reasoning or truncate
+  early. The backend records the concrete `routed_model` in each answer's
+  metadata for transparency and tightens the prompt to suppress
+  chain-of-thought leakage, but for publishable experiments pin a concrete
+  model id in `.env`. The OpenAI-compatible parser reads
+  `choices[0].message.content` and falls back to `message.reasoning` /
+  `reasoning_content` / `text` so reasoning-only replies are surfaced rather
+  than dropped.
+- **Non-answering replies are rejected, not shown.** A routing alias can land
+  on a specialist model whose `content` is a classification rather than prose
+  (observed live: `nvidia/nemotron-3.5-content-safety:free` returns the literal
+  `"User Safety: safe"`). The grounded backend detects empty replies,
+  reasoning-only replies and short classification markers, retries them, then
+  raises a clear `AnswerBackendError` naming the routed model — it never
+  fabricates a fallback answer and never displays a classification as the
+  answer. `answering.llm.max_tokens` defaults to 2048 so reasoning models do
+  not exhaust the budget before emitting an answer.
 - The pre-retrieval memory probe is a lexical feature, not true model
   uncertainty; a calibrated conformal or MC-dropout signal would be stronger.
+- **The retrieval evaluation is one corpus, 67 scored questions.** Chapter 6
+  slides paraphrase their own figures, so BM25 is unusually strong. Do not
+  generalise "hybrid beats dense" or "BM25 is enough" beyond this corpus. The
+  numbers are descriptive; no significance test is claimed.
+- **Labels are partial by construction** (a passage that mentions the topic but
+  does not answer the question is not labelled). This depresses recall for every
+  method equally, so it does not bias the comparison, but it does mean absolute
+  Recall@5 values are pessimistic.
+- **Dense and hybrid always return k passages**, so they cannot express "nothing
+  relevant found"; only BM25 can return an empty list. A score threshold would be
+  needed to use similarity as an abstention signal, and it is not tuned here.
+- **CPU-only embedding latency.** `all-MiniLM-L6-v2` costs ~37 s to load cold and
+  ~45 ms per query on this CPU. A GPU or a warmed long-lived process changes the
+  picture; both cold-start and steady-state are reported separately for exactly
+  this reason.
+- **Chunk ids changed format** while adding retrieval (`<doc_id>:<n>` now counts
+  across the whole document instead of restarting per page, which made ids from
+  different pages collide). Stored documents include `source.bin`, so
+  `DocumentStore.reindex_all()` rebuilds chunks in place without re-uploading.
+  Label sets and any chunk ids captured before this change no longer resolve.
+- **Downstream QA on the labelled set is not a paper result.** The script exists
+  and runs end to end, but the live demonstration used n = 3 with a routing
+  alias, and token-F1 is paraphrase-blind. Grading needs a pinned model and a
+  manual rubric pass.
 
 ## Report template
 

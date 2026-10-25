@@ -42,6 +42,8 @@ class BranchResult:
     path_total_ms: Optional[float] = None      # generation (+ retrieval for B)
     retrieval_ms: Optional[float] = None       # Option B only; None for A
     retrieval_hits: List[Dict[str, Any]] = field(default_factory=list)
+    retrieval_method: Optional[str] = None     # bm25 | dense | hybrid (B only)
+    retrieval_diagnostics: Optional[Dict[str, Any]] = None
     tokens: Optional[Dict[str, Any]] = None    # {in,out,total,source}
 
     def to_dict(self) -> Dict[str, Any]:
@@ -53,6 +55,8 @@ class BranchResult:
             "path_total_ms": self.path_total_ms,
             "retrieval_ms": self.retrieval_ms,
             "retrieval_hits": self.retrieval_hits,
+            "retrieval_method": self.retrieval_method,
+            "retrieval_diagnostics": self.retrieval_diagnostics,
             "tokens": self.tokens,
             "performed_retrieval": self.label == "B",
         }
@@ -78,6 +82,12 @@ def _hit_entry(h: Any, i: int) -> Dict[str, Any]:
         entry["page"] = page if page is not None else None
     else:
         entry["title"] = h.title
+    method = getattr(h, "method", "")
+    if method:
+        entry["retrieval_method"] = method
+    ranks = getattr(h, "component_ranks", None)
+    if ranks:
+        entry["component_ranks"] = dict(ranks)
     return entry
 
 
@@ -144,6 +154,7 @@ class ServeFlow:
         retriever = self.collection_retriever or self.benchmark_retriever
         if retriever is None:
             return BranchResult(label="B", ok=False, error="No retriever available for Option B.")
+        method = getattr(retriever, "method", None)
         t0 = now_ns()
         try:
             hits = retriever.retrieve(question, self.top_k)
@@ -151,6 +162,14 @@ class ServeFlow:
             return BranchResult(label="B", ok=False, error=_err_str(exc),
                                 retrieval_ms=_ms(now_ns() - t0))
         retrieval_ms = _ms(now_ns() - t0)
+        # Collected AFTER the query so lazy model-load and cache statistics
+        # describe the call that actually happened.
+        diagnostics = None
+        if hasattr(retriever, "diagnostics"):
+            try:
+                diagnostics = retriever.diagnostics()
+            except Exception:  # diagnostics must never break answering
+                diagnostics = None
         t1 = now_ns()
         try:
             answer = self.method_b.answer(question, hits)
@@ -159,6 +178,8 @@ class ServeFlow:
                 label="B", ok=False, error=_err_str(exc),
                 retrieval_ms=retrieval_ms,
                 retrieval_hits=[_hit_entry(h, i) for i, h in enumerate(hits)],
+                retrieval_method=method,
+                retrieval_diagnostics=diagnostics,
             )
         return BranchResult(
             label="B",
@@ -167,6 +188,8 @@ class ServeFlow:
             generation_ms=_ms(now_ns() - t1),
             retrieval_ms=retrieval_ms,
             retrieval_hits=[_hit_entry(h, i) for i, h in enumerate(hits)],
+            retrieval_method=method,
+            retrieval_diagnostics=diagnostics,
             tokens=(answer.meta or {}).get("tokens"),
         )
 

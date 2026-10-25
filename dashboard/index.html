@@ -48,9 +48,15 @@
 <div class="card">
   <textarea id="q" placeholder="Type your question, then choose a mode. Uploaded documents are used only by the WITH-retrieval branch."></textarea>
   <div class="row" style="margin-top:8px">
+    <label class="k" for="retrievalMethod">Option B retrieval method</label>
+    <select id="retrievalMethod" onchange="saveMethod()"></select>
+    <span id="retrievalNote" class="k"></span>
+  </div>
+  <div class="row" style="margin-top:8px">
     <button class="primary" onclick="runAsk('compare')">Run comparison (decision → both answers)</button>
     <button onclick="runAsk('adaptive')">Run adaptive-only (decision → selected path only)</button>
   </div>
+  <p class="k" style="margin:8px 0 0">BM25 = lexical baseline, dense = sentence-embedding cosine similarity, hybrid = Reciprocal Rank Fusion of the two. Whichever you pick is used only by Option B; Option A stays closed-book.</p>
   <p id="status" class="k" style="margin:8px 0 0"></p>
 </div>
 
@@ -70,22 +76,6 @@
 </div>
 
 <div id="result" class="hidden"></div>
-
-<h2>4 · Offline benchmark (HotpotQA four policies)</h2>
-<div class="card">
-  <p>
-    <button onclick="runBatch()">Run batch experiment</button>
-    <button onclick="loadSummary()">Load latest summary</button>
-    <a href="/evaluate/export?format=csv"><button>Export CSV</button></a>
-    <a href="/evaluate/export?format=json"><button>Export JSON</button></a>
-  </p>
-  <p id="batchStatus" class="k"></p>
-  <div id="summaryOut"></div>
-  <h3>Charts</h3>
-  <img id="chartQvsL" class="hidden" style="max-width:100%" alt="quality vs latency"/>
-  <img id="chartQvsC" class="hidden" style="max-width:100%" alt="quality vs cost"/>
-  <img id="chartRR" class="hidden" style="max-width:100%" alt="retrieval rate"/>
-</div>
 
 <script>
 const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -145,13 +135,28 @@ async function delDoc(id){
   refreshDocs();
 }
 
+async function loadRetrievalConfig(){
+  try{
+    const j = await (await fetch("/retrieval/config")).json();
+    const sel = document.getElementById("retrievalMethod");
+    const saved = localStorage.getItem("retrievalMethod");
+    sel.innerHTML = (j.methods||[]).map(m=>`<option value="${esc(m)}"${(saved||j.default)===m?" selected":""}>${esc(m)}</option>`).join("");
+    let note = j.default ? "server default: "+j.default : "";
+    if(j.dense && !j.dense.available){ note += " — dense unavailable: "+(j.dense.reason||""); }
+    else if(j.dense && j.dense.model_name){ note += " — embedding model: "+j.dense.model_name; }
+    set("retrievalNote", note);
+  }catch(e){ set("retrievalNote","Could not read /retrieval/config: "+e); }
+}
+function saveMethod(){ localStorage.setItem("retrievalMethod", document.getElementById("retrievalMethod").value); }
+
 let current = null;
 async function runAsk(mode){
   const q = document.getElementById("q").value.trim();
   if(!q){ set("status","Type a question first."); return; }
+  const method = document.getElementById("retrievalMethod").value || undefined;
   set("status","Running "+mode+" flow — decision first, then answering…");
   try{
-    const r = await fetch("/ask?mode="+mode,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({question:q})});
+    const r = await fetch("/ask?mode="+mode,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({question:q,retrieval_method:method})});
     const j = await r.json();
     if(!r.ok){ set("status","Request failed: "+(j.detail||r.status)); return; }
     current = j; renderResult(); set("status","");
@@ -213,7 +218,8 @@ function renderResult(){
         : (b.never_run
             ? `<p class="k"></p>`
             : `<p style="color:var(--bad);font-weight:600">Branch failed: ${esc(b.error||"unknown error")}</p>`)}
-      <p class="k">Backend: ${esc(b.backend||"—")}${b.abstained?" · abstained":""}</p>
+      <p class="k">Backend: ${esc(b.backend||"—")}${b.abstained?" · abstained":""}${(b.meta&&b.meta.model)?" · model: "+esc(b.meta.model):""}</p>
+      ${br.label==="B" && b.retrieval_method ? `<p class="k">Retrieval method: <b>${esc(b.retrieval_method)}</b>${b.retrieval_diagnostics && b.retrieval_diagnostics.model_name ? " · embedding model: "+esc(b.retrieval_diagnostics.model_name) : ""}${b.retrieval_diagnostics && b.retrieval_diagnostics.embedding_dim ? " · dim "+esc(b.retrieval_diagnostics.embedding_dim) : ""}${b.retrieval_diagnostics && b.retrieval_diagnostics.rrf_k ? " · RRF k="+esc(b.retrieval_diagnostics.rrf_k) : ""}</p>` : ""}
       <table>
         <tr><td>Performed document retrieval</td><td>${br.label==="B" ? (b.ok||!b.never_run ? "yes" : "—") : "<b>no</b> (never)"}</td></tr>`;
     if(b.ok){
@@ -230,7 +236,8 @@ function renderResult(){
         <table><tr><th>#</th><th>score</th><th>source</th><th>excerpt</th></tr>`;
       b.retrieval_hits.forEach(hit=>{
         const src = hit.source_file ? `${esc(hit.source_file)}` + (hit.page!=null?` (page ${hit.page})`:"") : esc(hit.title||hit.doc_id);
-        bh += `<tr><td>${hit.rank}</td><td>${Number(hit.score).toFixed(3)}</td><td>${src}</td><td>${esc(hit.excerpt)}</td></tr>`;
+        const comp = hit.component_ranks ? `<span class="k"> (bm25 #${hit.component_ranks.bm25||"—"}, dense #${hit.component_ranks.dense||"—"})</span>` : "";
+        bh += `<tr><td>${hit.rank}</td><td>${Number(hit.score).toFixed(3)}${comp}</td><td>${src}</td><td>${esc(hit.excerpt)}</td></tr>`;
       });
       bh += `</table></details>`;
     }
@@ -269,35 +276,7 @@ function renderResult(){
   out.scrollIntoView({behavior:"smooth", block:"start"});
 }
 
-async function runBatch(){
-  const n = prompt("Number of eval questions (max 200, recommended 50–100):","50");
-  if(!n) return;
-  set("batchStatus","Running batch experiment… (minutes)");
-  const r = await fetch("/evaluate/run",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({limit:Number(n)})});
-  const j = await r.json();
-  set("batchStatus", r.ok ? "Done — "+j.run_dir : "Failed: "+(j.detail||r.status));
-  if(r.ok) loadSummary();
-}
-
-async function loadSummary(){
-  const r = await fetch("/evaluate/summary");
-  const j = await r.json();
-  if(!r.ok){ set("batchStatus","No completed run yet."); return; }
-  let h = `<table><tr><th>policy</th><th>EM</th><th>F1</th><th>retrieval rate</th><th>mean E2E ms</th><th>median E2E ms</th><th>abstain rate</th></tr>`;
-  for(const [p,m] of Object.entries(j.policies||{})){
-    h += `<tr><td>${esc(p)}</td><td>${(m.em??0).toFixed(3)}</td><td>${(m.f1??0).toFixed(3)}</td>
-      <td>${(m.retrieval_rate??0).toFixed(2)}</td><td>${(m.latency_ms?.mean_e2e??0).toFixed(1)}</td>
-      <td>${(m.latency_ms?.median_e2e??0).toFixed(1)}</td><td>${(m.abstain_rate??0).toFixed(2)}</td></tr>`;
-  }
-  h += `</table>`;
-  document.getElementById("summaryOut").innerHTML = h;
-  for(const [id,name] of [["chartQvsL","quality_vs_latency.png"],["chartQvsC","quality_vs_cost.png"],["chartRR","retrieval_rate.png"]]){
-    const img = document.getElementById(id);
-    img.src = "/evaluate/chart/"+name; img.classList.remove("hidden");
-  }
-}
-
-refreshDocs(); checkLLM();
+refreshDocs(); checkLLM(); loadRetrievalConfig();
 </script>
 </body>
 </html>

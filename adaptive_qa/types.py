@@ -41,10 +41,21 @@ class CorpusDoc:
 
 @dataclass(frozen=True)
 class RetrievalHit:
+    """One retrieved passage.
+
+    ``method`` records which retriever produced the hit (``bm25`` / ``dense`` /
+    ``hybrid``). ``component_ranks``/``component_scores`` are filled by the
+    hybrid retriever so per-component behaviour stays inspectable; they are
+    diagnostic only and never reach the decision engine or the answer prompt.
+    """
+
     doc_id: str
     title: str
     text: str
     score: float
+    method: str = ""
+    component_ranks: Dict[str, int] = field(default_factory=dict)
+    component_scores: Dict[str, float] = field(default_factory=dict)
 
 
 @dataclass
