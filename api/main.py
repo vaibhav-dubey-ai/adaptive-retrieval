@@ -28,12 +28,25 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 
 from adaptive_qa.answering.llm_backend import LLMBackend, resolve_chat_kwargs
 from adaptive_qa.config import load_config, resolve_path
+from adaptive_qa.decision import build_decision_engine
+from adaptive_qa.decision.preflight import CollectionPreflight
 from adaptive_qa.documents import (
     DOCUMENT_ROOT,
     DEFAULT_MAX_UPLOAD_BYTES,
     DocumentStore,
     DocumentUploadError,
 )
+from adaptive_qa.eval.retrieval_eval import load_eval_examples
+from adaptive_qa.experiments_view import (
+    chunk_details,
+    list_policy_runs,
+    list_retrieval_runs,
+    load_policy_view,
+    load_retrieval_view,
+)
+from adaptive_qa.retrieval import RETRIEVAL_METHODS
+from adaptive_qa.retrieval.compare import compare_methods
+from adaptive_qa.types import CorpusDoc
 from adaptive_qa.experiment import ExperimentRunner
 from adaptive_qa.eval.outcome import label_outcome
 from adaptive_qa.pipeline import Pipeline
@@ -47,7 +60,12 @@ _STATE: Dict[str, Any] = {
     "eval_rows": None,
     "docs": None,
     "retrievers": {},          # (method, active-doc signature) -> CollectionRetriever
+    "preflight": None,         # (active-doc signature, CollectionPreflight)
 }
+
+EVAL_SET_DIR = resolve_path("eval_data/retrieval_eval")
+RESULTS_RETRIEVAL_DIR = resolve_path("results/retrieval_eval")
+RESULTS_POLICY_DIR = resolve_path("results/policy_eval")
 
 
 def _runner() -> ExperimentRunner:
@@ -115,18 +133,82 @@ def _collection_retriever(method: Optional[str] = None):
     return _STATE["retrievers"][key]
 
 
-def _serve_flow(retrieval_method: Optional[str] = None) -> ServeFlow:
-    """Interactive flow: decision engine FIRST, real LLM backends, retrievers."""
+def _invalidate_collection() -> None:
+    """Any change to the active collection drops cached retrievers + preflight."""
+    _STATE["retrievers"] = {}
+    _STATE["preflight"] = None
+
+
+def _collection_preflight() -> Optional[CollectionPreflight]:
+    """Aggregate document-relevance prober over the ACTIVE chunks (cached).
+
+    One BM25 index build per collection snapshot; the first probe after a
+    change is flagged ``cold`` so its cost is visible instead of hidden.
+    """
+    if not _docs().active_documents():
+        return None
+    key = _active_signature()
+    cached = _STATE.get("preflight")
+    if cached is not None and cached[0] == key:
+        return cached[1]
+    chunks = _docs().load_chunks()
+    names = [m["filename"] for m in _docs().active_documents()]
+    top_k = int(
+        ((_runner().cfg.get("decision", {}).get("heuristic", {}) or {}).get("preflight") or {})
+        .get("top_k", 5)
+    )
+    prober = CollectionPreflight(
+        [CorpusDoc(c["chunk_id"], names[0] if names else "", c["text"], ()) for c in chunks],
+        top_k=top_k,
+        doc_names=names,
+    )
+    _STATE["preflight"] = (key, prober)
+    return prober
+
+
+def _collection_info(method: str, top_k: int) -> Dict[str, Any]:
+    active = _docs().active_documents()
+    dense_cfg = (_runner().cfg.get("retrieval", {}) or {}).get("dense", {}) or {}
+    return {
+        "active_documents": [
+            {
+                "filename": m.get("filename"),
+                "n_chunks": int(m.get("n_chunks") or 0),
+                "n_pages": m.get("n_pages"),
+            }
+            for m in active
+        ],
+        "n_documents": len(active),
+        "n_chunks": sum(int(m.get("n_chunks") or 0) for m in active),
+        "retrieval_method": method,
+        "top_k": int(top_k),
+        "embedding_model": (
+            dense_cfg.get("model_name") if method in ("dense", "hybrid") else None
+        ),
+    }
+
+
+def _serve_flow(retrieval_method: Optional[str] = None, top_k: Optional[int] = None) -> ServeFlow:
+    """Interactive flow: decision engine FIRST, real LLM backends, retrievers.
+
+    The decision engine is rebuilt per request with the collection preflight
+    attached, so the live decision depends on the ACTIVE uploaded documents
+    (and its preflight cost is measured inside the decision step).
+    """
     runner = _runner()
     closed, grounded = _LLMBundle(runner.cfg).backends()
-    collection_retriever = _collection_retriever(retrieval_method)
+    method = retrieval_method or _default_method()
+    k = int(top_k or runner.top_k)
+    collection_retriever = _collection_retriever(method)
+    engine = build_decision_engine(runner.cfg, None, _collection_preflight())
     return ServeFlow(
-        decision_engine=runner.decision_engine,
+        decision_engine=engine,
         method_a=closed,
         method_b=grounded,
         benchmark_retriever=runner.retriever,
         collection_retriever=collection_retriever,
-        top_k=runner.top_k,
+        top_k=k,
+        collection_info=_collection_info(method, k),
     )
 
 
@@ -343,8 +425,8 @@ async def upload_document(file: UploadFile = File(...)) -> JSONResponse:
         meta = _docs().save_document(file.filename or "", data)
     except DocumentUploadError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
-    # Any collection change invalidates the cached retrievers.
-    _STATE["retrievers"] = {}
+    # Any collection change invalidates the cached retrievers + preflight.
+    _invalidate_collection()
     return JSONResponse(
         {
             "document": meta,
@@ -368,7 +450,7 @@ def set_document_active(doc_id: str, payload: Dict[str, Any] = None) -> JSONResp
     active = bool(((payload or {}).get("active")) or ((payload or {}).get("value")))
     if not _docs().set_active(doc_id, active):
         raise HTTPException(status_code=404, detail="document not found")
-    _STATE["retrievers"] = {}
+    _invalidate_collection()
     return JSONResponse({"doc_id": doc_id, "active": active})
 
 
@@ -376,7 +458,7 @@ def set_document_active(doc_id: str, payload: Dict[str, Any] = None) -> JSONResp
 def delete_document(doc_id: str) -> JSONResponse:
     if not _docs().delete(doc_id):
         raise HTTPException(status_code=404, detail="document not found")
-    _STATE["retrievers"] = {}
+    _invalidate_collection()
     return JSONResponse({"deleted": doc_id})
 
 
@@ -409,6 +491,7 @@ def retrieval_config() -> JSONResponse:
         {
             "methods": list(RETRIEVAL_METHODS),
             "default": _default_method(),
+            "default_top_k": int(_runner().top_k),
             "dense": {
                 "model_name": (cfg.get("dense") or {}).get("model_name"),
                 "available": dense_available,
@@ -429,6 +512,13 @@ def llm_config_status() -> JSONResponse:
             "api_key_set": bool(args.get("api_key")),
             "model_set": bool(args.get("model")),
             "base_url_set": bool(args.get("base_url")),
+            # The model id is not a secret and the dashboard shows which model
+            # answered; the API key itself is never returned.
+            "model": args.get("model"),
+            "local_endpoint": bool(
+                (args.get("base_url") or "").startswith("http://localhost")
+                or (args.get("base_url") or "").startswith("http://127.0.0.1")
+            ),
         }
     )
 
@@ -455,7 +545,21 @@ def ask(payload: Dict[str, Any], mode: str = Query(default="adaptive")) -> JSONR
         method = _collection_method(method)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
-    flow = _serve_flow(retrieval_method=method)
+    top_k = body.get("top_k")
+    if top_k is not None:
+        try:
+            top_k = int(top_k)
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=400, detail="top_k must be an integer")
+        if not 1 <= top_k <= 20:
+            raise HTTPException(status_code=400, detail="top_k must be between 1 and 20")
+    # Pass top_k only when the request overrides it, so monkeypatched flows
+    # that only accept ``retrieval_method`` keep working.
+    flow = (
+        _serve_flow(retrieval_method=method)
+        if top_k is None
+        else _serve_flow(retrieval_method=method, top_k=top_k)
+    )
     try:
         result = (
             flow.run_adaptive_only(question)
@@ -465,3 +569,209 @@ def ask(payload: Dict[str, Any], mode: str = Query(default="adaptive")) -> JSONR
     except Exception as exc:  # configuration errors surface to users clearly
         raise HTTPException(status_code=502, detail=f"Serve flow failed: {exc}")
     return JSONResponse(result)
+
+
+# ============================================================================
+# Demo mode, three-method retrieval comparison, and the Experiments view
+# ============================================================================
+
+def _eval_files() -> List[Any]:
+    if not EVAL_SET_DIR.exists():
+        return []
+    return sorted(EVAL_SET_DIR.glob("*.jsonl"))
+
+
+@app.get("/demo/examples")
+def demo_examples() -> JSONResponse:
+    """Representative questions from the labelled evaluation set.
+
+    Reference answers and chunk labels are deliberately NOT included: the demo
+    only needs the question text, and the live engine must never see labels.
+    """
+    files = _eval_files()
+    if not files:
+        return JSONResponse(
+            {
+                "available": False,
+                "reason": f"no *.jsonl evaluation set found under {EVAL_SET_DIR}",
+                "categories": [],
+            }
+        )
+    path = files[0]
+    try:
+        examples = load_eval_examples(path)
+    except Exception as exc:
+        return JSONResponse(
+            {"available": False, "reason": f"{type(exc).__name__}: {exc}", "categories": []}
+        )
+    groups: Dict[str, List[Dict[str, Any]]] = {}
+    for ex in examples:
+        groups.setdefault(ex.category, []).append(
+            {"question_id": ex.question_id, "question": ex.question}
+        )
+    order = [
+        "exact_terminology",
+        "paraphrase",
+        "definition",
+        "multi_passage",
+        "unanswerable",
+    ]
+    categories = [
+        {
+            "name": name,
+            "count": len(groups[name]),
+            "answerable": name != "unanswerable",
+            "examples": groups[name],
+        }
+        for name in order
+        if name in groups
+    ]
+    for name in sorted(groups):
+        if name not in order:
+            categories.append(
+                {
+                    "name": name,
+                    "count": len(groups[name]),
+                    "answerable": True,
+                    "examples": groups[name],
+                }
+            )
+    return JSONResponse(
+        {
+            "available": True,
+            "source": path.name,
+            "n_questions": len(examples),
+            "categories": categories,
+            "note": (
+                "Question text only. Reference answers and relevance labels stay "
+                "in the evaluation harness and are never sent to the live "
+                "decision engine or the answer prompts."
+            ),
+        }
+    )
+
+
+@app.post("/retrieval/compare")
+def retrieval_compare(payload: Dict[str, Any] = None) -> JSONResponse:
+    """Run BM25, dense and hybrid on ONE question over the same chunk set."""
+    body = payload or {}
+    question = (body.get("question", "") or "").strip()
+    if not question:
+        raise HTTPException(status_code=400, detail="question required")
+    if not _docs().active_documents():
+        raise HTTPException(
+            status_code=400,
+            detail="No active documents: upload and activate a document first.",
+        )
+    methods = body.get("methods") or list(RETRIEVAL_METHODS)
+    try:
+        methods = [_collection_method(m) for m in methods]
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    top_k = body.get("top_k", 5)
+    if top_k is None:
+        top_k = 5
+    try:
+        top_k = int(top_k)
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=400, detail="top_k must be an integer")
+    if not 1 <= top_k <= 20:
+        raise HTTPException(status_code=400, detail="top_k must be between 1 and 20")
+    method_for_collection = _default_method()
+    result = compare_methods(
+        question,
+        methods,
+        top_k,
+        retriever_provider=_collection_retriever,
+        collection=_collection_info(method_for_collection, top_k),
+    )
+    return JSONResponse(result)
+
+
+@app.get("/experiments/retrieval")
+def experiments_retrieval(run: Optional[str] = None) -> JSONResponse:
+    """Saved BM25 / dense / hybrid retrieval evaluation (read-only)."""
+    runs = list_retrieval_runs(RESULTS_RETRIEVAL_DIR)
+    if not runs:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                "no retrieval-evaluation results found; run "
+                "scripts/eval_retrieval.py first"
+            ),
+        )
+    view = load_retrieval_view(RESULTS_RETRIEVAL_DIR, run_id=run)
+    if view is None:
+        raise HTTPException(status_code=404, detail=f"unknown run {run!r}")
+    return JSONResponse({"available": True, "runs": runs, "view": view})
+
+
+@app.get("/experiments/retrieval/question/{question_id}")
+def experiments_retrieval_question(
+    question_id: str, run: Optional[str] = None
+) -> JSONResponse:
+    """Per-question inspector: retrieved passages, ranks and gold labels.
+
+    EVALUATION ONLY. This is the only place labels are exposed; it is not on
+    the live answering path.
+    """
+    view = load_retrieval_view(RESULTS_RETRIEVAL_DIR, run_id=run)
+    if view is None:
+        raise HTTPException(status_code=404, detail="no retrieval-evaluation run")
+    row = next(
+        (q for q in view["questions"] if q["question_id"] == question_id), None
+    )
+    if row is None:
+        raise HTTPException(status_code=404, detail=f"question {question_id!r} not in run")
+    all_ids = list(row["relevant_chunk_ids"])
+    for res in row["methods"].values():
+        all_ids.extend(res["retrieved"])
+    details = chunk_details(_docs(), all_ids)
+    relevant = set(row["relevant_chunk_ids"])
+    methods = {}
+    for method, res in row["methods"].items():
+        methods[method] = {
+            "recall_at_k": res["recall_at_k"],
+            "reciprocal_rank": res["reciprocal_rank"],
+            "ndcg": res["ndcg"],
+            "retrieval_ms": res["retrieval_ms"],
+            "retrieved": [
+                {
+                    "rank": i + 1,
+                    "chunk_id": cid,
+                    "is_relevant": cid in relevant,
+                    "source": details.get(cid),
+                }
+                for i, cid in enumerate(res["retrieved"])
+            ],
+        }
+    return JSONResponse(
+        {
+            "evaluation_only": True,
+            "run_id": view["run_id"],
+            "question": {
+                "question_id": row["question_id"],
+                "question": row["question"],
+                "category": row["category"],
+            },
+            "relevant_chunk_ids": row["relevant_chunk_ids"],
+            "relevant_passages": [details.get(c) for c in row["relevant_chunk_ids"]],
+            "methods": methods,
+            "note": "Labels come from hand labelling and are never used live.",
+        }
+    )
+
+
+@app.get("/experiments/policy")
+def experiments_policy(run: Optional[str] = None) -> JSONResponse:
+    """Saved adaptive-vs-never/always/oracle policy evaluation (read-only)."""
+    runs = list_policy_runs(RESULTS_POLICY_DIR)
+    if not runs:
+        raise HTTPException(
+            status_code=404,
+            detail="no policy-evaluation results found; run scripts/eval_policy.py first",
+        )
+    view = load_policy_view(RESULTS_POLICY_DIR, run_id=run)
+    if view is None:
+        raise HTTPException(status_code=404, detail=f"unknown run {run!r}")
+    return JSONResponse({"available": True, "runs": runs, "view": view})

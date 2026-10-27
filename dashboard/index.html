@@ -2,65 +2,182 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>Adaptive QA — Should the AI search before answering?</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Should the AI search before answering? — Adaptive Retrieval QA</title>
 <style>
-  :root { --ink:#1a2433; --sub:#5a6b82; --line:#d8dee9; --bg:#f6f8fb; --acc:#2f6fed; --ok:#1e7f4f; --bad:#b3261e; }
-  * { box-sizing: border-box; }
-  body { font-family: system-ui, sans-serif; max-width: 1180px; margin: 24px auto; padding: 0 16px; color: var(--ink); }
-  h1 { font-size: 1.35rem; margin-bottom: 4px; } h2 { font-size: 1.05rem; margin-top: 1.5rem; } h3 { font-size: 0.95rem; }
-  .k { color: var(--sub); font-size: 0.8rem; }
-  .card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-top:12px; }
-  .row { display:flex; gap:8px; align-items:flex-start; flex-wrap:wrap; }
-  textarea#q { flex:1 1 480px; min-height:70px; padding:8px; font:inherit; }
-  button { padding:8px 14px; cursor:pointer; border:1px solid var(--line); border-radius:7px; background:#fff; }
-  button.primary { background:var(--acc); border-color:var(--acc); color:#fff; }
-  button.danger { color:var(--bad); }
-  button:disabled { opacity:.45; cursor:not-allowed; }
-  table { border-collapse: collapse; width:100%; font-size:0.85rem; }
-  th, td { border:1px solid var(--line); padding:5px 8px; text-align:left; vertical-align:top; }
-  th { background:#eef1f6; }
-  pre { background:#f2f4f8; padding:8px; border-radius:6px; overflow-x:auto; font-size:0.8rem; white-space:pre-wrap; }
-  .hidden { display:none; }
-  .pill { display:inline-block; padding:2px 10px; border-radius:999px; font-size:0.8rem; border:1px solid var(--line); }
-  .pill.selected { background:#e8f0fe; border-color:var(--acc); color:var(--acc); font-weight:600; }
-  .branch { flex:1 1 420px; border:1px solid var(--line); border-radius:10px; padding:12px; min-width:380px; }
-  .branch.selected { border:2px solid var(--acc); }
-  .branch h3 { margin-top:0; }
-  .branch.err { border-color:var(--bad); }
-  .metric-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:8px; }
-  .metric { background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:8px 10px; }
-  .metric b { display:block; font-size:1.05rem; }
-  .neg { color:var(--bad); } .pos { color:var(--ok); }
-  .formula { font-size:0.78rem; color:var(--sub); }
+  :root{
+    --ink:#16202e; --sub:#5b6b82; --line:#d9e0ea; --bg:#f5f7fb; --panel:#fff;
+    --acc:#2f6fed; --ok:#17794a; --okbg:#e7f6ee; --warn:#a15c00; --warnbg:#fdf3e2;
+    --bad:#ad2018; --badbg:#fdeceb; --mute:#eef2f8;
+  }
+  *{box-sizing:border-box}
+  body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;max-width:1240px;margin:0 auto 64px;
+       padding:0 18px 40px;color:var(--ink);background:var(--bg);line-height:1.45}
+  h1{font-size:1.45rem;margin:26px 0 4px}
+  h2{font-size:1.12rem;margin:0 0 6px}
+  h3{font-size:.98rem;margin:14px 0 6px}
+  h4{font-size:.9rem;margin:10px 0 4px}
+  p{margin:6px 0}
+  .k{color:var(--sub);font-size:.82rem}
+  .tiny{color:var(--sub);font-size:.76rem}
+  code{background:var(--mute);padding:1px 5px;border-radius:4px;font-size:.86em}
+  a{color:var(--acc)}
+  .step{display:flex;gap:10px;align-items:center;margin:26px 0 8px}
+  .step .n{flex:0 0 28px;height:28px;border-radius:50%;background:var(--acc);color:#fff;
+           display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+  .step h2{margin:0}
+  .step .k{margin-left:auto;text-align:right}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px 16px;margin-top:10px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+  textarea#q{width:100%;min-height:74px;padding:10px;font:inherit;border:1px solid var(--line);border-radius:8px;resize:vertical}
+  input[type=file]{font:inherit}
+  button{padding:8px 13px;cursor:pointer;border:1px solid var(--line);border-radius:7px;background:#fff;font:inherit}
+  button:hover{border-color:#b9c6da}
+  button.primary{background:var(--acc);border-color:var(--acc);color:#fff}
+  button.ghost{background:#fff}
+  button.danger{color:var(--bad)}
+  button[disabled]{opacity:.45;cursor:not-allowed}
+  select{padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:#fff;font:inherit}
+  table{border-collapse:collapse;width:100%;font-size:.85rem}
+  th,td{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+  th{background:#eef2f8;font-weight:600}
+  details{margin-top:6px}
+  summary{cursor:pointer;color:var(--sub);font-size:.83rem}
+  pre{background:#f2f4f8;padding:8px;border-radius:6px;overflow:auto;font-size:.76rem;white-space:pre-wrap;max-height:280px}
+  .badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:.76rem;border:1px solid var(--line);background:#fff;white-space:nowrap}
+  .badge.ok{background:var(--okbg);border-color:#bfe3cd;color:var(--ok)}
+  .badge.warn{background:var(--warnbg);border-color:#f0d9b5;color:var(--warn)}
+  .badge.bad{background:var(--badbg);border-color:#f3c9c5;color:var(--bad)}
+  .badge.info{background:#e8f0fe;border-color:#c7d8fb;color:var(--acc)}
+  .badge.big{font-size:.92rem;padding:5px 16px;font-weight:700}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.78rem;border:1px solid var(--line);background:#fff}
+  .chip{padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:.8rem;cursor:pointer}
+  .chip:hover{border-color:var(--acc);color:var(--acc)}
+  .tab{font-size:.82rem}
+  .tab.active{background:#e8f0fe;border-color:var(--acc);color:var(--acc);font-weight:600}
+  .hidden{display:none!important}
+  .branch{border:1px solid var(--line);border-radius:11px;padding:12px 14px;background:var(--panel)}
+  .branch.selected{border:2px solid var(--acc)}
+  .branch.err{border-color:#e5b4b0;background:#fffafa}
+  .branch h3{margin-top:0;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .answer{white-space:pre-wrap;font-size:.93rem;margin:8px 0;padding:10px;background:#fbfcfe;border:1px solid var(--line);border-radius:8px}
+  .decision{border:1px solid var(--line);border-radius:11px;padding:14px;background:var(--panel)}
+  .decision.retrieve{border-left:6px solid var(--ok)}
+  .decision.skip{border-left:6px solid #8a97a8}
+  .rationale{font-size:.9rem;background:#f7f9fc;border:1px dashed var(--line);border-radius:8px;padding:9px 11px}
+  .bar{height:6px;background:var(--mute);border-radius:4px;overflow:hidden;min-width:70px}
+  .bar>span{display:block;height:100%;background:var(--acc)}
+  .muted{color:var(--sub)}
+  .hit{border:1px solid var(--line);border-radius:8px;padding:7px 9px;margin:6px 0;background:#fff;font-size:.83rem}
+  .hit .head{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+  .hit .excerpt{color:#2c3a4d;margin-top:4px}
+  .hit .full{background:#fbfcfe;border:1px solid var(--line);border-radius:6px;padding:8px;margin-top:6px;white-space:pre-wrap;font-size:.8rem}
+  .passage{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:7px 0;background:#fbfcfe;font-size:.84rem}
+  .passage .full{white-space:pre-wrap;margin-top:5px}
+  .passage.flash{box-shadow:0 0 0 3px #c7d8fb}
+  .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px}
+  .metric{background:#f7f9fc;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+  .metric b{display:block;font-size:1.02rem}
+  .neg{color:var(--bad)} .pos{color:var(--ok)}
+  .formula{font-size:.76rem;color:var(--sub)}
+  .list{max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+  .qrow{display:flex;gap:8px;align-items:flex-start;padding:6px 9px;border-bottom:1px solid var(--line);
+        cursor:pointer;font-size:.83rem;background:#fff}
+  .qrow:hover{background:#f3f7ff}
+  .qrow.active{background:#e8f0fe}
+  .qrow .qid{flex:0 0 44px;color:var(--sub)}
+  .qrow .qtext{flex:1}
+  .qrow .marks{flex:0 0 150px;text-align:right}
+  .rec{font-size:.72rem;padding:1px 5px;border-radius:5px;border:1px solid var(--line);margin-left:3px;background:#fff}
+  .rec.hit{background:var(--okbg);border-color:#bfe3cd;color:var(--ok);padding:1px 5px;margin:0 0 0 3px}
+  .rec.miss{background:var(--badbg);border-color:#f3c9c5;color:var(--bad);padding:1px 5px;margin:0 0 0 3px}
+  .notebox{background:#fff8e6;border:1px solid #f0dfb5;border-radius:8px;padding:8px 11px;font-size:.82rem}
+  .statusbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 </style>
 </head>
 <body>
-<h1>Should the AI search before answering?</h1>
-<p class="k">Adaptive retrieval decision engine → side-by-side answers (with/without retrieval), real timings and token accounting. Reference answers and oracle labels are never available to the live decision engine.</p>
 
-<h2>1 · Answering model configuration</h2>
-<div class="card">
-  <span id="llmStatus" class="k">Checking model configuration…</span>
-  <p class="k">Configure the answering model via a real <code>.env</code> file (LLM_API_KEY, LLM_BASE_URL, LLM_MODEL — see <code>.env.example</code>). No credentials are hardcoded or echoed; only presence is shown.</p>
+<h1>Should the AI search before answering?</h1>
+<p class="k">Adaptive retrieval for question answering — decision first, then a closed-book answer and an evidence-grounded answer, with the evidence, timings and token costs that actually occurred.</p>
+<div class="statusbar">
+  <span id="llmStatus" class="badge">Checking model…</span>
+  <span id="collectionStatus" class="badge">Checking documents…</span>
+  <span id="methodStatus" class="badge">Checking retrieval…</span>
 </div>
 
-<h2>2 · Ask a question</h2>
+<!-- ============================ 1. ASK ============================ -->
+<div class="step"><span class="n">1</span><h2>Ask a question</h2><span class="k">examples come from the labelled evaluation set (question text only)</span></div>
 <div class="card">
-  <textarea id="q" placeholder="Type your question, then choose a mode. Uploaded documents are used only by the WITH-retrieval branch."></textarea>
-  <div class="row" style="margin-top:8px">
-    <label class="k" for="retrievalMethod">Option B retrieval method</label>
+  <textarea id="q" placeholder="e.g. explain about complex attributes in dbms"></textarea>
+  <div class="row" style="margin-top:10px">
+    <span class="k">Examples:</span>
+    <span id="exampleTabs" class="row"></span>
+  </div>
+  <div class="row" id="exampleChips" style="margin-top:6px"></div>
+  <div class="row" style="margin-top:6px">
+    <select id="exampleSelect"><option value="">… or pick any of the 75 labelled questions</option></select>
+  </div>
+  <div class="row" style="margin-top:12px">
+    <label class="k" for="retrievalMethod">Option B retrieval</label>
     <select id="retrievalMethod" onchange="saveMethod()"></select>
-    <span id="retrievalNote" class="k"></span>
+    <label class="k" for="topK">passages sent to Option B</label>
+    <select id="topK">
+      <option value="3">3</option>
+      <option value="5">5</option>
+      <option value="8" selected>8 (default)</option>
+      <option value="12">12</option>
+    </select>
+    <button class="primary" onclick="runAsk('compare')">Run comparison — both answers</button>
+    <button onclick="runAsk('adaptive')">Adaptive-only (selected path)</button>
   </div>
-  <div class="row" style="margin-top:8px">
-    <button class="primary" onclick="runAsk('compare')">Run comparison (decision → both answers)</button>
-    <button onclick="runAsk('adaptive')">Run adaptive-only (decision → selected path only)</button>
-  </div>
-  <p class="k" style="margin:8px 0 0">BM25 = lexical baseline, dense = sentence-embedding cosine similarity, hybrid = Reciprocal Rank Fusion of the two. Whichever you pick is used only by Option B; Option A stays closed-book.</p>
+  <p class="k" id="retrievalNote" style="margin:8px 0 0"></p>
   <p id="status" class="k" style="margin:8px 0 0"></p>
 </div>
 
-<h2>3 · Documents</h2>
+<!-- ========================= 2. DECISION ========================= -->
+<div id="decisionWrap" class="hidden">
+  <div class="step"><span class="n">2</span><h2>Adaptive decision</h2><span class="k">made before any answering — and before Option B's retrieval</span></div>
+  <div id="decisionPanel"></div>
+</div>
+
+<!-- ========================== 3. ANSWERS ========================== -->
+<div id="answersWrap" class="hidden">
+  <div class="step"><span class="n">3</span><h2>Compare the two answers</h2><span class="k">same question, same model, different access to evidence</span></div>
+  <div class="grid2" id="branchCards"></div>
+  <div class="card" id="supportPanel"></div>
+  <div class="card" id="diffPanel"></div>
+  <div class="card" id="perfPanel"></div>
+</div>
+
+<!-- ====================== 4. RETRIEVAL METHODS ===================== -->
+<div class="step"><span class="n">4</span><h2>Compare BM25, dense and hybrid retrieval</h2><span class="k">same question · same chunks · same top-k</span></div>
+<div class="card">
+  <div class="row">
+    <button id="cmpBtn" onclick="compareMethods()">Compare all retrieval methods</button>
+    <label class="k" for="cmpTopK">top-k per method</label>
+    <select id="cmpTopK"><option>3</option><option selected>5</option><option>8</option></select>
+    <span class="k" id="cmpStatus"></span>
+  </div>
+  <p class="k" style="margin:8px 0 0">Uses the question in step 1. Every list below is exactly what that retriever returned — nothing is filtered or reordered by hand. Score scales differ per method, so only ranks and overlap are compared.</p>
+  <div id="overlapSummary"></div>
+</div>
+<div class="grid3" id="methodColumns"></div>
+
+<!-- ========================= 5. EXPERIMENTS ========================= -->
+<div class="step"><span class="n">5</span><h2>Experiments</h2><span class="k">saved evaluation results — nothing is recomputed in the browser</span></div>
+<div class="card">
+  <div class="row">
+    <button onclick="loadExperiments()">Load saved retrieval experiment</button>
+    <span id="expStatus" class="k"></span>
+  </div>
+  <div id="expBody"></div>
+</div>
+
+<!-- ========================== 6. DOCUMENTS ========================== -->
+<div class="step"><span class="n">6</span><h2>Documents</h2><span class="k">Option A never sees these; Option B searches only active ones</span></div>
 <div class="card">
   <div class="row">
     <input type="file" id="docFile" accept=".pdf,.txt,.md,.docx"/>
@@ -72,60 +189,108 @@
     <thead><tr><th>File</th><th>Type</th><th>Pages</th><th>Chunks</th><th>Active</th><th>Actions</th><th>Note</th></tr></thead>
     <tbody></tbody>
   </table>
-  <p class="k">Option A never sees these documents. Option B searches only the chunks of <b>active</b> documents; toggling Active selects the collection. Duplicates are detected by content.</p>
+  <p class="k">PDF · TXT · Markdown · DOCX, max 10 MiB. Duplicates are detected by content. Scanned PDFs without a text layer are rejected with an explicit warning.</p>
 </div>
 
-<div id="result" class="hidden"></div>
+<div class="card">
+  <details>
+    <summary>Advanced: raw JSON of the last live response</summary>
+    <pre id="rawJson">—</pre>
+  </details>
+</div>
 
 <script>
+/* ------------------------------------------------------------------ utils */
+const $ = id => document.getElementById(id);
 const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt = o => JSON.stringify(o,null,2);
-const set = (id,t)=>{document.getElementById(id).textContent=t;};
+const set = (id,t)=>{const el=$(id); if(el) el.textContent=t;};
 const ms = v => (v==null?"—":Number(v).toFixed(1)+" ms");
+const fix = (v,d=3) => (v==null?"—":Number(v).toFixed(d));
+const pct = v => (v==null?"—":(Number(v)*100).toFixed(1)+"%");
+const badge = (text,kind="") => `<span class="badge ${kind}">${esc(text)}</span>`;
+const show = (id,on=true)=>{const el=$(id); if(el) el.classList.toggle("hidden",!on);};
 
+const METHOD_LABEL = {bm25:"BM25 (lexical)", dense:"Dense (semantic)", hybrid:"Hybrid (RRF)"};
+let state = {question:"", lastAsk:null, demo:null, exp:null, category:null, cmp:null};
+
+async function api(path, opts){
+  const r = await fetch(path, opts);
+  let j=null; try{ j = await r.json(); }catch(_){}
+  if(!r.ok){ throw new Error((j&&j.detail)||("HTTP "+r.status)); }
+  return j;
+}
+
+/* -------------------------------------------------------------- status */
 async function checkLLM(){
   try{
-    const j = await (await fetch("/llm/config-status")).json();
+    const j = await api("/llm/config-status");
     const ok = j.api_key_set && j.model_set && j.base_url_set;
-    document.getElementById("llmStatus").innerHTML = ok
-      ? '<span style="color:var(--ok)">Answering model configured (key, base URL, model all set).</span>'
-      : '<span style="color:var(--bad)">Answering model NOT fully configured — missing: '
-        + [!j.api_key_set&&"API key",!j.model_set&&"model",!j.base_url_set&&"base URL"].filter(Boolean).join(", ")
-        + '. Set LLM_API_KEY / LLM_BASE_URL / LLM_MODEL in .env (copy .env.example) and restart the server.</span>';
-  }catch(e){ set("llmStatus","Could not read /llm/config-status: "+e); }
+    $("llmStatus").className = "badge " + (ok?"ok":"bad");
+    $("llmStatus").textContent = ok
+      ? "Answering model: " + (j.model||"configured")
+      : "Model NOT configured (" + [!j.api_key_set&&"key",!j.model_set&&"model",!j.base_url_set&&"base URL"].filter(Boolean).join(", ") + ")";
+  }catch(e){ $("llmStatus").className="badge bad"; set("llmStatus","Model status unavailable"); }
+}
+
+async function loadRetrievalConfig(){
+  try{
+    const j = await api("/retrieval/config");
+    const sel = $("retrievalMethod");
+    const saved = localStorage.getItem("retrievalMethod");
+    sel.innerHTML = (j.methods||[]).map(m=>`<option value="${esc(m)}"${(saved||j.default)===m?" selected":""}>${esc(METHOD_LABEL[m]||m)}</option>`).join("");
+    if(j.default_top_k){ $("topK").value = String(j.default_top_k); }
+    const dense = j.dense||{};
+    const bits = ["default: "+(METHOD_LABEL[j.default]||j.default)];
+    bits.push(dense.available ? ("embedding model: "+(dense.model_name||"?")) : ("dense unavailable: "+(dense.reason||"")));
+    if(j.hybrid && j.hybrid.k) bits.push("RRF k="+j.hybrid.k);
+    set("retrievalNote", bits.join(" · "));
+    $("methodStatus").className = "badge " + (dense.available?"ok":"warn");
+    $("methodStatus").textContent = dense.available ? "Retrieval: BM25 + dense + hybrid" : "Retrieval: BM25 only (dense unavailable)";
+  }catch(e){ set("retrievalNote","Could not read /retrieval/config: "+e.message); }
+}
+function saveMethod(){ localStorage.setItem("retrievalMethod", $("retrievalMethod").value); }
+
+/* ------------------------------------------------------------ documents */
+async function refreshDocs(){
+  try{
+    const j = await api("/documents");
+    const tb = document.querySelector("#docTable tbody");
+    tb.innerHTML = "";
+    (j.documents||[]).forEach(d=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${esc(d.filename)}</td><td>${esc(d.kind)}</td><td>${d.n_pages||"—"}</td>
+        <td>${d.n_chunks}</td>
+        <td>${d.active?badge("active","info"):badge("inactive")}</td>
+        <td><button onclick="toggleDoc('${d.doc_id}',${!d.active})">Set ${d.active?"inactive":"active"}</button>
+            <button class="danger" onclick="delDoc('${d.doc_id}')">Delete</button></td>
+        <td class="k">${esc(d.warning||"")}</td>`;
+      tb.appendChild(tr);
+    });
+    if(!(j.documents||[]).length){
+      tb.innerHTML = '<tr><td colspan="7" class="k">No documents uploaded yet — upload a PDF/TXT/MD/DOCX to enable Option B.</td></tr>';
+    }
+    const active = (j.documents||[]).filter(d=>d.active);
+    const chunks = active.reduce((a,d)=>a+(d.n_chunks||0),0);
+    $("collectionStatus").className = "badge " + (active.length?"ok":"warn");
+    $("collectionStatus").textContent = active.length
+      ? "Collection: " + active.map(d=>d.filename).join(", ") + " (" + chunks + " chunks)"
+      : "Collection: no active document";
+  }catch(e){ set("collectionStatus","Documents unavailable: "+e.message); }
 }
 
 async function uploadDoc(){
-  const f = document.getElementById("docFile").files[0];
+  const f = $("docFile").files[0];
   if(!f){ set("docStatus","Choose a file first."); return; }
   set("docStatus","Uploading "+f.name+" …");
   const fd = new FormData(); fd.append("file", f);
-  const r = await fetch("/documents/upload",{method:"POST",body:fd});
-  let j; try{ j = await r.json(); }catch(_){ j=null; }
-  if(!r.ok){ set("docStatus","Upload failed: "+(j&&j.detail||r.status)); }
-  else{
-    const d=j.document; let note=d.warning?" ⚠ "+d.warning:"";
-    set("docStatus", j.message+" — "+d.n_chunks+" chunks."+note);
-  }
-  refreshDocs();
+  try{
+    const j = await api("/documents/upload",{method:"POST",body:fd});
+    const d = j.document;
+    set("docStatus", j.message+" — "+d.n_chunks+" chunks."+(d.warning?" ⚠ "+d.warning:""));
+  }catch(e){ set("docStatus","Upload failed: "+e.message); }
+  refreshDocs(); loadDemoExamples();
 }
-
-async function refreshDocs(){
-  const j = await (await fetch("/documents")).json();
-  const tb = document.querySelector("#docTable tbody");
-  tb.innerHTML = "";
-  (j.documents||[]).forEach(d=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${esc(d.filename)}</td><td>${esc(d.kind)}</td><td>${d.n_pages||"—"}</td><td>${d.n_chunks}</td>
-      <td>${d.active?'<span class="pill selected">active</span>':'<span class="k">inactive</span>'}</td>
-      <td><button onclick="toggleDoc('${d.doc_id}',${!d.active})">Set ${d.active?'inactive':'active'}</button>
-          <button class="danger" onclick="delDoc('${d.doc_id}')">Delete</button></td>
-      <td class="k">${esc(d.warning||"")}</td>`;
-    tb.appendChild(tr);
-  });
-  if(!(j.documents||[]).length){ tb.innerHTML = '<tr><td colspan="7" class="k">No documents uploaded yet.</td></tr>'; }
-}
-
 async function toggleDoc(id, active){
   await fetch(`/documents/${id}/active`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({active})});
   refreshDocs();
@@ -135,148 +300,608 @@ async function delDoc(id){
   refreshDocs();
 }
 
-async function loadRetrievalConfig(){
+/* --------------------------------------------------------------- examples */
+const CAT_LABEL = {
+  exact_terminology:"Exact terminology", paraphrase:"Paraphrase", definition:"Definition",
+  multi_passage:"Needs 2 passages", unanswerable:"Not in the document"
+};
+async function loadDemoExamples(){
   try{
-    const j = await (await fetch("/retrieval/config")).json();
-    const sel = document.getElementById("retrievalMethod");
-    const saved = localStorage.getItem("retrievalMethod");
-    sel.innerHTML = (j.methods||[]).map(m=>`<option value="${esc(m)}"${(saved||j.default)===m?" selected":""}>${esc(m)}</option>`).join("");
-    let note = j.default ? "server default: "+j.default : "";
-    if(j.dense && !j.dense.available){ note += " — dense unavailable: "+(j.dense.reason||""); }
-    else if(j.dense && j.dense.model_name){ note += " — embedding model: "+j.dense.model_name; }
-    set("retrievalNote", note);
-  }catch(e){ set("retrievalNote","Could not read /retrieval/config: "+e); }
+    const j = await api("/demo/examples");
+    if(!j.available){ set("exampleTabs","Examples unavailable: "+(j.reason||"")); return; }
+    state.demo = j;
+    $("exampleTabs").innerHTML = j.categories.map(c=>
+      `<button class="chip tab" data-cat="${esc(c.name)}" onclick="pickCategory('${esc(c.name)}')">${esc(CAT_LABEL[c.name]||c.name)} (${c.count})</button>`
+    ).join("");
+    $("exampleSelect").innerHTML = `<option value="">… or pick any of the ${j.n_questions} labelled questions</option>` +
+      j.categories.map(c=>`<optgroup label="${esc(CAT_LABEL[c.name]||c.name)}">` +
+        c.examples.map(e=>`<option value="${esc(e.question)}">${esc(e.question_id)} — ${esc(e.question)}</option>`).join("") +
+        "</optgroup>").join("");
+    $("exampleSelect").onchange = e => { if(e.target.value){ $("q").value = e.target.value; } };
+    pickCategory(j.categories[0] && j.categories[0].name);
+  }catch(e){ set("exampleTabs","Examples unavailable: "+e.message); }
 }
-function saveMethod(){ localStorage.setItem("retrievalMethod", document.getElementById("retrievalMethod").value); }
+function pickCategory(name){
+  state.category = name;
+  document.querySelectorAll("#exampleTabs .tab").forEach(b=>b.classList.toggle("active", b.dataset.cat===name));
+  const cat = (state.demo && state.demo.categories || []).find(c=>c.name===name);
+  if(!cat){ $("exampleChips").innerHTML=""; return; }
+  $("exampleChips").innerHTML = cat.examples.slice(0,8).map(e=>
+    `<button class="chip" onclick="useExample(decodeURIComponent('${encodeURIComponent(e.question)}'))">${esc(e.question)}</button>`
+  ).join("") + (cat.name==="unanswerable"
+      ? ' <span class="k">← these select DO_NOT_RETRIEVE.</span>' : "");
+}
+function useExample(q){ $("q").value = q; }
 
-let current = null;
+/* ------------------------------------------------------------------- /ask */
 async function runAsk(mode){
-  const q = document.getElementById("q").value.trim();
-  if(!q){ set("status","Type a question first."); return; }
-  const method = document.getElementById("retrievalMethod").value || undefined;
-  set("status","Running "+mode+" flow — decision first, then answering…");
+  const question = $("q").value.trim();
+  if(!question){ set("status","Type a question (or click an example) first."); return; }
+  state.question = question;
+  set("status","Running "+mode+" — decision first, then answering. A local 4B model on CPU can take ~20-60 s per answer…");
+  const body = {
+    question,
+    retrieval_method: $("retrievalMethod").value || undefined,
+    top_k: Number($("topK").value) || undefined
+  };
   try{
-    const r = await fetch("/ask?mode="+mode,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({question:q,retrieval_method:method})});
-    const j = await r.json();
-    if(!r.ok){ set("status","Request failed: "+(j.detail||r.status)); return; }
-    current = j; renderResult(); set("status","");
-  }catch(e){ set("status","Error: "+e); }
+    const r = await api("/ask?mode="+mode, {
+      method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)
+    });
+    state.lastAsk = r;
+    $("rawJson").textContent = fmt(r).slice(0, 60000);
+    renderDecision(r.decision, r);
+    renderAnswers(r);
+    set("status","Done.");
+    show("decisionWrap"); show("answersWrap");
+    $("decisionWrap").scrollIntoView({behavior:"smooth", block:"start"});
+  }catch(e){
+    set("status","Request failed: "+e.message);
+  }
 }
 
-function tokensLine(b){
-  if(!b.tokens) return '<span class="k">tokens: n/a (no model call)</span>';
-  return `input ${b.tokens.input_tokens} · output ${b.tokens.output_tokens} · total <b>${b.tokens.total_tokens}</b> <span class="k">(${esc(b.tokens.source)})</span>`;
-}
+/* -------------------------------------------------------- decision panel */
+const SIGNAL_LABEL = {
+  question_cue:"Question cues (surface specificity)",
+  memory_uncertainty:"Model-memory uncertainty (familiarity probe)",
+  collection_relevance:"Document relevance (collection preflight)"
+};
+function renderDecision(d, r){
+  const retrieve = d.decision === "RETRIEVE";
+  const rows = Object.entries(d.signals||{}).map(([name,s])=>{
+    const val = s.value==null ? null : Number(s.value);
+    return `<tr>
+      <td><b>${esc(SIGNAL_LABEL[name]||name)}</b><br><span class="tiny">${esc(s.explanation||"")}</span></td>
+      <td>${val==null ? '<span class="k">n/a — excluded</span>' :
+        `<b>${fix(val,2)}</b><div class="bar"><span style="width:${Math.round(val*100)}%"></span></div>`}</td>
+      <td>${fix(s.weight,2)}</td>
+      <td>${fix(s.contribution,3)}</td>
+    </tr>`;
+  }).join("");
+  const pre = d.preflight||{};
+  const sig = pre.signals||{};
+  const preHtml = pre.available ? `
+    <table>
+      <tr><th>Preflight signal</th><th>Value</th></tr>
+      <tr><td>Question content terms in the collection</td><td>${sig.n_terms_in_collection ?? "—"} / ${sig.n_question_terms ?? "—"} (corpus coverage <b>${fix(sig.corpus_coverage,2)}</b>)</td></tr>
+      <tr><td>…inside the top-${esc((pre.collection||{}).top_k_probed)} passages</td><td><b>${fix(sig.topk_coverage,2)}</b></td></tr>
+      <tr><td>…inside the best single passage</td><td><b>${fix(sig.top1_coverage,2)}</b></td></tr>
+      <tr><td>Combined relevance (0.5·corpus + 0.35·top-k + 0.15·best)</td><td><b>${fix(sig.collection_relevance,2)}</b></td></tr>
+      <tr><td>Cost of the preflight</td><td>${ms(pre.ms)}${pre.build_ms!=null?` <span class="k">(includes a one-off index build of ${ms(pre.build_ms)})</span>`:""}
+        ${pre.cold?'<span class="badge warn">cold</span>':'<span class="badge ok">warm</span>'}</td></tr>
+      <tr><td>Scope</td><td>${esc((pre.collection||{}).scope||"")} · ${esc((pre.collection||{}).n_chunks ?? "?")} chunks · ${esc(((pre.collection||{}).documents||[]).join(", "))}</td></tr>
+    </table>` : `<p class="k">No collection preflight ran: ${esc(pre.explanation||"no active document collection")}</p>`;
 
-function renderResult(){
-  const out = document.getElementById("result");
-  const r = current;
-  const sel = r.selected_branch;
-
-  let h = `
-  <h2>Result — ${esc(r.mode)} mode</h2>
-  <div class="card">
-    <p><b>Q:</b> ${esc(r.question)}</p>
-    <div id="decisionPanel"></div>
-  </div>
-  <div class="row" id="branches"></div>
-  <div class="card" id="perfPanel"></div>`;
-  out.innerHTML = h;
-  out.classList.remove("hidden");
-
-  // ---- decision panel
-  const d = r.decision;
-  let dh = `<h3 style="margin:4px 0">Adaptive decision (made FIRST — before either branch ran)</h3>
-    <p><span class="pill ${d.decision==='RETRIEVE'?'selected':''}">${esc(d.decision)}</span>
-     <span class="k">decision latency ${ms(d.decision_ms)} · score ${d.decision_score==null?"n/a":Number(d.decision_score).toFixed(3)}</span></p>`;
-  dh += `<details><summary class="k">decision features / rationale</summary><pre>${esc(fmt(d.decision_features))}</pre></details>`;
-  document.getElementById("decisionPanel").innerHTML = dh;
-
-  // ---- branches
-  const holder = document.getElementById("branches");
-  const executed = r.mode==="adaptive" ? r.executed_branch : null;
-  const branches = [
-    {label:"A", title:"Option A — without retrieval", shown:(r.mode==="adaptive" ? executed && executed.label==="A" : r.selected_branch==="A"), data:(r.mode==="adaptive"? (executed&&executed.label==="A"?executed:null) : r.branch_a)},
-    {label:"B", title:"Option B — with retrieval", shown:(r.mode==="adaptive" ? executed && executed.label==="B" : r.selected_branch==="B"), data:(r.mode==="adaptive"? (executed&&executed.label==="B"?executed:null) : r.branch_b)},
-  ];
-  let bh = "";
-  for(const br of branches){
-    const b = br.data || {label:br.label, ok:false, error:null, never_run:(r.mode==="adaptive")};
-    const title = br.title;
-    const isExecutedVariant = (r.mode==="adaptive" ? (executed && executed.label===br.label) : true);
-    bh += `<div class="branch ${b.ok?'':'err'} ${r.mode==='compare'&&r.selected_branch===br.label?'selected':''}">
-      <h3>${esc(title.split(' — ')[0])} <span class="k">${esc(title.split(' — ')[1])}</span></h3>
-      ${ (r.mode==="adaptive")
-          ? (isExecutedVariant
-             ? '<p class="pill selected">⭐ executed — selected by the decision engine</p>'
-             : '<p class="k">not executed (adaptive-only mode: the other path never ran)</p>')
-          : (r.selected_branch===br.label
-              ? '<p class="pill selected">⭐ decision engine selected this path</p>'
-              : '<p class="k">shown for comparison — NOT selected by the decision engine</p>') }
-      ${b.ok
-        ? `<p><b>Answer:</b> ${esc(b.text ?? "")}</p>`
-        : (b.never_run
-            ? `<p class="k"></p>`
-            : `<p style="color:var(--bad);font-weight:600">Branch failed: ${esc(b.error||"unknown error")}</p>`)}
-      <p class="k">Backend: ${esc(b.backend||"—")}${b.abstained?" · abstained":""}${(b.meta&&b.meta.model)?" · model: "+esc(b.meta.model):""}</p>
-      ${br.label==="B" && b.retrieval_method ? `<p class="k">Retrieval method: <b>${esc(b.retrieval_method)}</b>${b.retrieval_diagnostics && b.retrieval_diagnostics.model_name ? " · embedding model: "+esc(b.retrieval_diagnostics.model_name) : ""}${b.retrieval_diagnostics && b.retrieval_diagnostics.embedding_dim ? " · dim "+esc(b.retrieval_diagnostics.embedding_dim) : ""}${b.retrieval_diagnostics && b.retrieval_diagnostics.rrf_k ? " · RRF k="+esc(b.retrieval_diagnostics.rrf_k) : ""}</p>` : ""}
+  $("decisionPanel").innerHTML = `
+    <div class="decision ${retrieve?"retrieve":"skip"}">
+      <div class="row">
+        ${badge(retrieve?"RETRIEVE":"DO NOT RETRIEVE", (retrieve?"ok":"")+" big")}
+        <span>score <b>${fix(d.decision_score,3)}</b> vs threshold <b>${fix(d.threshold,2)}</b></span>
+        <span class="k">decision took ${ms(d.decision_ms)} = engine ${ms(d.decision_engine_ms)} + preflight ${ms(d.preflight_ms)}</span>
+      </div>
+      <p class="k" style="margin:4px 0 0">Router type: <b>${esc(d.engine_name||"?")}</b>${d.engine_name==="heuristic"
+        ? ` — an interpretable weighted-signal heuristic (fixed threshold; no trained or calibrated decision model)${(d.signals&&d.signals.memory_uncertainty)?"":" · memory-uncertainty signal not configured"}`
+        : d.engine_name==="learned" ? " — a trained decision model (see scripts/train_decision.py)" : ""}.</p>
+      <p class="rationale">${esc(d.rationale||"(no rationale reported by this engine)")}</p>
+      <p class="formula">Rule: ${esc(d.decision_rule||"RETRIEVE if score ≥ threshold")} ·
+        Score: ${esc(d.score_definition||"")} · A score of 0.50 is not a coin flip and not a probability.</p>
       <table>
-        <tr><td>Performed document retrieval</td><td>${br.label==="B" ? (b.ok||!b.never_run ? "yes" : "—") : "<b>no</b> (never)"}</td></tr>`;
-    if(b.ok){
-      const t = b.tokens||null;
-      bh += `
-        <tr><td>Answer generation time</td><td>${ms(b.generation_ms)}</td></tr>
-        ${b.retrieval_ms!=null?`<tr><td>Document retrieval time</td><td>${ms(b.retrieval_ms)}</td></tr>`:""}
-        <tr><td>Total path time</td><td>${ms(b.path_total_ms)}</td></tr>
-        <tr><td>Input / output / total tokens</td>${t?`<td>${t.input_tokens} / ${t.output_tokens} / <b>${t.total_tokens}</b> <span class="k">(${esc(t.source)})</span></td>`:'<td class="k">n/a (no model call)</td>'}</tr>`;
-    }
-    bh += `</table>`;
-    if(b.retrieval_hits && b.retrieval_hits.length){
-      bh += `<details open><summary class="k">retrieved passages — source files and scores</summary>
-        <table><tr><th>#</th><th>score</th><th>source</th><th>excerpt</th></tr>`;
-      b.retrieval_hits.forEach(hit=>{
-        const src = hit.source_file ? `${esc(hit.source_file)}` + (hit.page!=null?` (page ${hit.page})`:"") : esc(hit.title||hit.doc_id);
-        const comp = hit.component_ranks ? `<span class="k"> (bm25 #${hit.component_ranks.bm25||"—"}, dense #${hit.component_ranks.dense||"—"})</span>` : "";
-        bh += `<tr><td>${hit.rank}</td><td>${Number(hit.score).toFixed(3)}${comp}</td><td>${src}</td><td>${esc(hit.excerpt)}</td></tr>`;
-      });
-      bh += `</table></details>`;
-    }
-    bh += `</div>`;
-  }
-  holder.innerHTML = bh;
-
-  // ---- performance panel
-  const c = r.comparison;
-  let ph = `<h3>Performance comparison</h3>`;
-  if(r.mode==="adaptive"){
-    ph += `<p class="k">Deployed adaptive path — measured: decision ${ms(r.operations.decision_ms)}
-      ${r.operations.retrieval_ms!=null?" + retrieval "+ms(r.operations.retrieval_ms):""}
-      ${r.operations.generation_ms!=null?" + generation "+ms(r.operations.generation_ms):""}
-      = <b>total ${ms(r.adaptive_total_ms)}</b>. Only the selected branch executed.</p>
-      <p class="k">Token usage for the selected path: ${(r.token_usage.selected_branch||{}).total_tokens ?? "n/a"}
-      <span class="k">(${(r.token_usage.selected_branch||{}).source ?? "no model tokens"})</span>. Decision engine uses no LLM tokens.</p>`;
-  }else{
-    const a = r.branch_a, b = r.branch_b;
-    ph += `<div class="metric-grid">
-      <div class="metric"><span class="k">Option A total</span><b>${ms(a.path_total_ms)}</b></div>
-      <div class="metric"><span class="k">Option B total</span><b>${ms(b.path_total_ms)}</b></div>
-      <div class="metric"><span class="k">Retrieval time (B only)</span><b>${ms(b.retrieval_ms)}</b></div>
-      <div class="metric"><span class="k">Decision engine time</span><b>${ms(r.decision.decision_ms)}</b></div>
-      <div class="metric"><span class="k">Full comparison request</span><b>${ms(r.comparison_total_ms)}</b></div>
-      <div class="metric"><span class="k">Time difference (B − A)</span><b class="${(c.time_difference_ms||0)>0?'neg':''}">${ms(c.time_difference_ms)}</b></div>
-      <div class="metric"><span class="k">Option A tokens</span><b>${c.tokens_a ?? "—"}</b></div>
-      <div class="metric"><span class="k">Option B tokens</span><b>${c.tokens_b ?? "—"}</b></div>
-      <div class="metric"><span class="k">Token difference (B − A)</span><b class="${(c.token_difference||0)>0?'neg':''}">${c.token_difference ?? "—"}</b></div>
-      <div class="metric"><span class="k">% time change vs B</span><b>${c.time_saved_pct==null?"—":c.time_saved_pct+" %"}</b></div>
-      <div class="metric"><span class="k">% token change vs B</span><b>${c.token_saved_pct_when_B_used_more==null?"—":c.token_saved_pct_when_B_used_more+" %"}</b></div>
-    </div>
-    <p class="formula">Positive time/token difference ⇒ the WITH-retrieval branch cost MORE (no-retrieval "saved" that amount); negative ⇒ an increase for the no-retrieval branch. Units: milliseconds, tokens. The full-comparison wall-clock runs both branches and is NOT deployed adaptive latency — use adaptive-only mode for that.</p>`;
-  }
-  document.getElementById("perfPanel").innerHTML = ph;
-  out.scrollIntoView({behavior:"smooth", block:"start"});
+        <tr><th style="width:52%">Signal</th><th>Value</th><th>Weight</th><th>Contribution</th></tr>
+        ${rows}
+      </table>
+      <details><summary>Collection preflight — what the decision looked at</summary>${preHtml}</details>
+      <details><summary>Decision inputs (leakage contract)</summary>
+        <p class="k">${esc(d.inputs||"")}</p>
+        <p class="tiny">The engine returned these fields: decision, score, threshold, components, features, rationale, preflight. No reference answer, gold chunk id, oracle label or retrieved passage is part of the input.</p>
+      </details>
+      ${r && r.mode==="compare" ? `<p class="k" style="margin-top:8px">Both answers below were produced <b>after</b> this decision, for research comparison. Only <b>Option ${esc(r.selected_branch)}</b> would run in a deployed adaptive request.</p>` : ""}
+    </div>`;
 }
 
-refreshDocs(); checkLLM(); loadRetrievalConfig();
+/* --------------------------------------------------------- answer panels */
+function tokenLine(b){
+  const t = b.tokens;
+  if(!t) return '<span class="k">tokens: n/a (no model call)</span>';
+  return `input <b>${t.input_tokens}</b> · output <b>${t.output_tokens}</b> · total <b>${t.total_tokens}</b>
+    <span class="badge ${t.source==="provider-reported"?"ok":"warn"}">${esc(t.source)}</span>`;
+}
+function citeChips(hits){
+  if(!hits||!hits.length) return "";
+  return hits.map((h,i)=>`<button class="chip" onclick="jumpPassage(${i+1})">[${i+1}] ${esc(h.source_file||h.title||h.doc_id)}${h.page!=null?" p."+h.page:""}</button>`).join(" ");
+}
+function passageList(hits){
+  if(!hits||!hits.length) return '<p class="k">No passages were retrieved.</p>';
+  return hits.map((h,i)=>`
+    <div class="passage" id="passage-${i+1}">
+      <div class="row">
+        <b>[${i+1}]</b>
+        <span class="k">${esc(h.source_file||h.title||"")}${h.page!=null?" · page "+h.page:""}</span>
+        <span class="badge">score ${fix(h.score,3)}</span>
+        ${h.component_ranks?badge("BM25 #"+(h.component_ranks.bm25||"—")+" / dense #"+(h.component_ranks.dense||"—"),"info"):""}
+        <span class="tiny">${esc(h.doc_id||"")}</span>
+      </div>
+      <div class="tiny" style="margin-top:4px">${esc((h.text||"").slice(0,320))}${(h.text||"").length>320?"…":""}</div>
+      <details><summary>read the complete passage</summary><div class="full">${esc(h.text||"")}</div></details>
+    </div>`).join("");
+}
+function jumpPassage(n){
+  const el = $("passage-"+n);
+  if(!el) return;
+  const det = el.querySelector("details"); if(det) det.open = true;
+  el.scrollIntoView({behavior:"smooth", block:"center"});
+  el.classList.add("flash"); setTimeout(()=>el.classList.remove("flash"), 1400);
+}
+
+function branchCard(b, label, selected, adaptiveMode, executedLabel){
+  const isA = label==="A";
+  const title = isA ? "Option A — closed book (no retrieval)" : "Option B — retrieval-augmented";
+  const executed = !adaptiveMode || executedLabel===label;
+  if(!executed){
+    return `<div class="branch"><h3>${esc(title)}</h3>
+      ${badge("not executed","")}
+      <p class="k">Adaptive-only mode: the decision engine chose Option ${esc(executedLabel)}, so this path never ran and has no timing.</p></div>`;
+  }
+  const cls = `branch ${b.ok?"":"err"} ${selected?"selected":""}`;
+  const head = `<h3>${esc(title)}
+      ${selected?badge("⭐ selected by the decision engine","info"):badge("shown for comparison","")}</h3>`;
+  if(!b.ok){
+    return `<div class="${cls}">${head}
+      <p class="notice" style="color:var(--bad);font-weight:600">This branch failed — no answer and no valid timing.</p>
+      <pre>${esc(b.error||"unknown error")}</pre>
+      ${!isA && b.retrieval_hits && b.retrieval_hits.length?`<p class="k">Retrieval did run (${b.retrieval_hits.length} passages, ${ms(b.retrieval_ms)}) before generation failed:</p>${passageList(b.retrieval_hits)}`:""}
+      </div>`;
+  }
+  const meta = b.meta||{};
+  return `<div class="${cls}">${head}
+    <div class="row">
+      ${isA?badge("no document access",""):badge("grounded in retrieved passages","info")}
+      ${meta.model?`<span class="badge">${esc(meta.model)}</span>`:""}
+      ${meta.backend||b.backend?`<span class="tiny">backend: ${esc(b.backend||meta.backend)}</span>`:""}
+    </div>
+    <div class="answer">${esc(b.text)}</div>
+    <table>
+      <tr><td>Performed document retrieval</td><td>${isA?"<b>no</b> — the question alone was sent":"yes"}</td></tr>
+      ${!isA?`<tr><td>Retrieval method</td><td><b>${esc(b.retrieval_method||"?")}</b>${(b.retrieval_diagnostics&&b.retrieval_diagnostics.model_name)?" · "+esc(b.retrieval_diagnostics.model_name)+((b.retrieval_diagnostics&&b.retrieval_diagnostics.embedding_dim)?" (dim "+b.retrieval_diagnostics.embedding_dim+")":""):""}</td></tr>
+      <tr><td>Passages sent to the model</td><td>${b.n_passages} · ${Number(b.retrieved_context_chars||0).toLocaleString()} characters of evidence</td></tr>`:""}
+      ${!isA?`<tr><td>Retrieval time</td><td>${ms(b.retrieval_ms)}</td></tr>`:""}
+      <tr><td>Answer generation time</td><td>${ms(b.generation_ms)}</td></tr>
+      <tr><td>Total path time</td><td><b>${ms(b.path_total_ms)}</b></td></tr>
+      <tr><td>Token usage</td><td>${tokenLine(b)}</td></tr>
+    </table>
+    ${!isA && meta.truncated ? `<p class="notebox">⚠ The answer hit the max_tokens limit and may be truncated.</p>`:""}
+    ${!isA?`<div class="row" style="margin-top:8px">${citeChips(b.retrieval_hits)}</div>
+      <h4>Retrieved passages (what the model received)</h4>${passageList(b.retrieval_hits)}`
+      : `<p class="k" style="margin-top:8px">Nothing from the uploaded collection was available to this branch — any overlap with the document is the model's own knowledge.</p>`}
+  </div>`;
+}
+
+function renderAnswers(r){
+  const adaptive = r.mode==="adaptive";
+  const executed = r.executed_branch || null;
+  const a = adaptive ? (executed && executed.label==="A" ? executed : null) : r.branch_a;
+  const b = adaptive ? (executed && executed.label==="B" ? executed : null) : r.branch_b;
+  $("branchCards").innerHTML =
+    branchCard(a||{ok:false,error:"not executed"}, "A", r.selected_branch==="A", adaptive, r.selected_branch) +
+    branchCard(b||{ok:false,error:"not executed"}, "B", r.selected_branch==="B", adaptive, r.selected_branch);
+
+  renderSupport(r);
+  renderDiff(r);
+  renderPerf(r);
+}
+
+function renderSupport(r){
+  if(r.mode==="adaptive"){
+    $("supportPanel").innerHTML = `<h3>Vocabulary overlap with evidence</h3>
+      <p class="k">Adaptive-only mode runs one path; the sentence-by-sentence overlap map needs both answers and is available in comparison mode.</p>`;
+    return;
+  }
+  if(!r.analysis || r.analysis.error){
+    $("supportPanel").innerHTML = `<h3>Vocabulary overlap with evidence</h3>
+      <p class="k">Not available: ${esc((r.analysis&&r.analysis.error)||"one of the branches produced no answer")}.</p>`;
+    return;
+  }
+  const an = r.analysis, s = an.summary;
+  const OVERLAP_KIND = {"high_overlap":"ok","partial_overlap":"warn","no_overlap":"bad","unchecked":""};
+  const rows = (an.b_sentences||[]).map(x=>{
+    const kind = OVERLAP_KIND[x.overlap_status]||"";
+    return `<tr>
+      <td>${esc(x.sentence)}</td>
+      <td>${badge(esc(x.overlap_status), kind)}<div class="tiny">term overlap ${x.overlap==null?"—":fix(x.overlap,2)}</div></td>
+      <td>${(x.citations||[]).map(c=>`<button class="chip" onclick="jumpPassage(${parseInt(c.replace(/[^0-9]/g,""),10)})">${esc(c)}</button>`).join(" ")||'<span class="k">—</span>'}</td>
+      <td class="tiny">${esc((x.terms_in_evidence||[]).join(", "))}</td>
+    </tr>`;
+  }).join("");
+  $("supportPanel").innerHTML = `
+    <h3>Which sentences re-use evidence vocabulary?</h3>
+    <p><b>${s.b_high_overlap}</b> of ${(an.b_sentences||[]).length} Option-B sentences share most of their content terms with a retrieved passage
+      (high overlap); ${s.b_partial_overlap} share some (partial), ${s.b_no_overlap} share almost none (no overlap).
+      For comparison, ${s.a_high_overlap} of ${(an.a_sentences||[]).length} closed-book sentences also re-use evidence vocabulary.</p>
+    <p class="k"><b>What this is and is not.</b> Overlap is LEXICAL: the share of a sentence's content terms that appear in a passage.
+      It points back to the passage whose wording the sentence most resembles. It is <b>not</b> entailment, <b>not</b> fact-checking and <b>not</b> correctness —
+      a sentence can re-use a passage's words while contradicting it, and a true paraphrase can show no overlap. To verify what the evidence actually proves, read the passages via the citation buttons.</p>
+    <table>
+      <tr><th style="width:44%">Sentence in Option B</th><th style="width:14%">Vocabulary overlap</th><th style="width:14%">Citations</th><th>Shared content terms</th></tr>
+      ${rows||'<tr><td colspan="4" class="k">No sentences to check.</td></tr>'}
+    </table>
+    <p class="formula">${esc(an.method_note)} Thresholds: high overlap ≥ ${an.thresholds.high_overlap_at}, partial ≥ ${an.thresholds.partial_overlap_at} of a sentence's content terms present in the passage.</p>`;
+}
+
+function renderDiff(r){
+  if(r.mode==="adaptive" || !r.analysis || r.analysis.error){
+    $("diffPanel").innerHTML = `<h3>Where the answers differ</h3><p class="k">Comparison mode required.</p>`;
+    return;
+  }
+  const an = r.analysis;
+  const diff = an.answer_diff||{};
+  const perPassage = (an.per_passage||[]).filter(p=>p.terms_b_not_a.length);
+  $("diffPanel").innerHTML = `
+    <h3>Where the answers differ in factual detail</h3>
+    <p class="k">Vocabulary overlap between the two answers: Jaccard ${fix(diff.jaccard,2)} (${diff.shared_terms} shared content terms).
+      This is a lexical comparison of the two generated texts — not a judgement of which answer is correct.</p>
+    <div class="grid2">
+      <div>
+        <h4>Terms only in Option A (closed book)</h4>
+        <p class="tiny">${esc((diff.only_in_a||[]).slice(0,18).join(", ")||"—")}</p>
+      </div>
+      <div>
+        <h4>Terms only in Option B (grounded)</h4>
+        <p class="tiny">${esc((diff.only_in_b||[]).slice(0,18).join(", ")||"—")}</p>
+      </div>
+    </div>
+    <h4>What Option B borrowed from each passage that Option A never mentioned</h4>
+    ${perPassage.length? perPassage.map(p=>`
+      <p style="font-size:.85rem;margin:6px 0">
+        ${badge(p.citation,"info")} ${esc(p.source_file||"")}${p.page!=null?" · page "+p.page:""} —
+        Option B used <b>${p.terms_b_not_a.length}</b> term(s) absent from Option A:
+        <span class="tiny">${esc(p.terms_b_not_a.join(", "))}</span>
+        <span class="k">(passage vocabulary covering ${pct(p.coverage_b)} of B's terms vs ${pct(p.coverage_a)} of A's)</span>
+      </p>`).join("")
+      : '<p class="k">Option B did not use distinctive vocabulary from any single passage (both answers use similar wording).</p>'}
+    <p class="formula">A citation proves where wording came from, never that the sentence is faithful or correct. Read the passages above before trusting an answer.</p>`;
+}
+
+function renderPerf(r){
+  if(r.mode==="adaptive"){
+    const t = r.timings||{};
+    const tok = (r.token_usage&&r.token_usage.selected_branch)||null;
+    $("perfPanel").innerHTML = `
+      <h3>Deployed adaptive latency (measured)</h3>
+      <div class="metric-grid">
+        <div class="metric"><span class="k">Decision (incl. preflight)</span><b>${ms(t.decision_ms)}</b></div>
+        <div class="metric"><span class="k">Collection preflight</span><b>${ms(t.preflight_ms)}</b></div>
+        <div class="metric"><span class="k">Retrieval</span><b>${ms(t.retrieval_ms)}</b></div>
+        <div class="metric"><span class="k">Generation</span><b>${ms(t.generation_ms)}</b></div>
+        <div class="metric"><span class="k">Total (decision → answer)</span><b>${ms(r.adaptive_total_ms)}</b></div>
+        <div class="metric"><span class="k">Selected path</span><b>Option ${esc(r.selected_branch)}</b></div>
+      </div>
+      <p class="k">Tokens for the selected path: <b>${tok?tok.total_tokens:"n/a"}</b>${tok?" ("+esc(tok.source)+")":""}. The decision engine calls no language model, so it reports no tokens.</p>
+      <p class="formula">This is real operational latency: only the selected branch ran. Units: milliseconds / tokens.</p>`;
+    return;
+  }
+  const c = r.comparison||{}, t = r.timings||{}, a = r.branch_a||{}, b = r.branch_b||{};
+  const incomplete = !a.ok || !b.ok;
+  $("perfPanel").innerHTML = `
+    <h3>Performance comparison</h3>
+    ${incomplete?`<p class="notebox">⚠ Incomplete comparison: ${!a.ok?"Option A failed":"Option B failed"}. Time and token differences below are only computed for successful branches, and a failed branch is not a valid answer or timing sample.</p>`:""}
+    <div class="metric-grid">
+      <div class="metric"><span class="k">Option A total</span><b>${ms(t.path_a_total_ms)}</b>
+        <div class="tiny">${c.generation_cold_a===true?'<span class="badge warn">includes first-call model load</span>':c.generation_cold_a===false?'<span class="badge ok">warm model</span>':''}
+        ${c.generation_cold_a!=null&&c.generation_cold_a===true?'<br>run benchmark scripts for unbiased medians':''}</div></div>
+      <div class="metric"><span class="k">Option B total</span><b>${ms(t.path_b_total_ms)}</b>
+        <div class="tiny">${c.generation_cold_b===true?'<span class="badge warn">includes first-call model load</span>':c.generation_cold_b===false?'<span class="badge ok">warm model</span>':''}</div></div>
+      <div class="metric"><span class="k">Retrieval (B only)</span><b>${ms(t.retrieval_ms)}</b></div>
+      <div class="metric"><span class="k">Generation A / B</span><b>${ms(t.generation_a_ms)} / ${ms(t.generation_b_ms)}</b></div>
+      <div class="metric"><span class="k">Decision engine</span><b>${ms(t.decision_engine_ms)}</b></div>
+      <div class="metric"><span class="k">Preflight</span><b>${ms(t.preflight_ms)}</b></div>
+      <div class="metric"><span class="k">Time difference (B − A), this single run</span><b class="${(c.time_difference_ms||0)>0?"neg":"pos"}">${ms(c.time_difference_ms)}</b></div>
+      <div class="metric"><span class="k">Tokens A / B</span><b>${c.tokens_a ?? "—"} / ${c.tokens_b ?? "—"}</b><div class="tiny">${c.tokens_a==null?"":""}${t.source||""}</div></div>
+      <div class="metric"><span class="k">Token difference (B − A)</span><b class="${(c.token_difference||0)>0?"neg":"pos"}">${c.token_difference ?? "—"}</b></div>
+      <div class="metric"><span class="k">Full comparison request</span><b>${ms(r.comparison_total_ms)}</b></div>
+      <div class="metric"><span class="k">Projected deployed latency</span><b>${ms(t.selected_path_projected_ms)}</b><div class="tiny">decision + selected branch of this run</div></div>
+    </div>
+    <p class="formula">time difference = Option B total − Option A total (positive ⇒ retrieving cost more time) ·
+      token difference = Option B total − Option A total (positive ⇒ retrieving cost more tokens) ·
+      units: milliseconds, tokens. The full-comparison wall clock runs BOTH answers and is not deployed latency;
+      use adaptive-only mode to measure that.</p>
+    ${c.fairness_note?`<p class="k">⚠ ${esc(c.fairness_note)} ${c.generation_cold_a===true?"This run's Option A was the first LLM call here, so B−A undercounts retrieval overhead by roughly the model-load time.":""}</p>`:""}
+    <details style="margin-top:6px"><summary>How to make latency claims fairly</summary>
+      <p class="tiny">Interactive sequential runs are for diagnosing, not proving speed. To compare A vs B latency:
+      run <code>.\\.venv\\Scripts\\python.exe scripts\\bench_latency.py --trials 3</code> — it alternates the branch
+      order every trial, separates each backend's first (cold) call from warmed-up calls, and reports medians.
+      Cold start here is Ollama loading the model (measured live: ≈24 s cold vs ≈7 s warm on this machine for a
+      short answer); <code>keep_alive</code> keeps the model resident between calls.</p>
+    </details>`;
+}
+
+/* --------------------------------------------------- three-method compare */
+async function compareMethods(){
+  const question = ($("q").value.trim() || state.question);
+  if(!question){ set("cmpStatus","Type a question in step 1 first."); return; }
+  set("cmpStatus","Running BM25, dense and hybrid over the same chunks… (the first dense call may load the embedding model)");
+  $("cmpBtn").disabled = true;
+  try{
+    const j = await api("/retrieval/compare", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({question, top_k: Number($("cmpTopK").value)||5})
+    });
+    state.cmp = j;
+    renderMethodCompare(j);
+    set("cmpStatus","Done — "+Object.keys(j.methods).length+" method(s).");
+  }catch(e){ set("cmpStatus","Comparison failed: "+e.message); }
+  $("cmpBtn").disabled = false;
+}
+
+function renderMethodCompare(j){
+  const ov = j.overlap||{};
+  const pair = Object.entries(ov.pairwise_jaccard||{}).map(([k,v])=>`${k.replace("|"," ↔ ")}: <b>${pct(v)}</b> top-5 overlap`).join(" · ");
+  $("overlapSummary").innerHTML = `
+    <div class="card" style="margin-top:10px">
+      <p><b>${(ov.shared_by_all||[]).length}</b> passage(s) appear in every method's top-${j.top_k};
+         shared by ≥2 methods: <b>${(ov.shared_by_two_or_more||[]).length}</b>.
+         Unique to one method: ${Object.entries(ov.n_unique||{}).map(([m,n])=>`${esc(m)} ${n}`).join(", ")||"—"}.</p>
+      <p class="k">${pair||""}</p>
+      <p class="formula">${esc(j.note||"")}</p>
+    </div>`;
+  $("methodColumns").innerHTML = (j.method_order||[]).map(m=>{
+    const r = (j.methods||{})[m]||{};
+    if(!r.ok){
+      return `<div class="card"><h3>${esc(METHOD_LABEL[m]||m)}</h3>
+        <p class="badge bad">failed</p><pre>${esc(r.error||"")}</pre></div>`;
+    }
+    const diag = r.diagnostics||{};
+    const dense = diag.components ? (diag.components.dense||{}) : diag;
+    const noteBits = [`query ${ms(r.query_ms)}`];
+    if(r.setup_ms) noteBits.push(`setup ${ms(r.setup_ms)}`);
+    if(dense.model_name) noteBits.push(esc(dense.model_name)+((dense.embedding_dim)?" · "+dense.embedding_dim+"d":""));
+    if(dense.vectors_reused_from_cache!=null) noteBits.push(`${dense.vectors_reused_from_cache} cached vectors`);
+    if(diag.rrf_k) noteBits.push(`RRF k=${diag.rrf_k}`);
+    const hits = r.hits||[];
+    return `<div class="card">
+      <h3>${esc(METHOD_LABEL[m]||m)}</h3>
+      <p class="tiny">${noteBits.join(" · ")}</p>
+      ${hits.length?hits.map(h=>`
+        <div class="hit">
+          <div class="head">
+            <b>#${h.rank}</b>
+            <span class="badge">${fix(h.score,3)}</span>
+            <span class="k">${esc(h.source_file||h.title||"")}${h.page!=null?" · p."+h.page:""}</span>
+            ${h.shared?badge("shared: "+h.found_by.join(", "),"info"):badge("only this method","warn")}
+            ${h.component_ranks?`<span class="badge">BM25 #${h.component_ranks.bm25||"—"} / dense #${h.component_ranks.dense||"—"}</span>`:""}
+          </div>
+          <div class="excerpt">${esc(h.excerpt)}</div>
+          ${h.rank_note?`<div class="tiny">rank by method: ${esc(h.rank_note)}</div>`:""}
+          <details><summary>read the complete passage</summary><div class="full">${esc(h.text)}</div></details>
+        </div>`).join(""):'<p class="k">No passage retrieved (no query term scored above zero).</p>'}
+    </div>`;
+  }).join("");
+}
+
+/* ------------------------------------------------------------ experiments */
+async function loadExperiments(){
+  set("expStatus","Loading saved results…");
+  try{
+    const j = await api("/experiments/retrieval");
+    state.exp = j;
+    renderExperiments(j);
+    set("expStatus","");
+    loadPolicy();
+  }catch(e){
+    set("expStatus","No saved retrieval experiment: "+e.message+
+      "  → run  .\\.venv\\Scripts\\python.exe scripts\\eval_retrieval.py --methods bm25,dense,hybrid");
+  }
+}
+
+function metricCell(row, key, best){
+  const v = row[key];
+  const isBest = (best[key]||[]).includes(row.method);
+  const delta = row.vs_bm25 && row.vs_bm25[key]!=null && row.method!=="bm25"
+    ? `<div class="tiny ${row.vs_bm25[key]>0?"pos":"neg"}">${row.vs_bm25[key]>0?"+":""}${(row.vs_bm25[key]*100).toFixed(1)} pts vs BM25</div>` : "";
+  return `<td class="${isBest?"":""}"><b>${v==null?"—":fix(v,4)}</b>${isBest?' <span class="badge ok">best</span>':""}${delta}</td>`;
+}
+
+function renderExperiments(j){
+  const v = j.view;
+  const rows = v.comparison_table||[];
+  const best = v.best||{};
+  const table = `<table>
+    <tr><th>Method</th><th>Recall@5</th><th>MRR@10</th><th>nDCG@10</th><th>Hit@1</th>
+        <th>Median query</th><th>Cold 1st query</th><th>Build</th></tr>
+    ${rows.map(r=>`<tr>
+      <td><b>${esc(r.method)}</b><div class="tiny">${r.n_scored_questions||"?"} scored / ${r.n_questions||"?"} questions</div></td>
+      ${metricCell(r,"recall_at_5",best)}
+      ${metricCell(r,"mrr_at_10",best)}
+      ${metricCell(r,"ndcg_at_10",best)}
+      ${metricCell(r,"hit_rate_at_1",best)}
+      <td>${ms(r.median_query_ms)}<div class="tiny">p95 ${ms(r.p95_query_ms)}</div></td>
+      <td>${r.cold_first_query_ms==null?"—":Math.round(r.cold_first_query_ms)+" ms"}</td>
+      <td>${r.build_ms==null?"—":Math.round(r.build_ms)+" ms"}${r.model_load_ms?`<div class="tiny">model load ${Math.round(r.model_load_ms)} ms</div>`:""}</td>
+    </tr>`).join("")}
+  </table>`;
+  const help = Object.entries(v.metric_help||{}).map(([k,t])=>`<p class="tiny"><b>${esc(k)}</b> — ${esc(t)}</p>`).join("");
+  $("expBody").innerHTML = `
+    <h3>Retrieval quality on one labelled question set</h3>
+    <p class="k">Run <b>${esc(v.run_id)}</b> · ${esc(v.generated_at_utc||"")} · dataset <code>${esc((v.dataset||{}).path||"")}</code>
+      ${(v.dataset||{}).sha256?`<span class="tiny">sha256 ${esc(v.dataset.sha256.slice(0,12))}…</span>`:""}
+      · k_recall=${esc((v.settings||{}).recall_k)} · k_rank=${esc((v.settings||{}).rank_k)}</p>
+    ${table}
+    <details><summary>What the metrics mean (plain language)</summary>${help}</details>
+    <p class="formula">${(v.notes||[]).map(esc).join(" ")}</p>
+
+    <h3 style="margin-top:16px">Per-question inspector <span class="badge info">evaluation labels</span></h3>
+    <div class="row">
+      <select id="expCatFilter" onchange="renderQuestionList()"><option value="">all categories</option>${
+        [...new Set((v.questions||[]).map(q=>q.category))].map(c=>`<option value="${esc(c)}">${esc(CAT_LABEL[c]||c)}</option>`).join("")}</select>
+      <label class="tiny"><input type="checkbox" id="expDisagreeOnly" onchange="renderQuestionList()"> only questions where the methods disagree</label>
+    </div>
+    <div class="grid2" style="margin-top:8px">
+      <div class="list" id="expQuestionList"></div>
+      <div id="expInspector"><p class="k">Pick a question to see the labels and what each method retrieved (✓ = labelled relevant).</p></div>
+    </div>`;
+
+  state._expCatSelect = true;
+  renderQuestionList();
+}
+
+function methodMark(method, q){
+  const row = q.methods[method]; if(!row) return "";
+  const hit = (row.recall_at_k!=null && row.recall_at_k>0);
+  const rr = row.reciprocal_rank;
+  return `<span class="rec ${hit?"hit":"miss"}" title="${esc(method)}: recall ${fix(row.recall_at_k,2)}, RR ${fix(rr,2)}">${esc(method.slice(0,1).toUpperCase())}${hit?"✓":"✗"}${rr?fix(rr,1):""}</span>`;
+}
+
+function renderQuestionList(){
+  const v = state.exp && state.exp.view; if(!v) return;
+  const cat = ($("expCatFilter")||{}).value || "";
+  const disagree = ($("expDisagreeOnly")||{}).checked;
+  const rows = (v.questions||[]).filter(q=>{
+    if(cat && q.category!==cat) return false;
+    if(disagree){
+      const recs = Object.values(q.methods).map(m=>m.recall_at_k);
+      const firstHits = Object.values(q.methods).map(m=>m.reciprocal_rank===1);
+      return new Set(recs).size>1 || new Set(firstHits).size>1;
+    }
+    return true;
+  });
+  const list = $("expQuestionList");
+  if(!list) return;
+  list.innerHTML = rows.map(q=>`
+    <div class="qrow" data-qid="${esc(q.question_id)}" onclick="inspectQuestion('${esc(q.question_id)}')">
+      <span class="qid">${esc(q.question_id)}</span>
+      <span class="qtext">${esc(q.question)}<div class="tiny">${esc(CAT_LABEL[q.category]||q.category)}${q.answerable?"":" · no answer in corpus"}</div></span>
+      <span class="marks">${(v.comparison_table||[]).map(r=>methodMark(r.method,q)).join("")}</span>
+    </div>`).join("") || '<p class="k" style="padding:8px">No question matches this filter.</p>';
+  document.querySelectorAll(".qrow").forEach(el=>el.classList.remove("active"));
+}
+
+async function inspectQuestion(qid){
+  document.querySelectorAll(".qrow").forEach(el=>el.classList.toggle("active", el.dataset.qid===qid));
+  $("expInspector").innerHTML = '<p class="k">Loading…</p>';
+  try{
+    const j = await api("/experiments/retrieval/question/"+encodeURIComponent(qid));
+    const rel = j.relevant_passages||[];
+    const cols = Object.entries(j.methods||{}).map(([m,res])=>{
+      const hits = (res.retrieved||[]).map(h=>`
+        <div class="hit">
+          <div class="head"><b>#${h.rank}</b>${h.is_relevant?badge("relevant ✓","ok"):badge("not labelled","")}
+            <span class="k">${esc((h.source||{}).filename||"")}${(h.source||{}).page!=null?" p."+(h.source).page:""}</span></div>
+          <div class="excerpt">${esc((h.source||{}).excerpt||"")}</div>
+        </div>`).join("") || '<p class="k">No passage returned.</p>';
+      return `<div class="card"><h4>${esc(m)}</h4>
+        <p class="tiny">recall@k ${fix(res.recall_at_k,2)} · RR ${fix(res.reciprocal_rank,2)} · nDCG ${fix(res.ndcg,2)} · ${ms(res.retrieval_ms)}</p>
+        ${hits}</div>`;
+    }).join("");
+    $("expInspector").innerHTML = `
+      <div class="card">
+        <p><b>${esc(j.question.question_id)}</b> · ${esc(CAT_LABEL[j.question.category]||j.question.category)}</p>
+        <p>${esc(j.question.question)}</p>
+        <p class="k">Labelled relevant passage(s): ${(j.relevant_chunk_ids||[]).map(esc).join(", ")||"none (unanswerable)"}</p>
+        ${rel.length?rel.map((p,i)=>`<div class="passage"><b>[${i+1}]</b> <span class="k">${esc((p||{}).filename||"")}${(p||{}).page!=null?" · page "+p.page:""}</span>
+          <div class="tiny">${esc((p||{}).excerpt||"")}</div></div>`).join(""):""}
+      </div>
+      ${cols}
+      <p class="formula">${esc(j.note||"")}</p>`;
+  }catch(e){ $("expInspector").innerHTML = '<p class="k">Could not load question: '+esc(e.message)+'</p>'; }
+}
+
+async function loadPolicy(){
+  const holder = $("expBody");
+  try{
+    const j = await api("/experiments/policy");
+    const v = j.view, pol = v.policies||{}, s = v.settings||{};
+    const dq = v.decision_quality||{};
+    const rows = Object.entries(pol).map(([name,p])=>{
+      const k = `evidence_recall_at_${s.k_recall||5}`;
+      const small = p.small_sample_warning;
+      return `<tr>
+        <td><b>${esc(name)}</b><div class="tiny">${esc((v.policy_help||{})[name]||"")}</div></td>
+        <td>${p[k]==null?"—":fix(p[k],3)}<div class="tiny">over all ${s.n_answerable} answerable question(s)</div></td>
+        <td>${p.unanswerable_probe_rate==null?"—":pct(p.unanswerable_probe_rate)}<div class="tiny">over all ${s.n_unanswerable} unanswerable</div></td>
+        <td>${p.retrieval_calls}<div class="tiny">of ${s.n_questions} questions</div></td>
+        <td>${ms(p.mean_retrieval_ms)}</td>
+        <td>${ms(p.mean_latency_ms)}<div class="tiny">n = ${p.n_latency_samples||0} answered question(s) · ${esc(p.latency_definition||"")}</div></td>
+        <td>${p.mean_total_tokens==null?"—":p.mean_total_tokens}<div class="tiny">n = ${p.n_token_samples||0}</div></td>
+        <td>${p.mean_composite==null?"— (no LLM answers ran)":fix(p.mean_composite,3)+(small?' <span class="badge warn">PRELIMINARY</span>':'')}</td>
+      </tr>`;
+    }).join("");
+    const cm = dq.confusion_matrix||{};
+    const m = (dq.metrics||{});
+    const cmRow = (label,tp,fn,fp,tn)=>`<tr><td><b>${label}</b></td><td>${tp}</td><td>${fn}</td><td>${fp}</td><td>${tn}</td></tr>`;
+    const confBlock = cm.n_rows!=null ? `
+      <details style="margin-top:8px"><summary>Confusion matrix & per-class metrics — what the 96% does and does not tell you</summary>
+        <p class="formula">Positive class = <b>answerable</b> (a labelled relevant passage exists); the predicted-positive action is <b>RETRIEVE</b>.
+          TP = retrieved an answerable question · FN = skipped an answerable one · FP = retrieved an unanswerable one · TN = skipped an unanswerable one.</p>
+        <table>
+          <tr><th>Policy</th><th>TP</th><th>FN</th><th>FP</th><th>TN</th></tr>
+          ${cmRow("adaptive", cm.tp_retrieve_answerable, cm.fn_skip_answerable, cm.fp_retrieve_unanswerable, cm.tn_skip_unanswerable)}
+          ${(dq.baseline_always_retrieve||{}).confusion_matrix ? cmRow("always-retrieve (baseline)", dq.baseline_always_retrieve.confusion_matrix.tp_retrieve_answerable, dq.baseline_always_retrieve.confusion_matrix.fn_skip_answerable, dq.baseline_always_retrieve.confusion_matrix.fp_retrieve_unanswerable, dq.baseline_always_retrieve.confusion_matrix.tn_skip_unanswerable):""}
+          ${(dq.baseline_never_retrieve||{}).confusion_matrix ? cmRow("never-retrieve (baseline)", dq.baseline_never_retrieve.confusion_matrix.tp_retrieve_answerable, dq.baseline_never_retrieve.confusion_matrix.fn_skip_answerable, dq.baseline_never_retrieve.confusion_matrix.fp_retrieve_unanswerable, dq.baseline_never_retrieve.confusion_matrix.tn_skip_unanswerable):""}
+        </table>
+        <table>
+          <tr><th>Metric (adaptive)</th><th>Value</th><th style="width:52%">Formula</th></tr>
+          <tr><td>Precision (of RETRIEVE)</td><td><b>${m.precision==null?"—":fix(m.precision,3)}</b></td><td class="tiny">${esc((m.definitions||{}).precision||"")}</td></tr>
+          <tr><td>Recall / sensitivity</td><td><b>${m.recall==null?"—":fix(m.recall,3)}</b></td><td class="tiny">${esc((m.definitions||{}).recall||"")}</td></tr>
+          <tr><td>F1 (RETRIEVE class)</td><td><b>${m.f1==null?"—":fix(m.f1,3)}</b></td><td class="tiny">${esc((m.definitions||{}).f1||"")}</td></tr>
+          <tr><td>Specificity</td><td><b>${m.specificity==null?"—":fix(m.specificity,3)}</b></td><td class="tiny">${esc((m.definitions||{}).specificity||"")}</td></tr>
+          <tr><td>Balanced accuracy</td><td><b>${m.balanced_accuracy==null?"—":fix(m.balanced_accuracy,3)}</b></td><td class="tiny">${esc((m.definitions||{}).balanced_accuracy||"")}</td></tr>
+          <tr><td>Accuracy (raw)</td><td><b>${m.accuracy==null?"—":pct(m.accuracy)}</b></td><td class="tiny">${esc((m.definitions||{}).accuracy||"")}</td></tr>
+        </table>
+        <p class="k">${esc(dq.metric_note||"")}${(dq.baseline_always_retrieve||{}).note?" "+esc(dq.baseline_always_retrieve.note):""}</p>
+      </details>` : "";
+    holder.insertAdjacentHTML("beforeend", `
+      <h3 style="margin-top:18px">Adaptive policy vs never / always / oracle</h3>
+      <p class="k">Run <b>${esc(v.run_id||"")}</b> · ${esc(v.generated_at_utc||"")} · ${s.n_questions} questions
+        (${s.n_answerable} answerable, ${s.n_unanswerable} unanswerable) · retriever <b>${esc(s.method||"?")}</b>
+        · top_k ${s.top_k} · answers run: ${s.answers_run||0}</p>
+      <table>
+        <tr><th>Policy</th><th>Evidence recall@${esc(s.k_recall||5)}</th><th>Unanswerable probe rate</th><th>Retrieval calls</th><th>Mean retrieval</th><th>Mean path latency</th><th>Mean tokens</th><th>Mean answer quality</th></tr>
+        ${rows}
+      </table>
+      <p class="formula">Evidence recall is about available evidence, not answer correctness. The oracle column is an evaluation upper bound only.
+        Unanswerable probe rate = how often the policy retrieves when the corpus cannot answer — lower is better.
+        <b>Two sample sizes:</b> routing metrics (recall, probe rate, calls) cover all ${s.n_questions} questions; latency, token and answer-quality means cover only the questions whose policy-primary LLM call succeeded (n shown per cell).${(s.answers_run||0) < s.n_questions ? ` Only ${s.answers_run} of ${s.n_questions} questions ran the answering model, so answer-quality / latency / token means here are <b>preliminary</b>, not a validation over the full set.` : ""}</p>
+      ${confBlock}
+      <div class="grid2">
+        <div>
+          <h4>Decision quality of the adaptive policy</h4>
+          <p>${badge("accuracy "+pct(dq.accuracy), (dq.accuracy>=0.9?"ok":"warn"))}<div class="tiny">n = ${dq.n_questions} routing decisions (classification of answerability — not answer quality)</div></p>
+          <p class="tiny">skipped but answerable: ${esc((dq.skipped_but_answerable||[]).join(", ")||"none")}<br>
+             retrieved but unanswerable: ${esc((dq.retrieved_but_unanswerable||[]).join(", ")||"none")}</p>
+        </div>
+        <div>
+          <h4>Notes</h4>
+          <p class="tiny">${(v.notes||[]).map(esc).join(" ")}</p>
+        </div>
+      </div>`);
+  }catch(e){
+    holder.insertAdjacentHTML("beforeend", `
+      <h3 style="margin-top:18px">Adaptive policy vs never / always / oracle</h3>
+      <p class="k">No policy-evaluation results yet (${esc(e.message)}). Run:<br>
+      <code>.\\.venv\\Scripts\\python.exe scripts\\eval_policy.py</code></p>`);
+  }
+}
+
+/* ------------------------------------------------------------------- init */
+checkLLM(); refreshDocs(); loadRetrievalConfig(); loadDemoExamples();
 </script>
 </body>
 </html>

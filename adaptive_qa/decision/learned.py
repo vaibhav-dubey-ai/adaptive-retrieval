@@ -100,7 +100,27 @@ class LearnedDecisionEngine:
         x = np.array([extract_features(question, familiarity)])
         proba = float(self.model.predict_proba(x)[0, 1])
         decision = Decision.RETRIEVE if proba >= self.threshold else Decision.DO_NOT_RETRIEVE
-        return decision, round(proba, 4), {"threshold": self.threshold}
+        meta = {
+            "engine": self.name,
+            "threshold": self.threshold,
+            "decision_rule": "RETRIEVE if probability >= threshold, else DO_NOT_RETRIEVE",
+            "score_definition": (
+                "predict_proba of the trained gradient-boosting classifier — a model "
+                "score, not a calibrated probability"
+            ),
+            "features": dict(zip(FEATURE_NAMES, [round(float(v), 4) for v in x[0]])),
+            "rationale": (
+                f"{decision.value}: learned classifier score {proba:.3f} "
+                f"{'≥' if decision == Decision.RETRIEVE else '<'} threshold {self.threshold:.2f} "
+                f"over {len(FEATURE_NAMES)} question/memory features"
+            ),
+            "preflight": {"available": False},
+            "note": (
+                "the learned engine was trained offline on pre-retrieval features and "
+                "does not consume the collection preflight signal"
+            ),
+        }
+        return decision, round(proba, 4), meta
 
     # ---------------------------------------------------------- persistence
     def save(self, path: str, train_meta: Optional[dict] = None) -> None:

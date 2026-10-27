@@ -82,6 +82,7 @@
       "timeout_s": 90,
       "max_retries": 3,
       "retry_backoff_s": 2.0,
+      "keep_alive": "30m",
       "closedbook_system_prompt": "",
       "grounded_system_prompt": ""
     }
@@ -90,13 +91,23 @@
     "engine": "heuristic",
     "model_path": "runs/decision_model/decision_bundle.json",
     "heuristic": {
+      "threshold": 0.5,
       "weights": {
-        "temporal_cue": 0.6,
-        "superlative_cue": 0.2,
-        "entity_count": 0.3,
-        "unknown_familiarity": 0.5
+        "question_cue": 0.15,
+        "memory_uncertainty": 0.2,
+        "collection_relevance": 0.7
       },
-      "threshold": 0.6
+      "cue_weights": {
+        "temporal": 0.35,
+        "superlative": 0.15,
+        "quoted": 0.25,
+        "entity": 0.15,
+        "wh_open": 0.1
+      },
+      "preflight": {
+        "enabled": true,
+        "top_k": 5
+      }
     },
     "learned": {
       "model": "gradient_boosting",

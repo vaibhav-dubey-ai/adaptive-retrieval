@@ -15,17 +15,23 @@ from . import learned  # noqa: F401
 from . import heuristic as _heuristic  # noqa: F401
 
 
-def build_decision_engine(cfg: dict, familiarity_prober=None):
-    """Factory. ``familiarity_prober`` is an object with a
+def build_decision_engine(cfg: dict, familiarity_prober=None, collection_prober=None):
+    """Factory.
+
+    ``familiarity_prober`` is an object with a
     ``familiarity_probe(question) -> dict`` method (the answering model's
     simulated memory); it supplies the model-side uncertainty feature.
+    ``collection_prober`` is a
+    :class:`adaptive_qa.decision.preflight.CollectionPreflight` (or anything
+    with ``probe(question)``) that supplies aggregate document-relevance
+    signals for the ACTIVE uploaded collection.
     """
     engine_name = cfg["decision"]["engine"]
     if engine_name == "heuristic":
         from .heuristic import HeuristicDecisionEngine
 
         return HeuristicDecisionEngine(
-            cfg["decision"].get("heuristic", {}), familiarity_prober
+            cfg["decision"].get("heuristic", {}), familiarity_prober, collection_prober
         )
     if engine_name == "learned":
         from .learned import LearnedDecisionEngine

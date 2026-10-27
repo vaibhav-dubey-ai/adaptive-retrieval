@@ -24,6 +24,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+from .analysis import compare_answers
 from .timeutil import now_ns
 from .types import Decision
 
@@ -45,6 +46,8 @@ class BranchResult:
     retrieval_method: Optional[str] = None     # bm25 | dense | hybrid (B only)
     retrieval_diagnostics: Optional[Dict[str, Any]] = None
     tokens: Optional[Dict[str, Any]] = None    # {in,out,total,source}
+    retrieved_context_chars: Optional[int] = None
+    generation_cold: Optional[bool] = None  # first call of this backend instance
 
     def to_dict(self) -> Dict[str, Any]:
         out = {
@@ -59,6 +62,11 @@ class BranchResult:
             "retrieval_diagnostics": self.retrieval_diagnostics,
             "tokens": self.tokens,
             "performed_retrieval": self.label == "B",
+            "n_passages": len(self.retrieval_hits) if self.label == "B" else 0,
+            "retrieved_context_chars": self.retrieved_context_chars,
+            # Flat copy from answer.meta so the UI can badge cold/warm without
+            # digging into the nested meta dict.
+            "generation_cold": (self.answer.meta or {}).get("generation_cold") if self.answer else None,
         }
         if self.answer is not None:
             out["text"] = self.answer.text
@@ -68,20 +76,32 @@ class BranchResult:
         return out
 
 
-def _hit_entry(h: Any, i: int) -> Dict[str, Any]:
+def _hit_entry(h: Any, i: int, retriever: Any = None) -> Dict[str, Any]:
     entry: Dict[str, Any] = {
         "rank": i + 1,
         "doc_id": h.doc_id,
         "score": round(float(h.score), 4),
         "excerpt": h.text[:400],
+        # Full passage text: the dashboard can expand a passage and the
+        # citation/support analysis must see exactly what the model received.
+        "text": h.text,
+        "title": h.title,
     }
-    src = getattr(h, "source_file", None)
-    if src is not None:
-        entry["source_file"] = src
-        page = getattr(h, "page", None)
+    # Source provenance (upload filename + PDF page) lives in the document
+    # store, not on the frozen RetrievalHit. Join it when the retriever exposes
+    # source_meta(); otherwise fall back to the hit's title.
+    source = getattr(h, "source_file", None)
+    page = getattr(h, "page", None)
+    if retriever is not None and hasattr(retriever, "source_meta"):
+        try:
+            sm = retriever.source_meta(h) or {}
+            source = sm.get("filename", source)
+            page = sm.get("page", page)
+        except Exception:
+            pass
+    if source is not None:
+        entry["source_file"] = source
         entry["page"] = page if page is not None else None
-    else:
-        entry["title"] = h.title
     method = getattr(h, "method", "")
     if method:
         entry["retrieval_method"] = method
@@ -114,6 +134,7 @@ class ServeFlow:
         benchmark_retriever=None,
         collection_retriever=None,
         top_k: int = 8,
+        collection_info: Optional[Dict[str, Any]] = None,
     ) -> None:
         self.decision_engine = decision_engine
         self.method_a = method_a
@@ -121,17 +142,46 @@ class ServeFlow:
         self.benchmark_retriever = benchmark_retriever
         self.collection_retriever = collection_retriever
         self.top_k = int(top_k)
+        self.collection_info = collection_info or {}
 
     # ------------------------------------------------------------- decision
     def decide_first(self, question: str) -> Dict[str, Any]:
+        """Run the decision engine (question only) and report its FULL trace.
+
+        ``decision_ms`` is the wall clock of the whole decision step, which for
+        the heuristic engine includes the documented collection preflight;
+        ``decision_engine_ms`` and ``preflight_ms`` split that cost so neither
+        is hidden.
+        """
         t0 = now_ns()
         decision, score, meta = self.decision_engine.decide(question)
         decision_ms = _ms(now_ns() - t0)
+        preflight = meta.get("preflight") or {"available": False}
+        preflight_ms = preflight.get("ms") if isinstance(preflight, dict) else None
+        engine_ms = (
+            round(max(0.0, decision_ms - float(preflight_ms)), 3)
+            if isinstance(preflight_ms, (int, float))
+            else decision_ms
+        )
         return {
             "decision": decision.value,
+            "engine_name": getattr(self.decision_engine, "name", None),
             "decision_score": score,
             "decision_features": meta,
             "decision_ms": decision_ms,
+            "decision_engine_ms": engine_ms,
+            "preflight_ms": preflight_ms,
+            "threshold": meta.get("threshold"),
+            "decision_rule": meta.get("decision_rule"),
+            "score_definition": meta.get("score_definition"),
+            "rationale": meta.get("rationale"),
+            "signals": meta.get("components") or {},
+            "preflight": preflight,
+            "inputs": (
+                "question text + optional model-memory signal + aggregate collection "
+                "relevance preflight; NEVER reference answers, gold chunk ids, "
+                "oracle labels or retrieved passages"
+            ),
         }
 
     # ------------------------------------------------------------ branches
@@ -147,6 +197,7 @@ class ServeFlow:
             answer=answer,
             generation_ms=_ms(now_ns() - t0),
             tokens=(answer.meta or {}).get("tokens"),
+            generation_cold=(answer.meta or {}).get("generation_cold"),
         )
         return info
 
@@ -177,7 +228,7 @@ class ServeFlow:
             return BranchResult(
                 label="B", ok=False, error=_err_str(exc),
                 retrieval_ms=retrieval_ms,
-                retrieval_hits=[_hit_entry(h, i) for i, h in enumerate(hits)],
+                retrieval_hits=[_hit_entry(h, i, retriever) for i, h in enumerate(hits)],
                 retrieval_method=method,
                 retrieval_diagnostics=diagnostics,
             )
@@ -187,10 +238,12 @@ class ServeFlow:
             answer=answer,
             generation_ms=_ms(now_ns() - t1),
             retrieval_ms=retrieval_ms,
-            retrieval_hits=[_hit_entry(h, i) for i, h in enumerate(hits)],
+            retrieval_hits=[_hit_entry(h, i, retriever) for i, h in enumerate(hits)],
             retrieval_method=method,
             retrieval_diagnostics=diagnostics,
             tokens=(answer.meta or {}).get("tokens"),
+            retrieved_context_chars=sum(len(h.text) for h in hits),
+            generation_cold=(answer.meta or {}).get("generation_cold"),
         )
 
     # --------------------------------------------------------------- flows
@@ -213,16 +266,54 @@ class ServeFlow:
         if b.ok or b.path_total_ms is None:
             b.path_total_ms = _ms(b_end - t_b0)
 
+        total_ms = _ms(b_end - t_a0)
+        selected = _decision_branch(d["decision"])
+        analysis = None
+        if a.ok and b.ok:
+            try:
+                analysis = compare_answers(
+                    a.answer.text if a.answer else "",
+                    b.answer.text if b.answer else "",
+                    b.retrieval_hits,
+                )
+            except Exception as exc:  # analysis must never break answering
+                analysis = {"error": _err_str(exc), "method": "lexical_overlap_only"}
+        selected_path_ms = round(
+            d["decision_ms"]
+            + ((a.path_total_ms or 0.0) if selected == "A" else (b.path_total_ms or 0.0)),
+            3,
+        )
         return {
             "mode": "compare",
             "question_id": question_id,
             "question": question,
             "decision": d,
-            "selected_branch": _decision_branch(d["decision"]),
+            "selected_branch": selected,
             "branch_a": a.to_dict(),
             "branch_b": b.to_dict(),
             "comparison": _compare_metrics(a, b),
-            "comparison_total_ms": _ms(b_end - t_a0),
+            "comparison_total_ms": total_ms,
+            "analysis": analysis,
+            "collection": self.collection_info,
+            "top_k": self.top_k,
+            "timings": {
+                "preflight_ms": d.get("preflight_ms"),
+                "decision_engine_ms": d.get("decision_engine_ms"),
+                "decision_ms": d["decision_ms"],
+                "retrieval_ms": b.retrieval_ms if b.ok else None,
+                "generation_a_ms": a.generation_ms if a.ok else None,
+                "generation_b_ms": b.generation_ms if b.ok else None,
+                "path_a_total_ms": a.path_total_ms if a.ok else None,
+                "path_b_total_ms": b.path_total_ms if b.ok else None,
+                "comparison_total_ms": total_ms,
+                "selected_path_projected_ms": selected_path_ms,
+                "units": "milliseconds",
+                "note": (
+                    "selected_path_projected_ms = measured decision + the measured "
+                    "selected branch of THIS run; it is an estimate of deployed "
+                    "latency, distinct from the measured adaptive-only mode."
+                ),
+            },
             "note": (
                 "Both branches executed for research comparison; the total is the "
                 "time of the full comparison request, NOT deployed adaptive latency."
@@ -231,14 +322,18 @@ class ServeFlow:
 
     def run_adaptive_only(self, question: str, question_id: str = "") -> Dict[str, Any]:
         """Deployed workflow: decision, then ONLY the selected path executes.
-        The wall-clock returned here (decision start -> branch end) is real
-        operational latency: decision + retrieval (B only) + generation."""
+
+        ``adaptive_total_ms`` is measured from BEFORE the decision to the end of
+        the selected branch, i.e. decision (incl. preflight) + retrieval (B
+        only) + generation. That is the real operational latency of a deployed
+        request; it is never merged with the comparison run's wall clock.
+        """
+        t_all = now_ns()
         d = self.decide_first(question)
-        t0 = now_ns()
 
         if d["decision"] == Decision.RETRIEVE.value:
             b = self._branch_b(question)
-            total_ms = _ms(now_ns() - t0)
+            total_ms = _ms(now_ns() - t_all)
             return {
                 "mode": "adaptive",
                 "question_id": question_id,
@@ -253,10 +348,21 @@ class ServeFlow:
                 },
                 "adaptive_total_ms": total_ms,
                 "token_usage": {"decision_tokens": None, "selected_branch": b.tokens},
+                "timings": {
+                    "preflight_ms": d.get("preflight_ms"),
+                    "decision_engine_ms": d.get("decision_engine_ms"),
+                    "decision_ms": d["decision_ms"],
+                    "retrieval_ms": b.retrieval_ms,
+                    "generation_ms": b.generation_ms,
+                    "adaptive_total_ms": total_ms,
+                    "units": "milliseconds",
+                },
+                "collection": self.collection_info,
+                "top_k": self.top_k,
                 "note": "Only the selected path executed — real deployed latency.",
             }
         a = self._branch_a(question)
-        total_ms = _ms(now_ns() - t0)
+        total_ms = _ms(now_ns() - t_all)
         return {
             "mode": "adaptive",
             "question_id": question_id,
@@ -271,6 +377,17 @@ class ServeFlow:
             },
             "adaptive_total_ms": total_ms,
             "token_usage": {"decision_tokens": None, "selected_branch": a.tokens},
+            "timings": {
+                "preflight_ms": d.get("preflight_ms"),
+                "decision_engine_ms": d.get("decision_engine_ms"),
+                "decision_ms": d["decision_ms"],
+                "retrieval_ms": None,
+                "generation_ms": a.generation_ms,
+                "adaptive_total_ms": total_ms,
+                "units": "milliseconds",
+            },
+            "collection": self.collection_info,
+            "top_k": self.top_k,
             "note": "Only the selected path executed — real deployed latency (no retrieval performed).",
         }
 
@@ -300,6 +417,8 @@ def _compare_metrics(a: BranchResult, b: BranchResult) -> Dict[str, Any]:
     b_t = b.path_total_ms if b.ok else None
     a_tok = (a.tokens or {}).get("total_tokens") if a.ok else None
     b_tok = (b.tokens or {}).get("total_tokens") if b.ok else None
+    cold_a = a.generation_cold if a.ok else None
+    cold_b = b.generation_cold if b.ok else None
 
     def pct(base: Optional[float], other: Optional[float]) -> Optional[float]:
         if not base:
@@ -318,5 +437,18 @@ def _compare_metrics(a: BranchResult, b: BranchResult) -> Dict[str, Any]:
         "tokens_b": b_tok,
         "token_saved_pct_when_B_used_more": pct(b_tok, a_tok) if b_tok else None,
         "retrieval_ms_brings_only_B": b.retrieval_ms if b.ok else None,
+        "generation_cold_a": cold_a,
+        "generation_cold_b": cold_b,
+        # Fairness: A always runs first in the comparison, so its generation
+        # may include the one-off model load/warm-up while B's already-warm
+        # call does not pay it. A single sequential run therefore cannot be
+        # read as "retrieval is faster/slower" — use the interleaved medians
+        # from scripts/bench_latency.py for that claim.
+        "fairness_note": (
+            "Single sequential comparison: Option A ran first and may carry "
+            "first-call model-load cost (marked below); differences from ONE "
+            "run are not evidence that either branch is faster. See "
+            "scripts/bench_latency.py for interleaved trials with medians."
+        ),
         "units": {"time": "milliseconds", "tokens": "tokens"},
     }

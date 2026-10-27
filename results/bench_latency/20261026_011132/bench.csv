@@ -1,0 +1,3 @@
+trial,order,a_ms,b_ms,a_cold,b_cold,a_tokens,b_tokens,retrieval_ms,decision_ms,error_a,error_b
+1,"A,B",14359.861,24299.825,True,True,171,1389,0.777,0.874,,
+2,"B,A",14299.791,21469.366,False,False,168,1386,0.177,2.224,,

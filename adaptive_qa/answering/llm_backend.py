@@ -114,6 +114,16 @@ class LLMBackend(AnsweringMethod):
         # provider error is surfaced verbatim so the user sees the cause.
         self.max_retries = max(0, int(self.cfg.get("max_retries", 3)))
         self.retry_backoff_s = float(self.cfg.get("retry_backoff_s", 2.0))
+        # Local-model model reuse (verified on Ollama 0.40.10, qwen3:4b-instruct):
+        # a chat-completion with ``keep_alive`` keeps the model resident after
+        # the call, so the NEXT call skips the one-off model load (measured:
+        # cold 23.8 s vs warm 7.2 s for the same request). ``None``/empty
+        # disables the field entirely (cloud providers reject unknown fields).
+        self.keep_alive = self.cfg.get("keep_alive", "30m")
+        # Per-instance cold/warm marker: the FIRST call an instance makes may
+        # pay provider-side model loading; later calls are warmed. Recorded in
+        # the answer meta so latency comparisons can label the bias.
+        self._warmed = False
         self.retry_statuses = {429, 500, 502, 503, 504}
         self.system_prompt = self.cfg.get(
             "grounded_system_prompt" if grounded else "closedbook_system_prompt", ""
@@ -285,6 +295,7 @@ class LLMBackend(AnsweringMethod):
                                 {"role": "system", "content": self._system()},
                                 {"role": "user", "content": user_msg},
                             ],
+                            **({"keep_alive": self.keep_alive} if self.keep_alive else {}),
                         }
                     ),
                 )
@@ -417,7 +428,13 @@ class LLMBackend(AnsweringMethod):
             "temperature": self.temperature,
             "tokens": self.usage_dict(user_msg, text, usage),
             "grounded": self.grounded,
+            # Cold/warm: the first call of this backend instance may include the
+            # local model's one-off load or a cloud route's warm-up. Latency
+            # reads must not treat that as typical generation time.
+            "generation_cold": not self._warmed,
+            "keep_alive": self.keep_alive or None,
         }
+        self._warmed = True
         if routed and routed != args["model"]:
             # Transparency: when the provider routes an alias (e.g.
             # openrouter/free) to a concrete model, record which one actually

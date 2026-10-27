@@ -277,6 +277,83 @@ Positive => the retrieval branch cost more (no-retrieval "saved" that
 amount); negative => increase. Percentages are only shown when the baseline
 is nonzero.
 
+### Latency fairness (cold start, warm-up, and how to compare honestly)
+
+The dashboard comparison always executes Option A first, so A's generation
+absorbs any one-off provider model-load cost while warm Option B does not.
+The UI therefore labels each branch's generation with a cold/warm badge
+(`execution first-call model load` vs warm) states that a single sequential
+run must not be used to say a branch is faster. Verified on the local stack
+(Ollama 0.40.10, `qwen3:4b-instruct`, one chat completion at max_tokens 64):
+
+| call | measured |
+|---|---|
+| first call after Ollama restart (model load) | 23.8 s |
+| same request, model already resident | 7.2 s |
+
+`answering.llm.keep_alive` (default `"30m"`) is sent with every chat request;
+Ollama honours it on its OpenAI-compatible endpoint and keeps the model
+resident between calls (`/api/ps` showed a live `expires_at`), which removes
+most dead-time reloads during a demo. Thinking/`<think>` behaviour is not an
+issue with this model: `qwen3:4b-instruct` answered without a reasoning block,
+and Ollama accepted `think: false` on both the OpenAI-compatible and native
+endpoints).
+
+For actual speed comparisons use the interleaved benchmark:
+
+```
+.\\.venv\\Scripts\\python.exe scripts\\bench_latency.py --trials 3
+```
+
+It alternates the branch order every trial (A,B then B,A …), reports each
+backend's cold first call separately from warmed-up medians, keeps retrieval
+(≤ ~1 ms) / decision (~1–5 ms incl. preflight) / generation separate, and
+writes `results/bench_latency/<timestamp>/bench.json` + `bench.csv`. A real
+2-trial measured run on this machine (short question, model kept warm):
+Option A warm median 14.3 s, Option B warm median 21.5 s (warm Δ B−A ≈ 7.2 s,
+driven by B's larger prompt: 1 388 vs 170 total tokens) — i.e. on this corpus
+the grounded path costs roughly 50% more warm generation time; the cold first
+call of the whole app (≈24 s) must never be charged to one of the branches
+alone.
+
+### Adaptive-policy decision metrics (confusion matrix, sample sizes)
+
+`scripts/eval_policy.py` reports the adaptive router's decision quality against
+the labelled answerability of each question, with
+*positive class = answerable (a labelled relevant passage exists)* and
+*predicted-positive action = RETRIEVE*:
+
+```
+TP = retrieval on an answerable question        FN = skip on an answerable question
+FP = retrieval on an unanswerable question      TN = skip on an unanswerable question
+precision   = TP / (TP + FP)
+recall      = TP / (TP + FN)                    (= sensitivity)
+specificity = TN / (TN + FP)
+F1          = 2·precision·recall / (precision + recall)
+balanced acc = (recall + specificity) / 2
+accuracy    = (TP + TN) / n
+```
+
+always-retrieve and never-retrieve grids are computed from the same rows at
+evaluation time, so raw accuracy is never read without the imbalance-aware
+baselines beside it. On the shipped 75-question set (67 answerable / 8
+unanswerable, fresh run 20261026_011553): adaptive TP=65 FN=2 (q52, q66) FP=1
+(q68) TN=7 → accuracy 96.0%, precision 98.5%, recall 97.0%, F1 97.7%,
+specificity 87.5%, balanced accuracy 92.25%; always-retrieve scores 89.3%
+accuracy (= 67/75, i.e. the class imbalance) with 0.5 balanced accuracy and
+specificity 0 — confirming that raw accuracy must be read next to these
+numbers, not instead of them.
+
+Routing metrics (evidence recall, probe rate, decision matrix) are measured
+over **all 75 questions**; answer-quality, latency and token means are
+measured separately over **the questions with a successful live LLM call**
+(n = `answers_run`, reported per policy as `n_latency_samples` /
+`n_token_samples` / `n_quality_samples`). With fewer than 10 LLM answers the
+dashboard flags those means PRELIMINARY; failed generations are listed
+separately and never counted as answers. The oracle policy exists only inside the
+evaluation scripts; the live decision path never receives labels, reference
+answers or oracle choices.
+
 ## Architecture
 
 ```
@@ -330,7 +407,7 @@ Key modules:
 | `adaptive_qa/experiment.py` | batch runner; per-question JSONL + summary.json + run artifacts |
 | `api/main.py` | FastAPI backend: `/ask` (compare/adaptive, `retrieval_method`), `/retrieval/config`, `/ask/benchmark` (legacy cross-verify), `/documents/*`, `/evaluate/*` |
 | `dashboard/index.html` | single-page research dashboard with a retrieval-method selector |
-| `tests/` | 167 pytest tests: leakage, timings, policy selection, BM25, dense, hybrid, metrics, documents |
+| `tests/` | 223 pytest tests: leakage, timings, policy selection, BM25, dense, hybrid, metrics, documents, decision trace, evidence-overlap map, policy confusion matrix, latency-benchmark math |
 
 ## Experimental design (what makes the comparison fair)
 
