@@ -72,6 +72,8 @@ def evaluate_policies(
     method_a=None,
     method_b=None,
     max_answers: Optional[int] = None,
+    answer_question_ids: Optional[Sequence[str]] = None,
+    cache=None,
     gap_threshold: float = 0.10,
 ) -> Dict[str, Any]:
     """Run the four-policy experiment over ``examples``.
@@ -84,10 +86,22 @@ def evaluate_policies(
 
     rows: List[Dict[str, Any]] = []
     answers_used = 0
+    wanted_qids = set(answer_question_ids) if answer_question_ids is not None else None
+
+    # Model name detection helper for caching
+    def _model_of(m):
+        if m is None:
+            return "model"
+        if hasattr(m, "model") and m.model:
+            return str(m.model)
+        from ..answering.llm_backend import resolve_chat_kwargs
+        return getattr(m, "cfg", {}).get("model") or resolve_chat_kwargs().get("model") or "qwen3:4b-instruct"
+
     for ex in examples:
         relevant = list(getattr(ex, "relevant_chunk_ids", ()) or ())
         answerable = bool(relevant)
         q = ex.question
+        qid = getattr(ex, "question_id", "")
 
         # ---- decision (question only; never sees labels) ------------------
         t0 = now_ns()
@@ -112,7 +126,7 @@ def evaluate_policies(
             retrieval_error = f"{type(exc).__name__}: {exc}"
 
         row: Dict[str, Any] = {
-            "question_id": getattr(ex, "question_id", ""),
+            "question_id": qid,
             "question": q,
             "category": getattr(ex, "category", ""),
             "answerable": answerable,
@@ -128,33 +142,59 @@ def evaluate_policies(
         }
 
         # ---- optional answering model (both branches, once) --------------
+        want_this = (qid in wanted_qids) if wanted_qids is not None else (max_answers is None or answers_used < max_answers)
         want_answers = (
             method_a is not None
             and method_b is not None
-            and (max_answers is None or answers_used < max_answers)
+            and want_this
         )
         if want_answers:
             answers_used += 1
-            t2 = now_ns()
-            try:
-                ans_a = method_a.answer(q)
-                row["gen_a_ms"] = round((now_ns() - t2) / 1_000_000.0, 3)
-                row["answer_a"] = ans_a.text
-                row["tokens_a"] = (ans_a.meta or {}).get("tokens")
-            except Exception as exc:
-                row["gen_a_ms"] = round((now_ns() - t2) / 1_000_000.0, 3)
-                row["answer_a"] = None
-                row["error_a"] = f"{type(exc).__name__}: {exc}"
-            t3 = now_ns()
-            try:
-                ans_b = method_b.answer(q, hits)
-                row["gen_b_ms"] = round((now_ns() - t3) / 1_000_000.0, 3)
-                row["answer_b"] = ans_b.text
-                row["tokens_b"] = (ans_b.meta or {}).get("tokens")
-            except Exception as exc:
-                row["gen_b_ms"] = round((now_ns() - t3) / 1_000_000.0, 3)
-                row["answer_b"] = None
-                row["error_b"] = f"{type(exc).__name__}: {exc}"
+
+            # Option A (closed-book)
+            cached_a = cache.get(q, False, _model_of(method_a), []) if cache is not None else None
+            if cached_a and cached_a.get("text"):
+                row["gen_a_ms"] = cached_a.get("gen_ms") or 0.0
+                row["answer_a"] = cached_a.get("text")
+                row["tokens_a"] = cached_a.get("tokens")
+                row["cached_a"] = True
+            else:
+                t2 = now_ns()
+                try:
+                    ans_a = method_a.answer(q)
+                    gen_a_ms = round((now_ns() - t2) / 1_000_000.0, 3)
+                    row["gen_a_ms"] = gen_a_ms
+                    row["answer_a"] = ans_a.text
+                    row["tokens_a"] = (ans_a.meta or {}).get("tokens")
+                    if cache is not None and ans_a.text:
+                        cache.put(q, False, _model_of(method_a), [], ans_a.text, row["tokens_a"], gen_a_ms, getattr(ans_a, "backend", "llm"))
+                except Exception as exc:
+                    row["gen_a_ms"] = round((now_ns() - t2) / 1_000_000.0, 3)
+                    row["answer_a"] = None
+                    row["error_a"] = f"{type(exc).__name__}: {exc}"
+
+            # Option B (retrieval-augmented)
+            cached_b = cache.get(q, True, _model_of(method_b), retrieved) if cache is not None else None
+            if cached_b and cached_b.get("text"):
+                row["gen_b_ms"] = cached_b.get("gen_ms") or 0.0
+                row["answer_b"] = cached_b.get("text")
+                row["tokens_b"] = cached_b.get("tokens")
+                row["cached_b"] = True
+            else:
+                t3 = now_ns()
+                try:
+                    ans_b = method_b.answer(q, hits)
+                    gen_b_ms = round((now_ns() - t3) / 1_000_000.0, 3)
+                    row["gen_b_ms"] = gen_b_ms
+                    row["answer_b"] = ans_b.text
+                    row["tokens_b"] = (ans_b.meta or {}).get("tokens")
+                    if cache is not None and ans_b.text:
+                        cache.put(q, True, _model_of(method_b), retrieved, ans_b.text, row["tokens_b"], gen_b_ms, getattr(ans_b, "backend", "llm"))
+                except Exception as exc:
+                    row["gen_b_ms"] = round((now_ns() - t3) / 1_000_000.0, 3)
+                    row["answer_b"] = None
+                    row["error_b"] = f"{type(exc).__name__}: {exc}"
+
             reference = getattr(ex, "reference_answer", "") or ""
             if reference:
                 for label in ("a", "b"):
@@ -341,7 +381,9 @@ def _per_class_metrics(cm: Dict[str, Any]) -> Dict[str, Any]:
             "balanced_accuracy": "(recall + specificity) / 2 — insensitive to class imbalance",
             "accuracy": "(TP + TN) / n — optimistic on this 67/8 imbalanced set",
         },
-        "positive_class": cm["positive_class"],
+        "positive_class": cm.get(
+            "positive_class", "answerable (the corpus contains a labelled relevant passage)"
+        ),
     }
 
 

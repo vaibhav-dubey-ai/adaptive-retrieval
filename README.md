@@ -57,45 +57,38 @@ Every step works from the CLI; the web UI is optional. The retrieval evaluation
 needs no API key and no paid service. (Bash users: identical commands with
 forward slashes and no backticks.)
 
-## Interactive comparison + uploaded documents (dashboard v2)
+## Interactive Research Dashboard (Three Primary Sections)
 
-The dashboard's primary flow is a **decide-first, side-by-side experiment**:
+The web dashboard is organized into three concise, uncluttered primary sections:
 
-1. The adaptive decision engine runs FIRST (recorded: action, features,
-   decision latency) — no retrieval happens before it.
-2. `POST /ask?mode=compare` then runs BOTH branches independently. Option A
-   (closed book) gets the question only — never the uploaded documents or
-   retrieved passages. Option B searches ONLY the active uploaded document
-   collection and grounds its answer in retrieved chunks (filenames, PDF page
-   numbers and retrieval scores are returned). Both branches use the same
-   configured LLM, so context/retrieval is the only experimental difference.
-3. `POST /ask?mode=adaptive` measures the deployed path: decision + only the
-   selected branch. Its wall-clock is real operational latency and is
-   structurally separate from the comparison request's total.
+1. **Ask a Question**:
+   - The adaptive decision engine runs **first** (action, features, decision latency) before any retrieval occurs.
+   - `POST /ask?mode=compare` executes both branches independently: Option A (closed-book parametric memory) vs. Option B (grounded with retrieved evidence chunks).
+   - Shows answers, citation chips, compact timing/token comparison, with technical passages and vocabulary overlap cleanly collapsed in expandable `<details>` sections.
+   - `POST /ask?mode=adaptive` executes only the selected path to measure real deployed operational latency.
 
-The model backing both branches is a general-purpose LLM behind the
-OpenAI-compatible chat API, configured ONLY via environment (never hardcoded):
+2. **Research Results**:
+   - Executive findings highlighting empirical answers to the research question.
+   - Retrieval quality benchmark table (Recall@5, MRR@10, nDCG@10, Hit@1) comparing BM25, Dense, and Hybrid RRF.
+   - Complete routing confusion matrix (TP, FN, FP, TN) and per-class metrics (Balanced Accuracy, Precision, Recall, F1, Specificity) comparing Adaptive against Always-Retrieve and Never-Retrieve baselines.
+   - Warmed-up latency and token usage benchmarks (interleaved trials).
+   - Collapsible per-question label inspector and interactive 3-method retrieval tester.
+
+3. **Documents**:
+   - Active document collection table, active/inactive toggles, chunk counts, and deletion.
+   - Upload form supporting PDF, TXT, Markdown, DOCX (with page tracking and deduplication).
+
+### Model Configuration & Resumable Answer Cache
+The model backing both branches is a general-purpose LLM (configured for local Ollama `qwen3:4b-instruct`):
 
 ```bash
-copy .env.example .env      # then fill in real values; .env is gitignored
-#   LLM_API_KEY / LLM_BASE_URL / LLM_MODEL   (OPENAI_* names also accepted)
+copy .env.example .env      # then verify local settings:
+#   LLM_API_KEY=ollama
+#   LLM_BASE_URL=http://localhost:11434/v1
+#   LLM_MODEL=qwen3:4b-instruct
 ```
 
-If the model is not configured, both branches return a clear
-`ModelNotConfiguredError` message in the UI — there is NO silent fallback to
-the deterministic extractors (those remain available as labeled baselines in
-the HotpotQA benchmark pipeline). Token usage is provider-reported when the
-API returns `usage`; otherwise estimated from text length and labeled
-`"source": "estimated"`. The decision engine does not call the model, so it
-has no LLM tokens.
-
-Document upload supports **PDF / TXT / Markdown / DOCX** (via the dashboard
-section 3 or `POST /documents/upload`): type/size validation, text extraction
-with PDF page numbers, overlapping chunking, persistent storage under
-`data/documents/` (survives restarts), content-hash deduplication, a clear
-warning for text-less scanned PDFs (OCR is future work), and a retrieval index
-scoped to the toggle-selected active collection. Uploaded documents never mix
-with the HotpotQA benchmark corpus.
+Evaluation runs (`scripts/eval_policy.py` and `scripts/eval_downstream.py`) are backed by `adaptive_qa/answering/cache.py` (`data/eval_answer_cache.jsonl`), saving successful model answers incrementally to prevent data loss and support resumable batch runs.
 
 ## Retrieval methods: BM25, dense and hybrid
 

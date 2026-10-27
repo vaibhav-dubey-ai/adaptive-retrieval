@@ -86,6 +86,7 @@ def main() -> int:
         default=0,
         help="number of questions to send to the LLM (0 = evidence layer only)",
     )
+    ap.add_argument("--no-cache", action="store_true", help="bypass cached LLM answers")
     ap.add_argument("--limit", type=int, default=0, help="cap total questions (0 = all)")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
@@ -123,8 +124,12 @@ def main() -> int:
     )
     engine = build_decision_engine(cfg, None, prober)
 
+    from adaptive_qa.answering.cache import AnswerCache
+    cache = None if args.no_cache else AnswerCache()
+
     method_a = method_b = None
     answer_examples = examples
+    wanted_qids = None
     if args.answers > 0:
         from adaptive_qa.answering.llm_backend import LLMBackend
 
@@ -132,7 +137,8 @@ def main() -> int:
         method_a = LLMBackend(llm_cfg, grounded=False, name="llm_closedbook")
         method_b = LLMBackend(llm_cfg, grounded=True, name="llm_grounded")
         answer_examples = _spread_by_category(examples, args.answers)
-        print(f"Running the answering model on {len(answer_examples)} questions …")
+        wanted_qids = [ex.question_id for ex in answer_examples]
+        print(f"Running the answering model on {len(answer_examples)} questions (cache size: {cache.size() if cache else 0}) …")
 
     payload = evaluate_policies(
         examples,
@@ -143,6 +149,8 @@ def main() -> int:
         method_a=method_a,
         method_b=method_b,
         max_answers=args.answers if args.answers > 0 else None,
+        answer_question_ids=wanted_qids,
+        cache=cache,
         gap_threshold=float(cfg["evaluation"].get("outcome_gap_threshold", 0.10)),
     )
     payload["generated_at_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())

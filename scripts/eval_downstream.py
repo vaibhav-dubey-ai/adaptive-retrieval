@@ -95,6 +95,7 @@ def main(argv=None) -> int:
     ap.add_argument("--top-k", type=int, default=5)
     ap.add_argument("--doc-id", default=None)
     ap.add_argument("--out", default="results/downstream_eval")
+    ap.add_argument("--no-cache", action="store_true", help="bypass cached LLM answers")
     args = ap.parse_args(argv)
 
     cfg = load_config(args.config)
@@ -152,6 +153,10 @@ def main(argv=None) -> int:
         retrievers[method].retrieve(warmup_question, 1)
         warmup_ms[method] = _ms(now_ns() - t0)
 
+    from adaptive_qa.answering.cache import AnswerCache
+    cache = None if getattr(args, "no_cache", False) else AnswerCache()
+    current_model = args_llm.get("model") or "qwen3:4b-instruct"
+
     rows: List[Dict[str, Any]] = []
     started = time.strftime("%Y%m%d_%H%M%S")
     out_dir = Path(args.out) / started
@@ -178,38 +183,66 @@ def main(argv=None) -> int:
                 row["retrieved_chunk_ids"] = [h.doc_id for h in hits]
                 row["retrieval_scores"] = [round(float(h.score), 4) for h in hits]
                 passages = [h.text for h in hits]
-            try:
-                t0 = now_ns()
-                answer = closed.answer(ex.question) if method == "closed_book" else grounded.answer(ex.question, hits)
-                gen_ms = _ms(now_ns() - t0)
+
+            is_grounded = (method != "closed_book")
+            cached_ans = cache.get(ex.question, is_grounded, current_model, row["retrieved_chunk_ids"]) if cache else None
+
+            if cached_ans and cached_ans.get("text"):
+                ans_text = cached_ans["text"]
+                gen_ms = cached_ans.get("gen_ms") or 0.0
                 row.update(
                     {
                         "ok": True,
-                        "answer": answer.text,
-                        "backend": answer.backend,
-                        "model": (answer.meta or {}).get("model"),
-                        "routed_model": (answer.meta or {}).get("routed_model"),
+                        "answer": ans_text,
+                        "backend": cached_ans.get("backend", "llm"),
+                        "model": cached_ans.get("model", current_model),
+                        "routed_model": cached_ans.get("model", current_model),
                         "generation_ms": gen_ms,
-                        "total_ms": _ms(now_ns() - t_all),
-                        "tokens": (answer.meta or {}).get("tokens"),
-                        "f1": round(f1_score(ex.reference_answer, answer.text), 4),
-                        "em": round(em_score(ex.reference_answer, answer.text), 4),
-                        "evidence_coverage": evidence_coverage(answer.text, passages),
+                        "total_ms": (row["retrieval_ms"] or 0.0) + gen_ms,
+                        "tokens": cached_ans.get("tokens"),
+                        "f1": round(f1_score(ex.reference_answer, ans_text), 4),
+                        "em": round(em_score(ex.reference_answer, ans_text), 4),
+                        "evidence_coverage": evidence_coverage(ans_text, passages),
+                        "cached": True,
                     }
                 )
-            except (AnswerBackendError, ModelNotConfiguredError, Exception) as exc:  # noqa: BLE001
-                row.update(
-                    {
-                        "ok": False,
-                        "error": f"{type(exc).__name__}: {exc}",
-                        "generation_ms": _ms(now_ns() - t_all),
-                        "total_ms": _ms(now_ns() - t_all),
-                    }
-                )
+            else:
+                try:
+                    t0 = now_ns()
+                    answer = closed.answer(ex.question) if method == "closed_book" else grounded.answer(ex.question, hits)
+                    gen_ms = _ms(now_ns() - t0)
+                    toks = (answer.meta or {}).get("tokens")
+                    row.update(
+                        {
+                            "ok": True,
+                            "answer": answer.text,
+                            "backend": answer.backend,
+                            "model": (answer.meta or {}).get("model"),
+                            "routed_model": (answer.meta or {}).get("routed_model"),
+                            "generation_ms": gen_ms,
+                            "total_ms": _ms(now_ns() - t_all),
+                            "tokens": toks,
+                            "f1": round(f1_score(ex.reference_answer, answer.text), 4),
+                            "em": round(em_score(ex.reference_answer, answer.text), 4),
+                            "evidence_coverage": evidence_coverage(answer.text, passages),
+                        }
+                    )
+                    if cache and answer.text:
+                        cache.put(ex.question, is_grounded, current_model, row["retrieved_chunk_ids"], answer.text, toks, gen_ms, answer.backend)
+                except (AnswerBackendError, ModelNotConfiguredError, Exception) as exc:  # noqa: BLE001
+                    row.update(
+                        {
+                            "ok": False,
+                            "error": f"{type(exc).__name__}: {exc}",
+                            "generation_ms": _ms(now_ns() - t_all),
+                            "total_ms": _ms(now_ns() - t_all),
+                        }
+                    )
             print(
                 f"    {method:<12} ok={row['ok']} "
                 f"f1={row.get('f1')} tokens={((row.get('tokens') or {}).get('total_tokens'))} "
                 f"latency={row.get('total_ms')}ms"
+                + (" (cached)" if row.get("cached") else "")
                 + ("" if row["ok"] else f" error={row['error'][:120]}")
             )
             rows.append(row)
