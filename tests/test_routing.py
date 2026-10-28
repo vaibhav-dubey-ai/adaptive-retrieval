@@ -95,3 +95,20 @@ def test_routing_endpoint_serves_saved_results(tmp_path, monkeypatch):
     assert body["view"]["run_id"] == "r1"
     assert body["view"]["questions"][0]["question_id"] == "q1"
     assert body["view"]["branch_costs"]["tokens_b"] == 800
+
+
+def test_outcome_counts_split_fallback_ties(tmp_path, monkeypatch):
+    from fastapi.testclient import TestClient
+
+    import api.main as api_main
+
+    run = tmp_path / "r1"
+    run.mkdir()
+    (run / "routing_results.json").write_text(json.dumps({"settings": {}, "policies": {}}))
+    base = {"quality_a": 0.2, "quality_b": 0.2, "retrieval_helps": False, "retrieval_hurts": False}
+    rows = [{**base, "question_id": "a", "b_fallback": True}, {**base, "question_id": "b", "b_fallback": False},
+            {**base, "question_id": "c", "retrieval_helps": True, "quality_b": 0.9}]
+    (run / "per_question.jsonl").write_text("\n".join(json.dumps(r) for r in rows))
+    monkeypatch.setattr(api_main, "RESULTS_ROUTING_DIR", tmp_path)
+    oc = TestClient(api_main.app).get("/experiments/routing").json()["view"]["outcome_counts"]
+    assert oc == {"helps": 1, "hurts": 0, "ties": 2, "ties_no_passage_fallback": 1}

@@ -211,6 +211,8 @@
   .rec.miss { background: var(--badbg); border-color: #f3c9c5; color: var(--bad); }
   .statusbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
   .highlight-card { background: #fdfefe; border: 1px solid #d0dbe9; border-radius: 9px; padding: 12px 14px; margin: 10px 0; }
+details[data-dev]{display:none}
+.dev details[data-dev]{display:block}
 </style>
 </head>
 <body>
@@ -284,13 +286,13 @@
       <div id="passagesContent" style="margin-top:8px"></div>
     </details>
 
-    <details style="margin-top:10px">
+    <details data-dev style="margin-top:10px">
       <summary>Word-overlap analysis (not a correctness check)</summary>
       <div id="supportPanel" style="margin-top:10px"></div>
       <div id="diffPanel" style="margin-top:10px"></div>
     </details>
 
-    <details style="margin-top:10px">
+    <details data-dev style="margin-top:10px">
       <summary>Raw JSON trace</summary>
       <pre id="rawJson">—</pre>
     </details>
@@ -328,7 +330,7 @@
       </div>
     </div>
     <p class="tiny" style="margin:6px 0 0"><b>Reload</b> only re-reads result files that already exist; it does not run any benchmark.</p>
-    <details>
+    <details data-dev>
       <summary>How to produce new results (rerun the experiments)</summary>
 <pre>python scripts/eval_routing.py            # main experiment (needs the LLM; resumes from cache; --no-llm re-analyses cached answers)
 python scripts/eval_retrieval.py --methods bm25,dense,hybrid --top-k 10 --repeat 3
@@ -351,11 +353,11 @@ python scripts/bench_latency.py           # repeated latency benchmark</pre>
     <h3 style="margin-top:24px">Retrieval ranking benchmark: BM25 vs Dense vs Hybrid</h3>
     <div id="retrievalMeta" class="tiny"></div>
     <div id="retrievalTableWrap">Loading retrieval benchmark…</div>
-    <details style="margin-top:6px">
+    <details data-dev style="margin-top:6px">
       <summary>What these retrieval metrics mean</summary>
       <div id="retrievalHelp"></div>
     </details>
-    <details style="margin-top:10px">
+    <details data-dev style="margin-top:10px">
       <summary>Inspect individual retrieval questions and labels</summary>
       <div class="row" style="margin:10px 0 6px">
         <select id="expCatFilter" onchange="renderQuestionList()"><option value="">All categories</option></select>
@@ -368,7 +370,7 @@ python scripts/bench_latency.py           # repeated latency benchmark</pre>
     </details>
 
     <!-- C. Historical -->
-    <details style="margin-top:24px">
+    <details data-dev style="margin-top:24px">
       <summary>Earlier corpus-coverage experiment (historical, preliminary)</summary>
       <div id="polMeta" class="tiny" style="margin-top:8px"></div>
       <p class="k" style="margin:6px 0">
@@ -632,7 +634,7 @@ function renderDecision(d, r) {
       </div>
       <p style="margin:8px 0 4px;font-size:0.92rem"><b>Why:</b> ${esc(d.rationale || "Evaluated collection relevance.")} <span class="tiny">(RETRIEVE when score ≥ threshold; the score is a weighted need estimate, not a probability.)</span></p>
 
-      <details style="margin-top:8px">
+      <details data-dev style="margin-top:8px">
         <summary>Technical Signal Weights & Preflight Details</summary>
         <table style="margin-top:6px">
           <thead><tr><th>Signal</th><th>Raw Value</th><th>Weight</th><th>Contribution</th></tr></thead>
@@ -917,7 +919,7 @@ function routingSummary(v) {
   const out = [];
 
   if (nev && alw) {
-    out.push(`<b>Does retrieval improve answer quality here?</b> On average, yes: ${nev.quality.mean.toFixed(3)} closed-book vs ${alw.quality.mean.toFixed(3)} always-retrieve. It is not uniform: retrieval helped on ${s.n_retrieval_helps} of ${s.n_scored} scored questions, hurt on ${s.n_retrieval_hurts}${hurtCats.length ? ` (mostly <i>${esc(hurtCats.join(", "))}</i>)` : ""}, and tied on the rest.`);
+    out.push(`<b>Does retrieval improve answer quality here?</b> On average, yes: ${nev.quality.mean.toFixed(3)} closed-book vs ${alw.quality.mean.toFixed(3)} always-retrieve. It is not uniform: retrieval helped on ${s.n_retrieval_helps} of ${s.n_scored} scored questions, hurt on ${s.n_retrieval_hurts}${hurtCats.length ? ` (mostly <i>${esc(hurtCats.join(", "))}</i>)` : ""}, and tied on ${v.outcome_counts ? v.outcome_counts.ties : "the rest"}${v.outcome_counts ? ` (${v.outcome_counts.ties_no_passage_fallback} of those because BM25 found no passage, so the retrieve path reused the closed-book answer; ${v.outcome_counts.ties - v.outcome_counts.ties_no_passage_fallback} are genuine ties with passages retrieved)` : ""}.`);
     out.push(`<b>What does it cost?</b> Always-retrieve uses about ${(alw.tokens.mean / nev.tokens.mean).toFixed(1)}× the tokens (${Math.round(alw.tokens.mean)} vs ${Math.round(nev.tokens.mean)} per question) and about ${(alw.latency_ms.mean / nev.latency_ms.mean).toFixed(1)}× the latency (${ms(alw.latency_ms.mean)} vs ${ms(nev.latency_ms.mean)}) on this machine.`);
   }
   if (heur && alw && nev) {
@@ -938,7 +940,9 @@ function renderRoutingExp(v) {
   const bullets = routingSummary(v);
 
   $("routingMeta").innerHTML = `Run <code>${esc(v.run_id)}</code> · generated ${esc(stamp(v.generated_at_utc))} · ${s.n_questions} questions (${s.n_scored} with a reference answer) · model <code>${esc(s.model)}</code> · retriever <code>${esc(s.retriever)}</code>, top-${s.top_k}<br>
-    Question sets: ${(s.datasets || []).map(p => `<code>${esc(p)}</code>`).join(", ")}`;
+    Question sets: ${(s.datasets || []).map(p => `<code>${esc(p)}</code>`).join(", ")}<br>
+    Corpus: DBMS chapters 6 + 7 (two documents, 173 chunks; this count comes from REPORT §9.0 because the results file does not store it). This is the 125-question answer-quality experiment; it is a different experiment from the 75-question Chapter 6 retrieval-ranking benchmark below (80 chunks).<br>
+    Model: the run recorded the Ollama model name <code>${esc(s.model)}</code>, a capped-resources setup of the same <code>qwen3:4b-instruct</code> weights the live app uses (3 threads, 2048-token window per REPORT §9.0); temperature 0 and the prompts are identical to the app's. The alias is not installed any more, so this equivalence is as reported, not re-checked.`;
 
   $("routingWrap").innerHTML = `
     <h4 style="margin:0 0 4px">Summary</h4>
@@ -956,11 +960,11 @@ function renderRoutingExp(v) {
     <p class="tiny" style="margin:6px 0 0"><b>Evaluation:</b> ${s.n_splits} repeated stratified ${trainPct}/${testPct} splits of the ${s.n_scored} scored questions (stratified on the retrieval-helps label, fixed seed; splits overlap, so the ± is split-to-split spread, not a confidence interval). The tuned threshold and the learned router are fitted on the ${trainPct}% training part only; every policy is scored on the ${testPct}% held-out part. Router inputs are the question text and the collection preflight; reference answers and helps/hurts labels are never router inputs.</p>
     <p class="tiny" style="margin:4px 0 0"><b>Answer quality</b> = mean of token-level F1 and token-level recall against a short reference answer (0–1). It measures word overlap with the reference, not factual correctness, entailment or hallucination rate. <b>Routing balanced accuracy</b> asks a different question: did the router choose retrieval exactly when retrieval helped (helps = grounded answer scored ≥ ${s.gap ?? 0.1} higher)? It is separate from answer quality and from retrieval ranking quality.</p>
     <p class="tiny" style="margin:4px 0 0"><span class="badge warn">Limits</span> A constructed workload (a mix of questions about the documents and general questions chosen by the author), one model, one corpus, one retriever, n = ${s.n_scored}. The reference answers were written for this evaluation. Results should not be generalised to other users, models or traffic.</p>
-    <details style="margin-top:8px"><summary>By question type</summary>
+    <details data-dev style="margin-top:8px"><summary>By question type</summary>
       <table><thead><tr><th>Category</th><th class="num">n</th><th class="num">Closed-book quality</th><th class="num">Grounded quality</th><th class="num">Retrieval helps</th><th class="num">Retrieval hurts</th></tr></thead>
       <tbody>${Object.entries(v.by_category || {}).map(([k, c]) => `<tr><td>${esc(CAT_LABEL[k] || k)}</td><td class="num">${c.n}</td><td class="num">${c.mean_quality_closed_book}</td><td class="num">${c.mean_quality_grounded}</td><td class="num">${c.helps}</td><td class="num">${c.hurts}</td></tr>`).join("")}</tbody></table>
     </details>
-    <details style="margin-top:8px"><summary>Inspect answers, both ways (${(v.questions || []).length} questions)</summary>
+    <details data-dev style="margin-top:8px"><summary>Inspect answers, both ways (${(v.questions || []).length} questions)</summary>
       <div class="row" style="margin:8px 0"><select id="rtFilter" onchange="renderRoutingQuestions()">
         <option value="">All</option><option value="helps">Retrieval helped</option><option value="hurts">Retrieval hurt</option><option value="tie">Tie</option><option value="miss">Heuristic routed wrongly</option></select></div>
       <div id="rtQuestions"></div></details>`;
@@ -1038,7 +1042,7 @@ function renderRetrievalExp(j, requested) {
           <th class="num">nDCG@10</th>
           <th class="num">Hit@1</th>
           <th class="num">Median query (warm)</th>
-          <th class="num">Cold first query</th>
+          <th class="num">First query after build</th>
           <th class="num">Index / build time</th>
         </tr>
       </thead>
@@ -1059,7 +1063,7 @@ function renderRetrievalExp(j, requested) {
         }).join("")}
       </tbody>
     </table>
-    <p class="tiny" style="margin:6px 0 0">Ranking quality only: whether labelled relevant passages are ranked highly. It does not say whether a generated answer is correct. Latency is retrieval only (no LLM), median over the repeated passes of this run; build time can be large for dense because it includes loading the embedding model and encoding the corpus.</p>`;
+    <p class="tiny" style="margin:6px 0 0">Ranking quality only: whether labelled relevant passages are ranked highly. It does not say whether a generated answer is correct. Latency is retrieval only (no LLM), median over the repeated passes of this run; build time can be large for dense because it includes loading the embedding model and encoding the corpus. "First query after build" is timed after the retriever is built: dense loads its model during the build, so its first query excludes the model load (full dense cold start = build + first query); hybrid loads its model lazily, so its first query includes it.</p>`;
 
   $("retrievalHelp").innerHTML = Object.entries(v.metric_help || {}).map(([k, t]) =>
     `<p class="tiny"><b>${esc(k)}</b>: ${esc(t)}</p>`
@@ -1244,5 +1248,6 @@ loadRetrievalConfig();
 loadDemoExamples();
 loadExperiments();
 </script>
+<script>if (/[?&]dev=1/.test(location.search)) document.documentElement.classList.add("dev");</script>
 </body>
 </html>

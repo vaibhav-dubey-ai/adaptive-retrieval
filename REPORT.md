@@ -140,6 +140,8 @@ The decision engine receives ONLY the question string and collection signals. It
 **Corpus:** Chapter 6 of *Database System Concepts* (7th ed.), 80 slides/chunks; doc_id=`udoc_151a82bc49d3`.
 
 > **Note on Active Corpus vs. Benchmark Corpus:**
+> **Corpus by experiment.** Main 125-question answer-quality experiment (9.0): chapters 6 + 7, 173 chunks (80 + 93), 2 documents. Retrieval-ranking benchmark (9.1) and the historical corpus-coverage experiment (9.2/9.3): chapter 6 only, 80 chunks. The section below describes the 75-question Chapter 6 set.
+>
 > The saved retrieval and policy evaluation runs (run IDs: `20261025_180311`, `20261026_011553`) were conducted exclusively over the Chapter 6 benchmark corpus (80 chunks, doc_id: `udoc_151a82bc49d3`). The active live collection in the system currently contains two uploaded chapters: Chapter 6 and Chapter 7 (total 173 chunks, doc_ids: `udoc_151a82bc49d3` and `udoc_8897c006f6f9`). The older benchmark results are reported faithfully as measurements over Chapter 6 and are not presented as measurements over the combined two-chapter corpus.
 
 **Question set:** `eval_data/retrieval_eval/ch6_er_model_questions.jsonl`
@@ -197,12 +199,22 @@ Cold-start (model load) reported separately from warm medians. Comparison-mode w
 
 **Design.** 133 questions: the 75 chapter-6 questions, 25 new chapter-7 questions, and 33 general questions with no labelled
 chunk (27 unrelated to the slides, 6 textbook definitions the slides also cover). Corpus: chapters 6 and 7 (173 chunks), BM25,
-top-5. Both branches answer every question (`qwen3:4b-instruct`, temperature 0, one-sentence prompts, run with Ollama capped at
-3 threads and a 2048-token window; same weights, no prompt exceeded the window). Answers are scored against short reference
+top-5. Both branches answer every question (temperature 0, one-sentence prompts, `max_tokens` 100). The run's result file records the model name
+`qwen3-4b-capped`: an Ollama model name set through `LLM_MODEL` at run time (the code takes it from the environment, not from any file in the repo),
+described by the author as `qwen3:4b-instruct` run with Ollama capped at 3 threads and a 2048-token window (same weights, no prompt exceeded the
+window). The live app uses `qwen3:4b-instruct` with the same temperature and prompts. The `qwen3-4b-capped` alias is no longer installed, so the
+same-weights claim and the cap values are as reported by the author and could not be re-checked; the name and the generation settings in the
+results file and `configs/default.json` were checked. Answers are scored against short reference
 answers with `quality = mean(token-F1, token-recall)`. A question is labelled *retrieval helps* when the grounded answer
 scores at least 0.10 higher. 125 of 133 questions are scorable (8 chapter-6 "unanswerable" questions have no reference):
-retrieval **helps on 86**, **hurts on 17**, ties on 22. On 11 questions BM25 found no passage at all; there the retrieve path
-falls back to the closed-book answer at closed-book cost.
+retrieval **helps on 86**, **hurts on 17**, ties on 22 (a tie means the quality difference is under 0.10). On 11 questions BM25 found no passage at all; there the retrieve path
+falls back to the closed-book answer at closed-book cost. **All 11 fallback questions are ties** (all `general_knowledge`, quality difference exactly 0 by construction),
+so **11 of the 22 ties come from the fallback** and 11 are genuine ties with passages retrieved (checked against `per_question.jsonl`: 0 fallbacks among the 86 helps and the 17 hurts).
+
+**Not the same experiment as 9.1.** This 125-question answer-quality experiment (133 questions, 125 scored) is separate from the 75-question Chapter 6
+retrieval-ranking benchmark in 9.1 (80 chunks, ranking metrics only, no LLM answers). Corpus size: the 80 + 93 = 173 chunks are reported here from the
+run's setup; the results file does not store the chunk count, Chapter 7's source is not in the repo, and the retrieved chunk ids in `per_question.jsonl` are
+consistent with it (Chapter 6 ids up to 79, Chapter 7 ids up to 92). Question counts were re-verified with the project loader: 75 + 25 + 33 = 133.
 
 Routers are compared on 30 repeated stratified 70/30 splits (`adaptive_qa/eval/routing.py:repeated_splits`: the scored questions are divided into retrieval-helps and not-helps groups, each group is shuffled with a fixed seed and 30% goes to the held-out part; the 30 draws overlap). The tuned threshold and the learned logistic regression are fitted on the 70% training part only, and every policy is scored on the 30% held-out part. Router inputs are the question text and the collection-preflight signals (`feature_vector`); reference answers, answer scores and the helps/hurts labels are used only to fit and score, never as router inputs. The oracle uses the labels by construction and is an evaluation-only upper bound. Answer quality is `mean(token-F1, token-recall)` against a short reference: a lexical-overlap score, not a measure of factual correctness, entailment or hallucination rate. Routing balanced accuracy is a separate measure of whether retrieval was chosen exactly when it helped.
 Mean ± sd over splits:
@@ -251,13 +263,15 @@ Source: `results/retrieval_eval/20261025_180311/retrieval_metrics.json`. **Scope
 Dataset: eval_data/retrieval_eval/ch6_er_model_questions.jsonl (sha256: 734a82f4...)
 Settings: Recall@k=5, Rank@k=10; n_questions=75, n_scored=67 (answerable only)
 
-| Method | Recall@5 | MRR@10 | nDCG@10 | Hit@1 | No-evidence | Median ms | p95 ms | Cold 1st ms | Build ms |
+| Method | Recall@5 | MRR@10 | nDCG@10 | Hit@1 | No-evidence | Median ms | p95 ms | 1st query after build ms | Build ms |
 |--------|----------|--------|---------|-------|-------------|-----------|--------|-------------|----------|
 | BM25 | 0.9179 | 0.7326 | 0.7871 | 0.5821 | 0.125 | 0.117 | 0.235 | 0.143 | 49.3 |
 | Dense | 0.9254 | 0.7184 | 0.7704 | 0.5970 | 0.000 | 28.293 | 81.461 | 57.2 | 22,999 |
 | **Hybrid** | **0.9478** | **0.8112** | **0.8461** | **0.7313** | 0.000 | **18.787** | 25.028 | 1,593 | 118 |
 
-Bold = best per metric. Hybrid is best on all four ranking metrics and also outperforms dense on query latency (19 ms vs 28 ms warm median). Dense build time (23.0 s) includes loading the embedding model (16.5 s); hybrid's first query (1,593 ms) is dominated by its own model load (1,461 ms). The cold-first-query and build columns are one-off costs, not per-query latency.
+Bold = best per metric. Hybrid is best on all four ranking metrics and also outperforms dense on query latency (19 ms vs 28 ms warm median). Dense build time (23.0 s) includes loading the embedding model (16.5 s); hybrid's first query (1,593 ms) is dominated by its own model load (1,461 ms). The first-query and build columns are one-off costs, not per-query latency.
+
+**Cold-start timing, checked against the code and `retrieval_metrics.json`.** The 57.2 ms dense figure is correct (57.239 ms, in milliseconds, identical in `summary.csv`, `retrieval_metrics.json` and `per_question.csv` q01) but it is *not* the full cold start: `DenseRetriever` loads the embedding model inside its constructor (`dense.py:_build`, 16,548 ms, part of the 22,999 ms build), and the first query is timed only afterwards. It was previously labelled "Cold 1st", which read as if it included the load. Full cold start = build + first query: BM25 49.4 ms, **dense 23,055.9 ms (23.06 s)**, hybrid 1,711.0 ms (hybrid loads lazily, so its model load falls inside the timed first query; its 118 ms build excludes it). The column is renamed "1st query after build" here and in the dashboard.
 
 A newer run, `20261028_021811`, exists but is **partial and not cited**: it contains BM25 only, and 178 of its retrieved chunk ids belong to a second document although it records a single-document, 80-chunk corpus, so its recorded scope is unreliable. It is kept as a historical result file; the dashboard flags it and defaults to the newest complete run.
 

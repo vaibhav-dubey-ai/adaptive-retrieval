@@ -809,5 +809,14 @@ def experiments_routing(run: Optional[str] = None) -> JSONResponse:
     payload["run_id"] = chosen.name
     payload["branch_costs"] = {k: mean(k) for k in ("quality_a", "quality_b", "tokens_a", "tokens_b",
                                                      "gen_a_ms", "gen_b_ms", "retrieval_ms")}
+    # Ties = neither helps nor hurts (|quality delta| < gap); fallback ties had no BM25 passage, so B == A by construction.
+    scored = [r for r in rows if r.get("quality_a") is not None and r.get("quality_b") is not None]
+    ties = [r for r in scored if not r.get("retrieval_helps") and not r.get("retrieval_hurts")]
+    payload["outcome_counts"] = {
+        "helps": sum(bool(r.get("retrieval_helps")) for r in scored),
+        "hurts": sum(bool(r.get("retrieval_hurts")) for r in scored),
+        "ties": len(ties),
+        "ties_no_passage_fallback": sum(bool(r.get("b_fallback")) for r in ties),
+    }
     payload["questions"] = rows
     return JSONResponse({"available": True, "view": payload})

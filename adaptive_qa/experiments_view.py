@@ -49,9 +49,12 @@ METRIC_HELP: Dict[str, str] = {
         "— see build_ms / model_load_ms / cold_first_query_ms."
     ),
     "cold_first_query_ms": (
-        "The very first query of the run, including lazy model/thread-pool "
-        "initialisation. Reported separately so a one-off cold start is never "
-        "mistaken for steady-state query latency."
+        "The first query after the retriever was built, including any lazy "
+        "initialisation still pending. Dense loads its model inside the build "
+        "(see build_ms / model_load_ms), so its first query excludes the load; "
+        "hybrid loads lazily, so its first query includes it. Full cold start = "
+        "build_ms + cold_first_query_ms. Reported separately so a one-off cost is "
+        "never mistaken for steady-state query latency."
     ),
     "build_ms": (
         "Time to construct the retriever over the corpus (index build; for "
