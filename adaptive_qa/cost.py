@@ -42,24 +42,18 @@ def cost_summary(
     cost_per_llm_call_usd: Optional[float] = None,
 ) -> Dict[str, Any]:
     n = max(1, len(records))
+    # every question costs exactly one model call (closed-book generation still calls the model)
+    llm_rate = 1.0 if records else 0.0
 
     def for_policy(policy: str) -> Dict[str, Any]:
-        retrievals = 0
-        llm_calls = 0
-        for rec in records:
-            is_b = _policy_uses_retrieval(policy, rec)
-            if is_b:
-                retrievals += 1
-                llm_calls += 1
-            else:
-                llm_calls += 1  # closed-book generation is still a model call
+        rate = sum(_policy_uses_retrieval(policy, rec) for rec in records) / n
         return {
             "policy": policy,
-            "retrieval_frequency_per_question": round(retrievals / n, 4),
-            "llm_calls_per_question": round(llm_calls / n, 4),
+            "retrieval_frequency_per_question": round(rate, 4),
+            "llm_calls_per_question": llm_rate,
             "estimated_cost_per_question_usd": round(
-                (retrievals * (cost_per_retrieval_usd or 0.0))
-                + (llm_calls * (cost_per_llm_call_usd or 0.0)) / n,
+                rate * (cost_per_retrieval_usd or 0.0)
+                + llm_rate * (cost_per_llm_call_usd or 0.0),
                 8,
             ),
             "note": (
@@ -68,7 +62,4 @@ def cost_summary(
             ),
         }
 
-    out = {}
-    for policy in ("never_retrieve", "always_retrieve", "adaptive", "oracle"):
-        out[policy] = for_policy(policy)
-    return out
+    return {p: for_policy(p) for p in ("never_retrieve", "always_retrieve", "adaptive", "oracle")}

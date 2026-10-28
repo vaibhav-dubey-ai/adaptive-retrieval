@@ -1,0 +1,255 @@
+{
+  "generated_at_utc": "2026-10-27T22:57:50Z",
+  "settings": {
+    "retriever": "bm25",
+    "top_k": 5,
+    "gap": 0.1,
+    "model": "qwen3-4b-capped",
+    "n_splits": 30,
+    "test_frac": 0.3,
+    "cache_tag": "qwen3-4b-capped|3114c38e",
+    "n_questions": 133,
+    "n_scored": 125,
+    "n_retrieval_helps": 86,
+    "n_retrieval_hurts": 17,
+    "n_empty_retrieval_fallback": 11,
+    "datasets": [
+      "eval_data/retrieval_eval/ch6_er_model_questions.jsonl",
+      "eval_data/routing_eval/ch7_normalization_questions.jsonl",
+      "eval_data/routing_eval/general_questions.jsonl"
+    ]
+  },
+  "policies": {
+    "never": {
+      "quality": {
+        "mean": 0.3335,
+        "sd": 0.0217
+      },
+      "retrieval_rate": {
+        "mean": 0.0,
+        "sd": 0.0
+      },
+      "tokens": {
+        "mean": 95.5605,
+        "sd": 1.2899
+      },
+      "latency_ms": {
+        "mean": 3145.9123,
+        "sd": 160.8562
+      },
+      "accuracy": {
+        "mean": 0.3158,
+        "sd": 0.0
+      },
+      "balanced_accuracy": {
+        "mean": 0.5,
+        "sd": 0.0
+      },
+      "recall_of_helpful": {
+        "mean": 0.0,
+        "sd": 0.0
+      }
+    },
+    "always": {
+      "quality": {
+        "mean": 0.5159,
+        "sd": 0.0233
+      },
+      "retrieval_rate": {
+        "mean": 1.0,
+        "sd": 0.0
+      },
+      "tokens": {
+        "mean": 818.4018,
+        "sd": 32.6987
+      },
+      "latency_ms": {
+        "mean": 31462.458,
+        "sd": 1542.0599
+      },
+      "accuracy": {
+        "mean": 0.6842,
+        "sd": 0.0
+      },
+      "balanced_accuracy": {
+        "mean": 0.5,
+        "sd": 0.0
+      },
+      "recall_of_helpful": {
+        "mean": 1.0,
+        "sd": 0.0
+      }
+    },
+    "heuristic@0.5": {
+      "quality": {
+        "mean": 0.5698,
+        "sd": 0.0234
+      },
+      "retrieval_rate": {
+        "mean": 0.7772,
+        "sd": 0.0383
+      },
+      "tokens": {
+        "mean": 732.2053,
+        "sd": 35.5587
+      },
+      "latency_ms": {
+        "mean": 28626.1404,
+        "sd": 1622.4699
+      },
+      "accuracy": {
+        "mean": 0.8895,
+        "sd": 0.0375
+      },
+      "balanced_accuracy": {
+        "mean": 0.8325,
+        "sd": 0.0571
+      },
+      "recall_of_helpful": {
+        "mean": 0.9872,
+        "sd": 0.0181
+      }
+    },
+    "heuristic-tuned": {
+      "quality": {
+        "mean": 0.5602,
+        "sd": 0.0234
+      },
+      "retrieval_rate": {
+        "mean": 0.7272,
+        "sd": 0.0533
+      },
+      "tokens": {
+        "mean": 693.2368,
+        "sd": 48.1217
+      },
+      "latency_ms": {
+        "mean": 27061.2645,
+        "sd": 2175.5088
+      },
+      "accuracy": {
+        "mean": 0.8623,
+        "sd": 0.0433
+      },
+      "balanced_accuracy": {
+        "mean": 0.8223,
+        "sd": 0.056
+      },
+      "recall_of_helpful": {
+        "mean": 0.9308,
+        "sd": 0.0491
+      }
+    },
+    "learned": {
+      "quality": {
+        "mean": 0.5591,
+        "sd": 0.0303
+      },
+      "retrieval_rate": {
+        "mean": 0.6904,
+        "sd": 0.0668
+      },
+      "tokens": {
+        "mean": 661.3658,
+        "sd": 59.82
+      },
+      "latency_ms": {
+        "mean": 26106.5308,
+        "sd": 2471.2371
+      },
+      "accuracy": {
+        "mean": 0.8605,
+        "sd": 0.0536
+      },
+      "balanced_accuracy": {
+        "mean": 0.836,
+        "sd": 0.0604
+      },
+      "recall_of_helpful": {
+        "mean": 0.9026,
+        "sd": 0.0707
+      }
+    },
+    "oracle": {
+      "quality": {
+        "mean": 0.5894,
+        "sd": 0.0222
+      },
+      "retrieval_rate": {
+        "mean": 0.707,
+        "sd": 0.0163
+      },
+      "tokens": {
+        "mean": 671.7667,
+        "sd": 21.7029
+      },
+      "latency_ms": {
+        "mean": 26185.3883,
+        "sd": 1126.0535
+      },
+      "accuracy": {
+        "mean": 0.9772,
+        "sd": 0.0163
+      },
+      "balanced_accuracy": {
+        "mean": 0.9639,
+        "sd": 0.0258
+      },
+      "recall_of_helpful": {
+        "mean": 1.0,
+        "sd": 0.0
+      }
+    }
+  },
+  "by_category": {
+    "exact_terminology": {
+      "n": 26,
+      "helps": 23,
+      "hurts": 1,
+      "mean_quality_closed_book": 0.193,
+      "mean_quality_grounded": 0.607
+    },
+    "definition": {
+      "n": 32,
+      "helps": 28,
+      "hurts": 0,
+      "mean_quality_closed_book": 0.262,
+      "mean_quality_grounded": 0.574
+    },
+    "paraphrase": {
+      "n": 24,
+      "helps": 22,
+      "hurts": 1,
+      "mean_quality_closed_book": 0.183,
+      "mean_quality_grounded": 0.467
+    },
+    "multi_passage": {
+      "n": 10,
+      "helps": 10,
+      "hurts": 0,
+      "mean_quality_closed_book": 0.228,
+      "mean_quality_grounded": 0.535
+    },
+    "general_knowledge": {
+      "n": 27,
+      "helps": 0,
+      "hurts": 14,
+      "mean_quality_closed_book": 0.675,
+      "mean_quality_grounded": 0.378
+    },
+    "general_in_domain": {
+      "n": 6,
+      "helps": 3,
+      "hurts": 1,
+      "mean_quality_closed_book": 0.458,
+      "mean_quality_grounded": 0.497
+    }
+  },
+  "errors": [],
+  "notes": [
+    "Policies are scored on held-out random splits (30% test); mean and sd over splits.",
+    "oracle is an evaluation upper bound. Quality = mean(token-F1, token-recall) vs the reference.",
+    "The question mix (corpus vs general) is a constructed workload, not natural traffic.",
+    "When retrieval returns no passage the retrieve path falls back to the closed-book answer (same cost as closed-book)."
+  ]
+}

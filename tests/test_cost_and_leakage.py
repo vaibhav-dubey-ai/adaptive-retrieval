@@ -45,8 +45,10 @@ def test_llm_calls_counted_per_policy():
     # every policy still generates once per question
     for policy, m in out.items():
         assert m["llm_calls_per_question"] == 1.0
-    assert out["always_retrieve"]["estimated_cost_per_question_usd"] > \
-        out["never_retrieve"]["estimated_cost_per_question_usd"]
+    # per-question: 1 llm call + retrieval rate, both priced at 1.0
+    assert out["never_retrieve"]["estimated_cost_per_question_usd"] == 1.0
+    assert out["always_retrieve"]["estimated_cost_per_question_usd"] == 2.0
+    assert out["adaptive"]["estimated_cost_per_question_usd"] == 1.5
 
 
 # ---------------------------------------------------------------- leakage
@@ -222,3 +224,12 @@ def test_api_benchmark_endpoint_preserved(monkeypatch):
     client = TestClient(api_main.app)
     j = client.post("/ask/benchmark?mode=cross", json={"question": "benchmark q?"}).json()
     assert j["mode"] == "cross" and j["record"]["answer_a"]["text"] == "a"
+
+
+def test_llm_backends_reused_so_cold_flag_is_not_always_true(monkeypatch):
+    """A fresh backend per request made generation_cold True for every live answer."""
+    import api.main as api_main
+
+    monkeypatch.setitem(api_main._STATE, "llm", None)
+    bundle = api_main._LLMBundle({"answering": {"llm": {}}})
+    assert bundle.backends() is bundle.backends()

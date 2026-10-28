@@ -1,0 +1,2 @@
+method,n_questions,n_scored_questions,recall_at_5,mrr_at_10,ndcg_at_10,hit_rate_at_1,no_evidence_rate,build_ms,model_load_ms,cold_first_query_ms,median_query_ms,mean_query_ms,p95_query_ms
+bm25,75,67,0.9328,0.735,0.7896,0.597,0.125,15.141,,0.064,0.078,0.083,0.16

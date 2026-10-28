@@ -15,3 +15,9 @@ runs/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Local logs and leftovers
+*.log
+*_log.txt
+server_pid.txt
+ret_or_not.zip

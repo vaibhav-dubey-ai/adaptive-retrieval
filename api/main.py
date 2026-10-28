@@ -66,6 +66,7 @@ _STATE: Dict[str, Any] = {
 EVAL_SET_DIR = resolve_path("eval_data/retrieval_eval")
 RESULTS_RETRIEVAL_DIR = resolve_path("results/retrieval_eval")
 RESULTS_POLICY_DIR = resolve_path("results/policy_eval")
+RESULTS_ROUTING_DIR = resolve_path("results/routing_eval")
 
 
 def _runner() -> ExperimentRunner:
@@ -93,10 +94,15 @@ class _LLMBundle:
     cfg: Dict[str, Any]
 
     def backends(self) -> tuple:
-        cfg = self.cfg["answering"]["llm"] if "llm" in self.cfg["answering"] else {}
-        closed = LLMBackend(cfg, grounded=False, name="llm_closedbook")
-        grounded = LLMBackend(cfg, grounded=True, name="llm_grounded")
-        return closed, grounded
+        # Reused across requests: a backend's generation_cold flag marks ITS first call, so
+        # fresh instances per request would label every live answer "cold".
+        if _STATE.get("llm") is None:
+            cfg = self.cfg["answering"]["llm"] if "llm" in self.cfg["answering"] else {}
+            _STATE["llm"] = (
+                LLMBackend(cfg, grounded=False, name="llm_closedbook"),
+                LLMBackend(cfg, grounded=True, name="llm_grounded"),
+            )
+        return _STATE["llm"]
 
 
 def _active_signature() -> tuple:
@@ -475,18 +481,15 @@ def retrieval_config() -> JSONResponse:
     from adaptive_qa.retrieval import RETRIEVAL_METHODS
 
     cfg = _runner().cfg.get("retrieval", {})
-    try:
-        import sentence_transformers  # noqa: F401
+    # find_spec checks the package is installed without importing PyTorch (many seconds
+    # on first call), which left the dashboard's retriever list empty while it loaded.
+    from importlib.util import find_spec
 
-        dense_available = True
-        dense_reason = ""
-    except Exception as exc:  # pragma: no cover - environment dependent
-        dense_available = False
-        dense_reason = (
-            "sentence-transformers is not installed; run "
-            "pip install sentence-transformers to enable dense/hybrid retrieval. "
-            f"({type(exc).__name__})"
-        )
+    dense_available = find_spec("sentence_transformers") is not None
+    dense_reason = "" if dense_available else (
+        "sentence-transformers is not installed; run "
+        "pip install sentence-transformers to enable dense/hybrid retrieval."
+    )
     return JSONResponse(
         {
             "methods": list(RETRIEVAL_METHODS),
@@ -775,3 +778,36 @@ def experiments_policy(run: Optional[str] = None) -> JSONResponse:
     if view is None:
         raise HTTPException(status_code=404, detail=f"unknown run {run!r}")
     return JSONResponse({"available": True, "runs": runs, "view": view})
+
+
+@app.get("/experiments/routing")
+def experiments_routing(run: Optional[str] = None) -> JSONResponse:
+    """Saved routing evaluation: does the router retrieve when retrieval helps? (read-only)."""
+    import json as _json
+
+    runs = sorted((d for d in RESULTS_ROUTING_DIR.glob("*") if (d / "routing_results.json").exists()),
+                  key=lambda d: d.stat().st_mtime, reverse=True) if RESULTS_ROUTING_DIR.exists() else []
+    if not runs:
+        raise HTTPException(status_code=404,
+                            detail="no routing results found; run scripts/eval_routing.py first")
+    chosen = next((d for d in runs if d.name == run), runs[0]) if run else runs[0]
+    payload = _json.loads((chosen / "routing_results.json").read_text(encoding="utf-8"))
+    rows = []
+    qfile = chosen / "per_question.jsonl"
+    if qfile.exists():
+        for line in qfile.read_text(encoding="utf-8").splitlines():
+            r = _json.loads(line)
+            rows.append({k: r.get(k) for k in (
+                "question_id", "category", "question", "reference_answer", "answer_a", "answer_b",
+                "quality_a", "quality_b", "retrieval_helps", "retrieval_hurts", "heuristic_score",
+                "decision", "b_fallback", "tokens_a", "tokens_b", "gen_a_ms", "gen_b_ms", "retrieval_ms")})
+
+    def mean(key):
+        vals = [r[key] for r in rows if r.get(key) is not None]
+        return round(sum(vals) / len(vals), 3) if vals else None
+
+    payload["run_id"] = chosen.name
+    payload["branch_costs"] = {k: mean(k) for k in ("quality_a", "quality_b", "tokens_a", "tokens_b",
+                                                     "gen_a_ms", "gen_b_ms", "retrieval_ms")}
+    payload["questions"] = rows
+    return JSONResponse({"available": True, "view": payload})

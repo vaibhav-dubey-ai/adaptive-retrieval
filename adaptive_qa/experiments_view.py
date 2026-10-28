@@ -68,6 +68,37 @@ def _read_json(path: Path) -> Optional[Dict[str, Any]]:
         return None
 
 
+REQUIRED_METHODS = ("bm25", "dense", "hybrid")
+
+
+def _run_scope(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Which corpus a saved run covers, and whether its own results agree with that.
+
+    ``scope_warning`` is set when retrieved chunk ids belong to documents the
+    run's recorded corpus does not contain (the recorded scope is then wrong).
+    """
+    corpus = payload.get("corpus") or {}
+    doc_ids = list(corpus.get("document_ids") or [])
+    seen = {
+        cid.split(":")[0]
+        for res in (payload.get("methods") or {}).values()
+        for row in res.get("per_question") or []
+        for cid in row.get("retrieved") or []
+    }
+    extra = sorted(seen - set(doc_ids)) if doc_ids else []
+    return {
+        "n_chunks": corpus.get("n_chunks"),
+        "document_ids": doc_ids,
+        "scope_warning": (
+            f"Retrieved chunks come from {len(extra)} document(s) not in the recorded corpus "
+            f"({', '.join(extra)}); the recorded corpus size is unreliable and the labels only cover "
+            "the recorded document."
+            if extra
+            else None
+        ),
+    }
+
+
 def list_retrieval_runs(root: Path) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
     if not root.exists():
@@ -78,11 +109,18 @@ def list_retrieval_runs(root: Path) -> List[Dict[str, Any]]:
             continue
         payload = _read_json(f) or {}
         table = payload.get("comparison_table") or []
+        methods = [row.get("method") for row in table]
+        scope = _run_scope(payload)
+        missing = [m for m in REQUIRED_METHODS if m not in methods]
         out.append(
             {
                 "run_id": d.name,
                 "generated_at": payload.get("generated_at_utc"),
-                "methods": [row.get("method") for row in table],
+                "methods": methods,
+                "missing_methods": missing,
+                "complete": not missing and scope["scope_warning"] is None,
+                "n_chunks": scope["n_chunks"],
+                "scope_warning": scope["scope_warning"],
                 "n_questions": (table[0] or {}).get("n_questions") if table else None,
                 "path": str(d),
             }
@@ -91,8 +129,14 @@ def list_retrieval_runs(root: Path) -> List[Dict[str, Any]]:
 
 
 def latest_run(root: Path) -> Optional[Path]:
+    """Newest run that has BM25, dense and hybrid over a consistent corpus.
+
+    Falls back to the newest run of any kind (the view then flags what is missing),
+    so a newer partial run never silently hides the full three-method benchmark.
+    """
     runs = list_retrieval_runs(root)
-    return Path(runs[0]["path"]) if runs else None
+    pick = next((r for r in runs if r["complete"]), runs[0] if runs else None)
+    return Path(pick["path"]) if pick else None
 
 
 def _per_method_questions(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -150,11 +194,14 @@ def build_retrieval_view(run_dir: Path) -> Dict[str, Any]:
             continue
         top = max(v for v, _ in vals)
         best[k] = [m for v, m in vals if v == top]
+    scope = _run_scope(payload)
     return {
         "run_id": Path(run_dir).name,
         "run_dir": str(run_dir),
         "generated_at_utc": payload.get("generated_at_utc"),
         "dataset": payload.get("dataset") or {},
+        "corpus": scope,
+        "methods_missing": [m for m in REQUIRED_METHODS if m not in methods],
         "settings": payload.get("metrics") or {},
         "comparison_table": table,
         "best": best,

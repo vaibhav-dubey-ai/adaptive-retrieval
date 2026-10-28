@@ -77,14 +77,14 @@
       "method_b_system_prompt": "Answer the question using ONLY the provided passages. Quote the shortest exact span from a passage that answers the question. If the passages do not contain the answer, respond exactly: ABSTAIN."
     },
     "llm": {
-      "temperature": 0.2,
-      "max_tokens": 2048,
-      "timeout_s": 90,
-      "max_retries": 3,
+      "temperature": 0.0,
+      "max_tokens": 100,
+      "timeout_s": 240,
+      "max_retries": 1,
       "retry_backoff_s": 2.0,
       "keep_alive": "30m",
-      "closedbook_system_prompt": "",
-      "grounded_system_prompt": ""
+      "closedbook_system_prompt": "Answer the question in ONE short sentence (at most 25 words) using only your own knowledge. No documents are provided. If you do not know, say \"I don't know.\" Output only the answer, with no preamble or reasoning.",
+      "grounded_system_prompt": "Answer the question in ONE short sentence (at most 25 words). Prefer the numbered passages and cite them like [1]. If they do not contain the answer, answer from your own knowledge and start with \"(general knowledge)\". Output only the answer, with no preamble or reasoning."
     }
   },
   "decision": {

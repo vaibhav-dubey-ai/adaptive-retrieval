@@ -57,22 +57,76 @@ Every step works from the CLI; the web UI is optional. The retrieval evaluation
 needs no API key and no paid service. (Bash users: identical commands with
 forward slashes and no backticks.)
 
+## Linux / macOS setup
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate     # Ubuntu: sudo apt install python3-venv first
+pip install requests scikit-learn fastapi uvicorn matplotlib pytest httpx pypdf python-docx python-multipart numpy pandas
+# optional, ~2.5 GB, only for dense/hybrid retrieval:  pip install sentence-transformers
+
+# local model (any OpenAI-compatible endpoint works; Ollama shown)
+curl -fsSL https://ollama.com/install.sh | sh && ollama pull qwen3:4b-instruct
+cp .env.example .env     # then set LLM_BASE_URL=http://localhost:11434/v1, LLM_MODEL=qwen3:4b-instruct, LLM_API_KEY=ollama
+
+# ingest the course PDFs (same hashing/chunking as the dashboard upload)
+python - <<'PY'
+from pathlib import Path
+from adaptive_qa.documents import DocumentStore
+for n in ("ch6.pdf", "ch7.pdf"):
+    DocumentStore().save_document(n, Path(n).read_bytes())
+PY
+
+python -m pytest tests -q
+uvicorn api.main:app --port 8000
+```
+
+## Routing evaluation: does the router retrieve exactly when retrieval helps?
+
+This is the primary experiment. The older "corpus coverage" check only asks whether a
+question's topic appears in the documents; almost every question in that set was written
+from the slides, so even "always retrieve" scores about 89%.
+
+`scripts/eval_routing.py` instead runs **both** answering paths for every question
+(closed-book and grounded), scores each answer against a short reference, and labels the
+question *retrieval helps* when the grounded answer scores at least 0.10 higher. Routers are
+then compared on **held-out random splits** (mean ± sd over 30 splits) by the quality they
+achieve and the tokens, latency and retrieval calls they spend:
+
+| Router | What it is |
+|---|---|
+| never / always | fixed baselines |
+| heuristic@0.5 | the shipped weighted-signal engine, untuned threshold |
+| heuristic-tuned | same score, threshold chosen on the training split only |
+| learned | logistic regression on preflight and question cues, fit on the training split only |
+| oracle | the better answer per question; an upper bound, never a live policy |
+
+```bash
+python scripts/eval_routing.py              # collect answers (resumable, slow on CPU) then analyse
+python scripts/eval_routing.py --no-llm     # re-analyse cached answers in seconds
+```
+
+Questions: the 75 chapter-6 questions, 25 new chapter-7 questions (`eval_data/routing_eval/ch7_normalization_questions.jsonl`)
+and 33 general questions with no labelled chunk (`general_questions.jsonl`). The corpus-versus-general mix is a
+**constructed workload**, so the savings it shows describe such a mix, not real traffic.
+Answer quality is `mean(token-F1, token-recall)`; it is still lexical and blind to paraphrase.
+Results land in `results/routing_eval/<run>/` and are shown on the dashboard's *Research Results* tab.
+
 ## Interactive Research Dashboard (Three Primary Sections)
 
 The web dashboard is organized into three concise, uncluttered primary sections:
 
-1. **Ask a Question**:
+1. **Ask a Question** (a live experiment on one question; it never changes saved results):
    - The adaptive decision engine runs **first** (action, features, decision latency) before any retrieval occurs.
    - `POST /ask?mode=compare` executes both branches independently: Option A (closed-book parametric memory) vs. Option B (grounded with retrieved evidence chunks).
-   - Shows answers, citation chips, compact timing/token comparison, with technical passages and vocabulary overlap cleanly collapsed in expandable `<details>` sections.
+   - Default view: decision and reason, both answers, citation chips, and a compact timing/token table (one live measurement, with a `cold start` flag for the first model call since the server started). Raw signals, full passages, word-overlap tables, the full benchmark question list and the raw JSON are in expandable sections.
    - `POST /ask?mode=adaptive` executes only the selected path to measure real deployed operational latency.
+   - An expandable tool compares BM25, Dense and Hybrid on the question currently typed, only when you click its button.
 
-2. **Research Results**:
-   - Executive findings highlighting empirical answers to the research question.
-   - Retrieval quality benchmark table (Recall@5, MRR@10, nDCG@10, Hit@1) comparing BM25, Dense, and Hybrid RRF.
-   - Complete routing confusion matrix (TP, FN, FP, TN) and per-class metrics (Balanced Accuracy, Precision, Recall, F1, Specificity) comparing Adaptive against Always-Retrieve and Never-Retrieve baselines.
-   - Warmed-up latency and token usage benchmarks (interleaved trials).
-   - Collapsible per-question label inspector and interactive 3-method retrieval tester.
+2. **Research Results** (saved aggregates read from `results/`; independent of the question typed; *Reload saved results* only re-reads files and runs nothing):
+   - Main experiment first: summary, then one table of the six routers (quality, retrieval rate, tokens, latency, routing balanced accuracy), with the shipped heuristic marked as deployed, the tuned and learned routers as experimental and the oracle as an evaluation-only upper bound.
+   - Cost of each answering path from the same run.
+   - Retrieval ranking benchmark (Recall@5, MRR@10, nDCG@10, Hit@1, median/cold latency, build time) for BM25, Dense and Hybrid from one run, with its corpus scope. Partial or scope-mismatched runs are flagged and not combined with others.
+   - Collapsed: the earlier 75-question corpus-coverage experiment (confusion matrix; preliminary, 4 answers only), the per-question inspector and metric definitions.
 
 3. **Documents**:
    - Active document collection table, active/inactive toggles, chunk counts, and deletion.
@@ -188,9 +242,11 @@ Windows 11, Python 3.13, `all-MiniLM-L6-v2` fetched from the Hugging Face hub.
 
 | Method | Recall@5 | MRR@10 | nDCG@10 | hit@1 | no-evidence | median query | cold build |
 |---|---|---|---|---|---|---|---|
-| bm25 | 0.918 | 0.733 | 0.787 | 0.582 | 0.125 | 0.07 ms | 0.03 s |
-| dense | 0.925 | 0.718 | 0.770 | 0.597 | 0.000 | 44.6 ms | 47.4 s (37.2 s model load) |
-| hybrid | **0.948** | **0.811** | **0.846** | **0.731** | 0.000 | 38.6 ms | 0.13 s (warm cache) |
+| bm25 | 0.918 | 0.733 | 0.787 | 0.582 | 0.125 | 0.12 ms | 0.05 s |
+| dense | 0.925 | 0.718 | 0.770 | 0.597 | 0.000 | 28.3 ms | 23.0 s (16.5 s model load) |
+| hybrid | **0.948** | **0.811** | **0.846** | **0.731** | 0.000 | 18.8 ms | 0.12 s (1.5 s model load) |
+
+Source: `results/retrieval_eval/20261025_180311/retrieval_metrics.json` (the same run as REPORT section 9.1). Corpus scope: Chapter 6 only, 80 chunks.
 
 Reading these numbers honestly:
 
@@ -204,7 +260,7 @@ Reading these numbers honestly:
 - **Hybrid RRF is best on every ranking metric** (Recall +0.03, nDCG +0.06 over
   BM25), which is the expected effect of fusing a precise lexical ranking with a
   broader semantic one.
-- **A dense query costs ~44 ms on CPU versus ~0.1 ms for BM25** — roughly 500×.
+- **A dense query costs ~28 ms on CPU versus ~0.1 ms for BM25** — roughly 240×.
   Whether the ranking gain justifies that is an application decision, not a
   research claim.
 - **67 questions is a small sample.** The gaps between BM25 and dense are within

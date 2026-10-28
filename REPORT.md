@@ -11,6 +11,12 @@ This report presents a reproducible experimental evaluation of an **adaptive ret
 
 The system implements three interchangeable retrievers (BM25, Dense, Hybrid RRF) and a heuristic decision engine that runs before any retrieval. A hand-labelled set of 75 questions (67 answerable, 8 unanswerable) over an 80-chunk DBMS PDF corpus drives all experiments.
 
+> **Update, 28 Oct 2026 (read first).** The routing result in the key findings below (72/75 correct, balanced accuracy 0.92)
+> measures whether a question's *topic appears in the slides*, not whether retrieval *improves the answer*. Almost every
+> question in that set was written from the slides, so it cannot show the second thing. Section 9.0 replaces it with an
+> evaluation that runs both answering paths on every question and compares routers on held-out splits. Its conclusions are
+> more modest and are the ones to cite.
+
 **Key verified findings (from saved result files):**
 - Hybrid RRF is best on all ranking metrics: Recall@5=0.9478, MRR@10=0.8112, nDCG@10=0.8461, Hit@1=0.7313 (run 20261025_180311)
 - Adaptive routing: 72/75 correct (96%), F1=0.977, balanced accuracy=0.922 (run 20261026_011553)
@@ -185,7 +191,62 @@ Cold-start (model load) reported separately from warm medians. Comparison-mode w
 
 > All numbers verified against saved result files. Run IDs cited.
 
+### 9.0 Routing evaluation: does the router retrieve when retrieval helps? (run `results/routing_eval/main`)
+
+**Main experiment.** Source: `results/routing_eval/main/routing_results.json` (generated 2026-10-27T22:57:50Z) and `per_question.jsonl`. Everything in this subsection comes from that one run; sections 9.1-9.4 are separate, earlier experiments that measure different things and are not comparable with it.
+
+**Design.** 133 questions: the 75 chapter-6 questions, 25 new chapter-7 questions, and 33 general questions with no labelled
+chunk (27 unrelated to the slides, 6 textbook definitions the slides also cover). Corpus: chapters 6 and 7 (173 chunks), BM25,
+top-5. Both branches answer every question (`qwen3:4b-instruct`, temperature 0, one-sentence prompts, run with Ollama capped at
+3 threads and a 2048-token window; same weights, no prompt exceeded the window). Answers are scored against short reference
+answers with `quality = mean(token-F1, token-recall)`. A question is labelled *retrieval helps* when the grounded answer
+scores at least 0.10 higher. 125 of 133 questions are scorable (8 chapter-6 "unanswerable" questions have no reference):
+retrieval **helps on 86**, **hurts on 17**, ties on 22. On 11 questions BM25 found no passage at all; there the retrieve path
+falls back to the closed-book answer at closed-book cost.
+
+Routers are compared on 30 repeated stratified 70/30 splits (`adaptive_qa/eval/routing.py:repeated_splits`: the scored questions are divided into retrieval-helps and not-helps groups, each group is shuffled with a fixed seed and 30% goes to the held-out part; the 30 draws overlap). The tuned threshold and the learned logistic regression are fitted on the 70% training part only, and every policy is scored on the 30% held-out part. Router inputs are the question text and the collection-preflight signals (`feature_vector`); reference answers, answer scores and the helps/hurts labels are used only to fit and score, never as router inputs. The oracle uses the labels by construction and is an evaluation-only upper bound. Answer quality is `mean(token-F1, token-recall)` against a short reference: a lexical-overlap score, not a measure of factual correctness, entailment or hallucination rate. Routing balanced accuracy is a separate measure of whether retrieval was chosen exactly when it helped.
+Mean ± sd over splits:
+
+| Router | Answer quality | Retrieves on | Tokens / question | Latency / question | Balanced accuracy |
+|---|---|---|---|---|---|
+| Never retrieve | 0.334 ± 0.022 | 0% | 96 | 3.1 s | 0.500 |
+| Always retrieve | 0.516 ± 0.023 | 100% | 818 | 31.5 s | 0.500 |
+| Heuristic, threshold 0.5 (shipped, untuned) | **0.570 ± 0.023** | 78% | 732 | 28.6 s | 0.833 ± 0.057 |
+| Heuristic, threshold tuned on train split | 0.560 ± 0.023 | 73% | 693 | 27.1 s | 0.822 ± 0.056 |
+| Learned (logistic regression) | 0.559 ± 0.030 | 69% | 661 | 26.1 s | 0.836 ± 0.060 |
+| Oracle (upper bound, not deployable) | 0.589 ± 0.022 | 71% | 672 | 26.2 s | 0.964 ± 0.026 |
+
+| Question type | n | Closed-book | Grounded | Helps / hurts |
+|---|---|---|---|---|
+| Definition | 32 | 0.26 | 0.57 | 28 / 0 |
+| Exact terminology | 26 | 0.19 | 0.61 | 23 / 1 |
+| Paraphrase | 24 | 0.18 | 0.47 | 22 / 1 |
+| Needs two passages | 10 | 0.23 | 0.54 | 10 / 0 |
+| Textbook definition, also in slides | 6 | 0.46 | 0.50 | 3 / 1 |
+| General knowledge, not in slides | 27 | 0.68 | 0.38 | 0 / 14 |
+
+**What the evidence supports**
+1. Retrieval is essential for questions about the documents (quality roughly 0.2 → 0.55), as expected: a 4B model cannot know these slides.
+2. Routing beats both fixed policies on quality (0.570 vs 0.516 and 0.334) and lands within about 0.02 of the oracle. The gain over
+   always-retrieve exists because retrieval *hurts* on general questions: when the retrieved passages are irrelevant the model often
+   answers "the provided passages do not address this" instead of using its own knowledge, even though the prompt allows that fallback.
+3. The cost saving is modest: 732 tokens against 818 (about 10% fewer). Even the oracle only reaches 672 (about 18% fewer), because
+   about three quarters of this workload is questions about the documents.
+4. **The tuned and learned routers did not beat the shipped heuristic.** Their quality (0.559–0.560) is within noise of 0.570. The learned
+   router saves about 10% more tokens at about 0.01 lower quality, which is a trade-off rather than an improvement.
+5. The heuristic works here largely because lexical overlap with the slides separates "about the slides" from "general". Cases it
+   cannot separate, such as textbook definitions the model also knows, remain (3 corpus questions skipped, 9 general ones retrieved).
+
+**Limitations specific to this experiment.** n = 125 and a single model, corpus and retriever (BM25; hybrid was not run for answers).
+The splits are repeated draws from the same 125 questions, so the sd describes split-to-split variation, not an independent
+confidence interval. The 58 new questions and their reference answers were written for this evaluation and have not been independently
+reviewed. The corpus-versus-general ratio was chosen by the author, so the savings describe such a mix, not real traffic. The quality
+metric is lexical. Latency is for a 4-core CPU and includes no GPU. Three closed-book timings distorted by process pauses were
+re-measured; answers were unaffected. The analysis reproduces from the cached answers (`--no-llm`), up to measured BM25 time.
+
 ### 9.1 Retrieval Ranking Quality (Run: 20261025_180311)
+
+Source: `results/retrieval_eval/20261025_180311/retrieval_metrics.json`. **Scope: DBMS Chapter 6 only, 80 chunks (one document).** It does not describe the 173-chunk Chapter 6 + 7 collection that the routing experiment (9.0) and the live app can use.
 
 Dataset: eval_data/retrieval_eval/ch6_er_model_questions.jsonl (sha256: 734a82f4...)
 Settings: Recall@k=5, Rank@k=10; n_questions=75, n_scored=67 (answerable only)
@@ -193,14 +254,21 @@ Settings: Recall@k=5, Rank@k=10; n_questions=75, n_scored=67 (answerable only)
 | Method | Recall@5 | MRR@10 | nDCG@10 | Hit@1 | No-evidence | Median ms | p95 ms | Cold 1st ms | Build ms |
 |--------|----------|--------|---------|-------|-------------|-----------|--------|-------------|----------|
 | BM25 | 0.9179 | 0.7326 | 0.7871 | 0.5821 | 0.125 | 0.117 | 0.235 | 0.143 | 49.3 |
-| Dense | 0.9254 | 0.7184 | 0.7704 | 0.5970 | 0.000 | 28.293 | 81.461 | 57,239 | 22,999 |
+| Dense | 0.9254 | 0.7184 | 0.7704 | 0.5970 | 0.000 | 28.293 | 81.461 | 57.2 | 22,999 |
 | **Hybrid** | **0.9478** | **0.8112** | **0.8461** | **0.7313** | 0.000 | **18.787** | 25.028 | 1,593 | 118 |
 
-Bold = best per metric. Hybrid is best on all four ranking metrics and also outperforms dense on query latency (19 ms vs 28 ms warm median).
+Bold = best per metric. Hybrid is best on all four ranking metrics and also outperforms dense on query latency (19 ms vs 28 ms warm median). Dense build time (23.0 s) includes loading the embedding model (16.5 s); hybrid's first query (1,593 ms) is dominated by its own model load (1,461 ms). The cold-first-query and build columns are one-off costs, not per-query latency.
+
+A newer run, `20261028_021811`, exists but is **partial and not cited**: it contains BM25 only, and 178 of its retrieved chunk ids belong to a second document although it records a single-document, 80-chunk corpus, so its recorded scope is unreliable. It is kept as a historical result file; the dashboard flags it and defaults to the newest complete run.
 
 **These metrics measure retrieval ranking quality only — they do not indicate whether the generated answer is correct.**
 
-### 9.2 Routing Decision Quality (Run: 20261026_011553)
+### 9.2 Corpus-coverage check (Run: 20261026_011553) — earlier experiment
+
+Source: `results/policy_eval/20261026_011553/policy_results.json`. Historical and preliminary; superseded by 9.0 for conclusions about routing.
+
+> This measures whether the topic appears in the slides, not whether retrieval improves the answer; see 9.0 for that.
+
 
 Settings: n_questions=75, retriever=bm25, top_k=5, decision_threshold=0.5
 
@@ -231,7 +299,9 @@ Balanced accuracy for both fixed-policy baselines is 0.500 — they provide no d
 
 **Evidence recall@5:** adaptive=0.903, always-retrieve=0.918. Adaptive saves 9/75 retrieval calls (12%) at the cost of 2 missed answers.
 
-### 9.3 Answer Quality (Run: 20261026_011553)
+### 9.3 Answer Quality (Run: 20261026_011553) — earlier experiment, 4 answers only
+
+Source: same file as 9.2. These four-answer figures are not comparable with the 125-question results in 9.0.
 
 **PRELIMINARY — n=4 questions only. No statistical claim is made.**
 
@@ -269,6 +339,8 @@ Trials: 2 interleaved (Trial 1: A,B; Trial 2: B,A)
 | Median decision engine | 1.549 ms | — |
 
 **Interpretation:** Retrieval adds ~7,170 ms to the warm path. This overhead comes from larger input context (8× more tokens) increasing generation time, not from retrieval itself (< 0.5 ms BM25). With n=1 warm sample, these numbers describe one question only.
+
+**How the dashboard reports timing.** Live single-question timings are one measurement on one machine, shown in seconds from 1 s upward and in milliseconds below. The `cold start` flag means the first model call since the dashboard server started (it may include a one-off model load by the provider). An earlier version created a fresh model client for every request, so the flag was always set; the client is now reused. Retrieval time is the search itself; embedding-model load and corpus encoding for dense and hybrid are separate one-off costs. Aggregated, repeated numbers come only from saved runs such as this one (n = 1 warm sample here, so no median or p95 is claimed).
 
 **Retrieval does not reduce latency or tokens — it adds both.** The trade-off: more context may improve answer quality on corpus-specific questions at the cost of more tokens and longer generation.
 
@@ -308,7 +380,7 @@ Trials: 2 interleaved (Trial 1: A,B; Trial 2: B,A)
 
 **Yes, with caveats:**
 
-- **Routing quality is strong (evidence solid):** 96% accuracy, F1=0.977, balanced accuracy=0.922 over all 75 questions — substantially above both fixed-policy baselines (balanced accuracy 0.500).
+- **Routing helps, modestly (section 9.0):** on 125 scored questions the shipped heuristic reaches answer quality 0.570 against 0.516 for always-retrieve and 0.334 for never-retrieve, with about 10% fewer tokens than always-retrieve. A learned router did not improve on it. The earlier 96% figure measured topic overlap with the slides and should not be cited as routing quality.
 - **Retrieval quality is strong (evidence solid):** Hybrid RRF Recall@5=0.9478, Hit@1=0.731 over 67 answerable questions.
 - **Answer quality is inconclusive (evidence preliminary, n=4):** Direction is consistent with expectations (retrieval-augmented F1 0.421 vs closed-book 0.106) but n=4 has no statistical power.
 - **Latency trade-off is confirmed:** Retrieval-augmented path takes longer (~7 s more warm) and uses ~8× more tokens; retrieval itself adds negligible time.
@@ -333,9 +405,10 @@ Trials: 2 interleaved (Trial 1: A,B; Trial 2: B,A)
 
 | Section | Result file | Run ID |
 |---------|------------|--------|
+| 9.0 Main routing experiment | results/routing_eval/main/routing_results.json (+ per_question.jsonl) | main |
 | 9.1 Retrieval ranking | results/retrieval_eval/20261025_180311/retrieval_metrics.json | 20261025_180311 |
 | 9.1 Retrieval ranking (summary) | results/retrieval_eval/20261025_180311/summary.csv | 20261025_180311 |
-| 9.2 Routing quality | results/policy_eval/20261026_011553/policy_results.json | 20261026_011553 |
+| 9.2 Corpus-coverage (earlier) | results/policy_eval/20261026_011553/policy_results.json | 20261026_011553 |
 | 9.2 Per-question routing | results/policy_eval/20261026_011553/per_question.csv | 20261026_011553 |
 | 9.3 Answer quality | results/policy_eval/20261026_011553/policy_results.json | 20261026_011553 |
 | 9.4 Latency/tokens | results/bench_latency/20261026_011132/bench.json | 20261026_011132 |
@@ -345,6 +418,9 @@ Trials: 2 interleaved (Trial 1: A,B; Trial 2: B,A)
 
 ```powershell
 # Prerequisites: Python 3.10+, Ollama running with qwen3:4b-instruct
+
+# Main routing experiment (needs Ollama; resumes from the answer cache; add --no-llm to re-analyse cached answers)
+.\.venv\Scripts\python.exe scripts\eval_routing.py
 
 # Retrieval evaluation (no LLM, ~5 min)
 .\.venv\Scripts\python.exe scripts\eval_retrieval.py --methods bm25,dense,hybrid --top-k 10 --repeat 3
@@ -366,7 +442,7 @@ Trials: 2 interleaved (Trial 1: A,B; Trial 2: B,A)
 
 # Dashboard
 .\.venv\Scripts\python.exe -m uvicorn api.main:app --port 8000
-# -> http://127.0.0.1:8000 -> click "Load saved retrieval experiment"
+# -> http://127.0.0.1:8000 -> Research Results tab (it reads saved files; "Reload saved results" does not run benchmarks)
 ```
 
 ---

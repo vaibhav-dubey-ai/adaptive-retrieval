@@ -236,21 +236,26 @@
 <!-- ======================================================================= -->
 <section id="sec-ask">
   <div class="card">
-    <label for="q" style="font-weight:600;display:block;margin-bottom:6px">Enter a Question:</label>
+    <p class="k" style="margin:0 0 10px">A live experiment on one question: the router decides, then the question is answered without retrieval (Option A) and with retrieval (Option B). It does not change the saved results on the Research Results tab.</p>
+    <label for="q" style="font-weight:600;display:block;margin-bottom:6px">Your question</label>
     <textarea id="q" placeholder="e.g., What is an entity set? or What does the initial design phase do?"></textarea>
 
-    <div class="row" style="margin-top:10px">
-      <span class="k" style="font-weight:600">Sample Questions:</span>
-      <span id="exampleTabs" class="row"></span>
+    <div class="row" style="margin-top:8px">
+      <span class="k" style="font-weight:600">Try:</span>
+      <span id="quickChips" class="row"></span>
     </div>
-    <div class="row" id="exampleChips" style="margin-top:6px"></div>
-    <div class="row" style="margin-top:6px">
-      <select id="exampleSelect" style="max-width:100%"><option value="">… or pick any of the 75 labelled benchmark questions</option></select>
-    </div>
+    <details id="sampleDetails">
+      <summary>Browse all benchmark questions by category</summary>
+      <div class="row" style="margin-top:8px"><span id="exampleTabs" class="row"></span></div>
+      <div class="row" id="exampleChips" style="margin-top:6px"></div>
+      <div class="row" style="margin-top:6px">
+        <select id="exampleSelect" style="max-width:100%"><option value="">… or pick any benchmark question</option></select>
+      </div>
+    </details>
 
     <div class="row" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
       <label class="k" for="retrievalMethod" style="font-weight:600">Retriever (Option B):</label>
-      <select id="retrievalMethod" onchange="saveMethod()"></select>
+      <select id="retrievalMethod" onchange="saveMethod()"><option value="">Loading… (server default)</option></select>
 
       <label class="k" for="topK" style="font-weight:600">Passages (k):</label>
       <select id="topK">
@@ -259,42 +264,52 @@
         <option value="8">8</option>
       </select>
 
-      <button class="primary" onclick="runAsk('compare')" id="btnCompare">Run Comparison (Both Answers)</button>
-      <button onclick="runAsk('adaptive')" id="btnAdaptive">Run Adaptive-Only (Selected Path)</button>
+      <button class="primary" onclick="runAsk('compare')" id="btnCompare">Run comparison (both answers)</button>
+      <button onclick="runAsk('adaptive')" id="btnAdaptive">Run adaptive only (selected path)</button>
       <span id="status" class="k" style="margin-left:auto"></span>
     </div>
   </div>
 
-  <!-- Adaptive Decision Banner (Visible upon ask) -->
   <div id="decisionWrap" class="hidden">
     <div id="decisionBox"></div>
   </div>
 
-  <!-- Answers & Compact Comparison (Visible upon ask) -->
   <div id="answersWrap" class="hidden">
     <div class="grid2" id="answerCards"></div>
 
-    <!-- Passages (Expandable by default) -->
+    <div class="card" id="perfCard" style="margin-top:14px"></div>
+
     <details id="passagesDetails" style="margin-top:12px">
-      <summary id="passagesSummary">Retrieved Passages & Citations (Click to inspect)</summary>
+      <summary id="passagesSummary">Retrieved passages (click a citation above to jump to its passage)</summary>
       <div id="passagesContent" style="margin-top:8px"></div>
     </details>
 
-    <!-- Compact Performance Comparison -->
-    <div class="card" id="perfCard" style="margin-top:14px"></div>
-
-    <!-- Collapsible Advanced Analysis -->
     <details style="margin-top:10px">
-      <summary>In-Depth Evidence Vocabulary Overlap & Diff Analysis</summary>
+      <summary>Word-overlap analysis (not a correctness check)</summary>
       <div id="supportPanel" style="margin-top:10px"></div>
       <div id="diffPanel" style="margin-top:10px"></div>
     </details>
 
     <details style="margin-top:10px">
-      <summary>Raw JSON Trace</summary>
+      <summary>Raw JSON trace</summary>
       <pre id="rawJson">—</pre>
     </details>
   </div>
+
+  <details style="margin-top:14px">
+    <summary>Compare BM25, Dense and Hybrid on the question typed above</summary>
+    <div style="margin-top:8px">
+      <p class="k" style="margin:0 0 6px">Runs only when you click the button, on whatever is in the question box now. It shows what each retriever returns for that one question; it is not a benchmark (see Research Results for those).</p>
+      <div class="row">
+        <button id="cmpBtn" onclick="compareMethods()">Compare retrievers on this question</button>
+        <label class="k" for="cmpTopK">top-k:</label>
+        <select id="cmpTopK"><option>3</option><option selected>5</option><option>8</option></select>
+        <span class="k" id="cmpStatus"></span>
+      </div>
+      <div id="overlapSummary"></div>
+      <div class="grid3" id="methodColumns" style="margin-top:10px"></div>
+    </div>
+  </details>
 </section>
 
 <!-- ======================================================================= -->
@@ -303,120 +318,66 @@
 <section id="sec-results" class="hidden">
   <div class="card">
     <div class="row" style="justify-content:space-between">
-      <div>
-        <h2 style="margin:0">Empirical Research Findings</h2>
-        <p class="k">Saved evaluation results over the 75 hand-labelled question benchmark. All numbers are verified from saved experiment artifacts.</p>
+      <div style="flex:1;min-width:260px">
+        <h2 style="margin:0">Saved research results</h2>
+        <p class="k" style="margin:4px 0 0">Aggregates over fixed, labelled question sets, read from completed runs under <code>results/</code>. They do not change when you ask a question on the other tab.</p>
       </div>
       <div class="row">
-        <button onclick="loadExperiments()">Reload Saved Results</button>
+        <button onclick="loadExperiments()">Reload saved results</button>
         <span id="expStatus" class="k"></span>
       </div>
     </div>
-
-    <!-- Executive Takeaways Card -->
-    <div class="highlight-card" style="margin-top:12px">
-      <h3 style="margin:0 0 6px;color:var(--acc)">Key Findings Summary</h3>
-      <ul style="margin:0;padding-left:20px;font-size:0.88rem">
-        <li><b>Retrieval Ranking:</b> Hybrid RRF achieves the highest Recall@5 (<b>0.9478</b>) and nDCG@10 (<b>0.8461</b>) on the 67 answerable questions, outperforming BM25 (0.9179) and Dense (0.9254) while maintaining fast warm queries (18.8 ms).</li>
-        <li><b>Routing Accuracy:</b> The lightweight pre-retrieval heuristic correctly routes <b>72/75 questions (96.0%)</b> with a <b>Balanced Accuracy of 0.9225</b> and F1 of <b>0.9774</b>, far exceeding fixed baselines (Balanced Accuracy = 0.5000). It avoids unnecessary retrieval for 7 of 8 unanswerable questions.</li>
-        <li><b>Efficiency Trade-Off:</b> Retrieval does <i>not</i> make answering faster or cheaper — retrieval adds sub-millisecond overhead (< 0.5 ms), but grounded generation takes ~7.2 seconds longer (warm) and uses ~4.4× more tokens due to evidence context. Adaptive retrieval preserves answer quality while avoiding this overhead for questions that do not need documents.</li>
-      </ul>
-    </div>
-
-    <!-- Table 1: Retrieval Benchmark -->
-    <h3 style="margin-top:20px">1. Retrieval Method Comparison (BM25 vs. Dense vs. Hybrid RRF)</h3>
-    <p class="k">
-      Run ID: <code id="retRunId">—</code> · Dataset: <code>eval_data/retrieval_eval/ch6_er_model_questions.jsonl</code> (67 answerable / 75 total questions).<br>
-      <span class="badge warn">Corpus Note</span> <i>Evaluated over DBMS Chapter 6 (80 chunks). The active collection currently contains Chapters 6 & 7 (173 chunks).</i>
-    </p>
-    <div id="retrievalTableWrap">Loading retrieval benchmark…</div>
-
-    <details style="margin-top:6px">
-      <summary>Plain Language Metric Explanations</summary>
-      <div id="retrievalHelp"></div>
+    <p class="tiny" style="margin:6px 0 0"><b>Reload</b> only re-reads result files that already exist; it does not run any benchmark.</p>
+    <details>
+      <summary>How to produce new results (rerun the experiments)</summary>
+<pre>python scripts/eval_routing.py            # main experiment (needs the LLM; resumes from cache; --no-llm re-analyses cached answers)
+python scripts/eval_retrieval.py --methods bm25,dense,hybrid --top-k 10 --repeat 3
+python scripts/eval_policy.py             # earlier corpus-coverage experiment
+python scripts/bench_latency.py           # repeated latency benchmark</pre>
+      <p class="tiny" style="margin:0">Each run writes a new timestamped folder; older runs are kept. Then click Reload.</p>
     </details>
 
-    <!-- Table 2: Policy Comparison & Decision Quality -->
-    <h3 style="margin-top:24px">2. Adaptive Routing Policy vs. Baselines</h3>
-    <p class="k">
-      Run ID: <code id="polRunId">—</code> · Evaluates whether to retrieve before answering on all 75 questions.<br>
-      <span class="badge info">Sample Sizes</span> Routing decisions cover <b>n=75</b> questions; LLM answer-quality means cover <b>n=4</b> preliminary live generations.
-    </p>
-    <div id="policyTableWrap">Loading policy evaluation…</div>
+    <!-- A. Main experiment -->
+    <div class="highlight-card" style="margin-top:14px">
+      <h3 style="margin:0 0 2px;color:var(--acc)">Main experiment: does adaptive retrieval pay off?</h3>
+      <div id="routingMeta" class="tiny" style="margin-bottom:8px"></div>
+      <div id="routingWrap">Loading routing evaluation…</div>
+    </div>
 
-    <!-- Complete Confusion Matrix & Per-Class Metrics -->
-    <h3 style="margin-top:20px">3. Routing Confusion Matrix & Per-Class Metrics</h3>
-    <p class="k">
-      Positive Class: <b>Answerable question</b> (relevant passage exists in corpus). Predicted Positive Action: <b>RETRIEVE</b>.
-    </p>
-    <div id="confusionMatrixWrap"></div>
+    <h3 style="margin-top:20px">Cost of each answering path (same run)</h3>
+    <div id="costWrap">Loading…</div>
 
-    <!-- Table 4: Latency & Tokens -->
-    <h3 style="margin-top:24px">4. Latency & Token Usage Benchmark</h3>
-    <p class="k">Measured using repeated, warmed-up trials with interleaved execution (Run ID: <code>20261026_011132</code>).</p>
-    <table>
-      <thead>
-        <tr><th>Metric</th><th>Option A (Closed-Book)</th><th>Option B (Retrieval-Augmented)</th><th>Overhead of Retrieval Path</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><b>Cold-Start First Call</b> (includes initial model loading)</td>
-          <td>14,360 ms</td>
-          <td>24,300 ms</td>
-          <td>+9,940 ms (initial Ollama weight load)</td>
-        </tr>
-        <tr>
-          <td><b>Warm Generation Latency</b> (steady-state median)</td>
-          <td>14,300 ms</td>
-          <td>21,469 ms</td>
-          <td><b>+7,169 ms</b> (longer context generation)</td>
-        </tr>
-        <tr>
-          <td><b>Retrieval Latency</b> (BM25 search step)</td>
-          <td>0 ms</td>
-          <td>0.48 ms</td>
-          <td>&lt; 0.5 ms (negligible)</td>
-        </tr>
-        <tr>
-          <td><b>Pre-retrieval Decision Engine</b></td>
-          <td>—</td>
-          <td>—</td>
-          <td>1.55 ms (lightweight preflight)</td>
-        </tr>
-        <tr>
-          <td><b>Token Usage</b> (input / output / total)</td>
-          <td>~25 in / ~145 out / <b>169.5 total</b></td>
-          <td>~1,180 in / ~207 out / <b>1,387.5 total</b></td>
-          <td><b>+1,218 tokens (~8.2× context expansion)</b></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- Expandable Inspections -->
-    <details style="margin-top:16px">
-      <summary>Inspect Individual Questions & Labels (75 Questions)</summary>
+    <!-- B. Retrieval benchmark -->
+    <h3 style="margin-top:24px">Retrieval ranking benchmark: BM25 vs Dense vs Hybrid</h3>
+    <div id="retrievalMeta" class="tiny"></div>
+    <div id="retrievalTableWrap">Loading retrieval benchmark…</div>
+    <details style="margin-top:6px">
+      <summary>What these retrieval metrics mean</summary>
+      <div id="retrievalHelp"></div>
+    </details>
+    <details style="margin-top:10px">
+      <summary>Inspect individual retrieval questions and labels</summary>
       <div class="row" style="margin:10px 0 6px">
-        <select id="expCatFilter" onchange="renderQuestionList()"><option value="">All Categories</option></select>
-        <label class="k"><input type="checkbox" id="expDisagreeOnly" onchange="renderQuestionList()"/> Show only questions where retrieval methods disagree</label>
+        <select id="expCatFilter" onchange="renderQuestionList()"><option value="">All categories</option></select>
+        <label class="k"><input type="checkbox" id="expDisagreeOnly" onchange="renderQuestionList()"/> Only questions where the methods disagree</label>
       </div>
       <div class="grid2">
         <div class="list-box" id="expQuestionList"></div>
-        <div id="expInspector"><p class="k">Click a question on the left to inspect its labelled relevant passages and retriever hits.</p></div>
+        <div id="expInspector"><p class="k">Click a question on the left to see its labelled passages and each retriever's hits.</p></div>
       </div>
     </details>
 
-    <details style="margin-top:10px">
-      <summary>Interactive Live Retriever Comparison (Test on any query)</summary>
-      <div style="margin-top:8px">
-        <div class="row">
-          <button id="cmpBtn" onclick="compareMethods()">Compare BM25, Dense & Hybrid on current question</button>
-          <label class="k" for="cmpTopK">top-k:</label>
-          <select id="cmpTopK"><option>3</option><option selected>5</option><option>8</option></select>
-          <span class="k" id="cmpStatus"></span>
-        </div>
-        <div id="overlapSummary"></div>
-        <div class="grid3" id="methodColumns" style="margin-top:10px"></div>
-      </div>
+    <!-- C. Historical -->
+    <details style="margin-top:24px">
+      <summary>Earlier corpus-coverage experiment (historical, preliminary)</summary>
+      <div id="polMeta" class="tiny" style="margin-top:8px"></div>
+      <p class="k" style="margin:6px 0">
+        <span class="badge warn">Read with care</span>
+        This asks only whether a question's topic appears in the document and whether the router chose to retrieve. It is <b>not</b> answer correctness. Its answer-quality column covers only the few questions whose answers were generated, so it is not comparable with the main experiment above.
+      </p>
+      <div id="policyTableWrap">Loading…</div>
+      <h4 style="margin-top:14px">Routing decisions against corpus coverage</h4>
+      <div id="confusionMatrixWrap"></div>
     </details>
   </div>
 </section>
@@ -452,7 +413,12 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt = o => JSON.stringify(o, null, 2);
 const set = (id, t) => { const el = $(id); if (el) el.textContent = t; };
-const ms = v => (v == null ? "—" : Number(v).toFixed(1) + " ms");
+// One unit rule everywhere: milliseconds below 1 s, seconds from 1 s up.
+const ms = v => {
+  if (v == null || isNaN(v)) return "—";
+  v = Number(v);
+  return Math.abs(v) < 1000 ? v.toFixed(Math.abs(v) < 10 ? 2 : 1) + " ms" : (v / 1000).toFixed(2) + " s";
+};
 const fix = (v, d = 3) => (v == null ? "—" : Number(v).toFixed(d));
 const pct = v => (v == null ? "—" : (Number(v) * 100).toFixed(1) + "%");
 const badge = (text, kind = "") => `<span class="badge ${kind}">${esc(text)}</span>`;
@@ -460,10 +426,11 @@ const badge = (text, kind = "") => `<span class="badge ${kind}">${esc(text)}</sp
 const METHOD_LABEL = { bm25: "BM25 (lexical)", dense: "Dense (semantic)", hybrid: "Hybrid (RRF)" };
 const CAT_LABEL = {
   exact_terminology: "Exact Terminology", paraphrase: "Paraphrase", definition: "Definition",
-  multi_passage: "Needs 2 Passages", unanswerable: "Not in Document"
+  multi_passage: "Needs 2 Passages", unanswerable: "Not in Document",
+  general_knowledge: "General Knowledge (not in slides)", general_in_domain: "Textbook Definition (also in slides)"
 };
 
-let state = { question: "", lastAsk: null, demo: null, exp: null, pol: null, activeSection: "ask" };
+let state = { question: "", lastAsk: null, demo: null, exp: null, pol: null, routing: null, activeSection: "ask" };
 
 async function api(path, opts) {
   const r = await fetch(path, opts);
@@ -580,6 +547,10 @@ async function loadDemoExamples() {
     $("exampleTabs").innerHTML = j.categories.map(c =>
       `<button class="chip tab" data-cat="${esc(c.name)}" onclick="pickCategory('${esc(c.name)}')">${esc(CAT_LABEL[c.name] || c.name)} (${c.count})</button>`
     ).join("");
+    // compact default: one example from each of the first four categories
+    $("quickChips").innerHTML = j.categories.filter(c => c.examples.length).slice(0, 4).map(c =>
+      `<button class="chip" title="${esc(CAT_LABEL[c.name] || c.name)}" onclick="useExample(decodeURIComponent('${encodeURIComponent(c.examples[0].question)}'))">${esc(c.examples[0].question)}</button>`
+    ).join("");
     $("exampleSelect").innerHTML = `<option value="">… or pick any of the ${j.n_questions} benchmark questions</option>` +
       j.categories.map(c => `<optgroup label="${esc(CAT_LABEL[c.name] || c.name)}">` +
         c.examples.map(e => `<option value="${esc(e.question)}">${esc(e.question_id)}: ${esc(e.question)}</option>`).join("") +
@@ -659,8 +630,7 @@ function renderDecision(d, r) {
         </div>
         <span class="k">Decision time: <b>${ms(d.decision_ms)}</b> (Engine: ${ms(d.decision_engine_ms)} · Preflight: ${ms(d.preflight_ms)})</span>
       </div>
-      <p style="margin:8px 0 4px;font-size:0.92rem"><b>Rationale:</b> ${esc(d.rationale || "Evaluated collection relevance.")}</p>
-      <p class="tiny">Heuristic decision rule: RETRIEVE if score ≥ threshold. Score is a weighted retrieval-need estimate, not a probability.</p>
+      <p style="margin:8px 0 4px;font-size:0.92rem"><b>Why:</b> ${esc(d.rationale || "Evaluated collection relevance.")} <span class="tiny">(RETRIEVE when score ≥ threshold; the score is a weighted need estimate, not a probability.)</span></p>
 
       <details style="margin-top:8px">
         <summary>Technical Signal Weights & Preflight Details</summary>
@@ -774,74 +744,76 @@ function jumpPassage(n) {
 }
 
 /* ------------------------------------------- Compact Performance Table */
+function coldBadge(b) { return b && b.generation_cold ? badge("cold start", "warn") : ""; }
+
+// One-off retriever setup the retriever itself reports (dense/hybrid load an embedding model once).
+function retrievalSetupNote(b) {
+  const d = (b && b.retrieval_diagnostics) || {};
+  const dense = (d.components && d.components.dense) || d;
+  const parts = [];
+  if (dense.model_load_ms) parts.push(`embedding-model load ${ms(dense.model_load_ms)}`);
+  if (dense.encode_ms) parts.push(`corpus encoding ${ms(dense.encode_ms)}`);
+  return parts.length ? `Retriever-reported one-off setup (paid once per process, not per query): ${parts.join(", ")}.` : "";
+}
+
 function renderCompactPerf(r) {
   const t = r.timings || {};
   const a = r.branch_a || {};
   const b = r.branch_b || {};
   const tokA = a.tokens || {};
   const tokB = b.tokens || {};
-  const comp = r.comparison || {};
+  const num = v => (v == null ? "—" : v);
+  const decision = `${ms(t.decision_ms)} <span class="tiny">(router ${ms(t.decision_engine_ms)} + collection preflight ${ms(t.preflight_ms)})</span>`;
+  const single = "<b>Single live measurement</b> (n = 1, this machine). Repeated, aggregated measurements are on the Research Results tab.";
+  const tokenNote = "Retrieval puts evidence into the prompt, so Option B can use more input tokens and take longer to generate; it is not always faster or cheaper.";
 
   if (r.mode === "adaptive") {
+    const ex = r.executed_branch || {};
+    const tok = ex.tokens || {};
+    const isB = r.selected_branch === "B";
     $("perfCard").innerHTML = `
-      <h3>Operational Timing & Token Profile (Adaptive Mode)</h3>
+      <h3>Timing and tokens: selected path (Option ${esc(r.selected_branch)})</h3>
       <table>
-        <thead><tr><th>Metric</th><th>Selected Path (Option ${esc(r.selected_branch)})</th><th>Decision Engine</th><th>Total Deployed Latency</th></tr></thead>
         <tbody>
-          <tr>
-            <td><b>Execution Time</b></td>
-            <td>${ms(t.generation_ms)} generation</td>
-            <td>${ms(t.decision_ms)} (Engine ${ms(t.decision_engine_ms)} + Preflight ${ms(t.preflight_ms)})</td>
-            <td><b>${ms(r.adaptive_total_ms)}</b></td>
-          </tr>
-          <tr>
-            <td><b>Token Usage</b></td>
-            <td>Input: <b>${tokB.input_tokens || tokA.input_tokens || "—"}</b> · Output: <b>${tokB.output_tokens || tokA.output_tokens || "—"}</b> · Total: <b>${tokB.total_tokens || tokA.total_tokens || "—"}</b></td>
-            <td>0 tokens (no LLM call)</td>
-            <td><b>${tokB.total_tokens || tokA.total_tokens || "—"} tokens</b></td>
-          </tr>
+          <tr><td>Decision</td><td class="num">${decision}</td></tr>
+          ${isB ? `<tr><td>Retrieval</td><td class="num">${ms(t.retrieval_ms)}</td></tr>` : ""}
+          <tr><td>Generation</td><td class="num">${ms(t.generation_ms)} ${coldBadge(ex)}</td></tr>
+          <tr><td><b>Total adaptive path</b> (decision + ${isB ? "retrieval + " : ""}generation)</td><td class="num"><b>${ms(r.adaptive_total_ms)}</b></td></tr>
+          <tr><td>Tokens (in / out / total)</td><td class="num">${num(tok.input_tokens)} / ${num(tok.output_tokens)} / <b>${num(tok.total_tokens)}</b></td></tr>
         </tbody>
-      </table>`;
+      </table>
+      <p class="tiny" style="margin:6px 0 0">${single} ${ex.generation_cold ? "This was the first model call since the server started, so it may include a one-off model load (cold start); run it again for a warm timing." : ""} ${isB ? esc(retrievalSetupNote(ex)) : ""}</p>
+      <p class="tiny" style="margin:4px 0 0">${tokenNote}</p>`;
     return;
   }
 
-  const diffTime = (b.path_total_ms && a.path_total_ms) ? (b.path_total_ms - a.path_total_ms) : null;
-  const diffTok = (tokB.total_tokens && tokA.total_tokens) ? (tokB.total_tokens - tokA.total_tokens) : null;
+  const diffTime = (b.path_total_ms != null && a.path_total_ms != null) ? b.path_total_ms - a.path_total_ms : null;
+  const diffTok = (tokB.total_tokens != null && tokA.total_tokens != null) ? tokB.total_tokens - tokA.total_tokens : null;
+  const sgn = v => (v > 0 ? "+" : "");
+  const cold = [a.generation_cold ? "Option A" : null, b.generation_cold ? "Option B" : null].filter(Boolean);
+  const coldMsg = cold.length
+    ? `<span class="badge warn">Not like-for-like</span> ${cold.join(" and ")} was the first model call since the server started, so it may include a one-off model load (cold start) and the time difference above can mix load time with generation time. Run again for warm timings.`
+    : "Both paths ran warm.";
 
   $("perfCard").innerHTML = `
-    <h3>Performance & Efficiency Comparison</h3>
+    <h3>Timing and tokens (research comparison, both answers generated)</h3>
     <table>
-      <thead>
-        <tr><th>Metric</th><th>Option A (Closed-Book)</th><th>Option B (Retrieval-Augmented)</th><th>Difference (B − A)</th></tr>
-      </thead>
+      <thead><tr><th>Measure</th><th class="num">Option A: closed-book</th><th class="num">Option B: with retrieval</th><th class="num">B − A</th></tr></thead>
       <tbody>
-        <tr>
-          <td><b>Total Path Time</b></td>
-          <td>${ms(a.path_total_ms)}</td>
-          <td>${ms(b.path_total_ms)}</td>
-          <td><b class="${(diffTime || 0) > 0 ? "badge warn" : "badge ok"}">${diffTime != null ? (diffTime > 0 ? "+" : "") + ms(diffTime) : "—"}</b></td>
-        </tr>
-        <tr>
-          <td><b>Retrieval Time</b></td>
-          <td>0.0 ms (None)</td>
-          <td>${ms(t.retrieval_ms)}</td>
-          <td>+${ms(t.retrieval_ms)}</td>
-        </tr>
-        <tr>
-          <td><b>Generation Latency</b></td>
-          <td>${ms(a.generation_ms)}</td>
-          <td>${ms(b.generation_ms)}</td>
-          <td>${(b.generation_ms && a.generation_ms) ? (b.generation_ms > a.generation_ms ? "+" : "") + ms(b.generation_ms - a.generation_ms) : "—"}</td>
-        </tr>
-        <tr>
-          <td><b>Tokens (In / Out / Total)</b></td>
-          <td>${tokA.input_tokens ?? "—"} / ${tokA.output_tokens ?? "—"} / <b>${tokA.total_tokens ?? "—"}</b></td>
-          <td>${tokB.input_tokens ?? "—"} / ${tokB.output_tokens ?? "—"} / <b>${tokB.total_tokens ?? "—"}</b></td>
-          <td><b class="${(diffTok || 0) > 0 ? "badge warn" : "badge ok"}">${diffTok != null ? (diffTok > 0 ? "+" : "") + diffTok + " tokens" : "—"}</b></td>
-        </tr>
+        <tr><td>Retrieval</td><td class="num">—</td><td class="num">${ms(t.retrieval_ms)}</td><td class="num">—</td></tr>
+        <tr><td>Generation</td><td class="num">${ms(a.generation_ms)} ${coldBadge(a)}</td><td class="num">${ms(b.generation_ms)} ${coldBadge(b)}</td>
+            <td class="num">${(a.generation_ms != null && b.generation_ms != null) ? sgn(b.generation_ms - a.generation_ms) + ms(b.generation_ms - a.generation_ms) : "—"}</td></tr>
+        <tr><td><b>Path total</b> (generation, plus retrieval for B)</td><td class="num"><b>${ms(a.path_total_ms)}</b></td><td class="num"><b>${ms(b.path_total_ms)}</b></td>
+            <td class="num">${diffTime != null ? sgn(diffTime) + ms(diffTime) : "—"}</td></tr>
+        <tr><td>Tokens (in / out / total)</td><td class="num">${num(tokA.input_tokens)} / ${num(tokA.output_tokens)} / <b>${num(tokA.total_tokens)}</b></td>
+            <td class="num">${num(tokB.input_tokens)} / ${num(tokB.output_tokens)} / <b>${num(tokB.total_tokens)}</b></td>
+            <td class="num">${diffTok != null ? sgn(diffTok) + diffTok + " tokens" : "—"}</td></tr>
       </tbody>
     </table>
-    <p class="tiny">Note: In research comparison mode, both answers are generated sequentially. Retrieval itself takes sub-millisecond time (${ms(t.retrieval_ms)}), while longer context expansion adds generation latency.</p>`;
+    <p class="tiny" style="margin:8px 0 0">Decision (shared by both options): ${decision}.<br>
+      Estimated time if deployed (decision + selected path): <b>${ms(t.selected_path_projected_ms)}</b>. Time for this whole research comparison, both answers run one after the other: <b>${ms(r.comparison_total_ms)}</b>.</p>
+    <p class="tiny" style="margin:6px 0 0">${coldMsg} ${esc(retrievalSetupNote(b))}</p>
+    <p class="tiny" style="margin:4px 0 0">${single} ${tokenNote}</p>`;
 }
 
 /* ------------------------------------------------ Support & Lexical Diff */
@@ -880,91 +852,247 @@ function renderDiff(r) {
 
 /* ------------------------------------------------- Load Saved Experiments */
 async function loadExperiments() {
-  set("expStatus", "Loading saved results…");
+  set("expStatus", "Reading saved results…");
   try {
-    const [rRet, rPol] = await Promise.all([
-      api("/experiments/retrieval"),
-      api("/experiments/policy")
-    ]);
-    state.exp = rRet;
-    state.pol = rPol;
-    renderRetrievalExp(rRet);
-    renderPolicyExp(rPol);
-    set("expStatus", "Results loaded.");
+    try {
+      const d = await api("/documents");
+      state.activeChunks = (d.documents || []).filter(x => x.active).reduce((n, x) => n + (x.n_chunks || 0), 0);
+    } catch (e) { state.activeChunks = null; }
+    loadRouting();
+    const results = await Promise.allSettled([api("/experiments/retrieval"), api("/experiments/policy")]);
+    const [rRet, rPol] = results;
+    if (rRet.status === "fulfilled") { state.exp = rRet.value; renderRetrievalExp(rRet.value); }
+    else $("retrievalTableWrap").innerHTML = `<p class="k">No retrieval results: ${esc(rRet.reason.message)}</p>`;
+    if (rPol.status === "fulfilled") { state.pol = rPol.value; renderPolicyExp(rPol.value); }
+    else $("policyTableWrap").innerHTML = `<p class="k">No earlier-experiment results: ${esc(rPol.reason.message)}</p>`;
+    set("expStatus", "Saved results re-read at " + new Date().toLocaleTimeString() + ".");
   } catch (e) {
     set("expStatus", "Error loading: " + e.message);
   }
 }
 
-function renderRetrievalExp(j) {
+async function loadRetrievalRun(run) {
+  try {
+    const j = await api("/experiments/retrieval" + (run ? "?run=" + encodeURIComponent(run) : ""));
+    state.exp = j;
+    renderRetrievalExp(j, !!run);
+  } catch (e) { set("expStatus", "Error loading run: " + e.message); }
+}
+
+/* ------------------------------------------------- Routing evaluation */
+const ROUTER_LABEL = {
+  never: "Never retrieve", always: "Always retrieve", "heuristic@0.5": "Heuristic, threshold 0.5",
+  "heuristic-tuned": "Heuristic, threshold tuned on train split", learned: "Learned (logistic regression)",
+  oracle: "Oracle"
+};
+const ROUTER_ROLE = {
+  never: ["fixed baseline", ""], always: ["fixed baseline", ""],
+  "heuristic@0.5": ["deployed policy", "ok"], "heuristic-tuned": ["experimental", "info"],
+  learned: ["experimental", "info"], oracle: ["evaluation-only upper bound", "warn"]
+};
+const pm = (m, d = 3) => (m && m.mean != null) ? `${m.mean.toFixed(d)} <span class="tiny">±${(m.sd ?? 0).toFixed(d)}</span>` : "—";
+const stamp = iso => (iso ? new Date(iso).toLocaleString() : "—");
+
+async function loadRouting() {
+  try {
+    const j = await api("/experiments/routing");
+    state.routing = j.view;
+    renderRoutingExp(j.view);
+  } catch (e) {
+    $("routingWrap").innerHTML = `<p class="k">No routing results yet. Run <code>python scripts/eval_routing.py</code> and reload.</p>`;
+    $("costWrap").innerHTML = "";
+  }
+}
+
+function routingSummary(v) {
+  const s = v.settings || {}, P = v.policies || {};
+  const { never: nev, always: alw, learned, oracle } = P;
+  const heur = P["heuristic@0.5"];
+  const Q = k => P[k].quality;
+  // "within noise": the gap is no larger than the split-to-split sd of either policy (not a significance test).
+  const noisy = (x, y) => Math.abs(x.mean - y.mean) <= Math.max(x.sd || 0, y.sd || 0);
+  const d = (x, y, dig = 3) => (x - y >= 0 ? "+" : "−") + Math.abs(x - y).toFixed(dig);
+  const cats = Object.entries(v.by_category || {});
+  const hurtCats = cats.filter(([, c]) => c.hurts > c.helps).map(([k]) => CAT_LABEL[k] || k);
+  const out = [];
+
+  if (nev && alw) {
+    out.push(`<b>Does retrieval improve answer quality here?</b> On average, yes: ${nev.quality.mean.toFixed(3)} closed-book vs ${alw.quality.mean.toFixed(3)} always-retrieve. It is not uniform: retrieval helped on ${s.n_retrieval_helps} of ${s.n_scored} scored questions, hurt on ${s.n_retrieval_hurts}${hurtCats.length ? ` (mostly <i>${esc(hurtCats.join(", "))}</i>)` : ""}, and tied on the rest.`);
+    out.push(`<b>What does it cost?</b> Always-retrieve uses about ${(alw.tokens.mean / nev.tokens.mean).toFixed(1)}× the tokens (${Math.round(alw.tokens.mean)} vs ${Math.round(nev.tokens.mean)} per question) and about ${(alw.latency_ms.mean / nev.latency_ms.mean).toFixed(1)}× the latency (${ms(alw.latency_ms.mean)} vs ${ms(nev.latency_ms.mean)}) on this machine.`);
+  }
+  if (heur && alw && nev) {
+    out.push(`<b>Shipped heuristic vs the fixed policies.</b> It retrieves on ${Math.round(100 * heur.retrieval_rate.mean)}% of questions and scores ${heur.quality.mean.toFixed(3)} (${d(heur.quality.mean, alw.quality.mean)} vs always-retrieve, ${d(heur.quality.mean, nev.quality.mean)} vs never) with ${Math.round(100 * (1 - heur.tokens.mean / alw.tokens.mean))}% fewer tokens than always-retrieve. Its gain over always-retrieve is ${noisy(heur.quality, alw.quality) ? "within" : "larger than"} the split-to-split sd (±${Math.max(heur.quality.sd, alw.quality.sd).toFixed(3)}). ${oracle ? `The oracle upper bound is ${oracle.quality.mean.toFixed(3)}.` : ""}`);
+  }
+  if (heur && learned) {
+    const same = noisy(learned.quality, heur.quality);
+    out.push(`<b>Learned router vs shipped heuristic.</b> Quality ${learned.quality.mean.toFixed(3)} vs ${heur.quality.mean.toFixed(3)} (${d(learned.quality.mean, heur.quality.mean)}), ${Math.round(learned.tokens.mean)} vs ${Math.round(heur.tokens.mean)} tokens, routing balanced accuracy ${learned.balanced_accuracy.mean.toFixed(3)} vs ${heur.balanced_accuracy.mean.toFixed(3)}. The quality gap is ${same ? "within" : "larger than"} the split-to-split sd, so ${same ? "this is a cost/quality trade-off, not a demonstrated improvement" : "it is a measurable difference on this workload"}.`);
+  }
+  return out;
+}
+
+function renderRoutingExp(v) {
+  const s = v.settings || {}, P = v.policies || {}, bc = v.branch_costs || {};
+  const order = ["never", "always", "heuristic@0.5", "heuristic-tuned", "learned", "oracle"].filter(k => P[k]);
+  const best = Math.max(...order.filter(k => k !== "oracle").map(k => P[k].quality.mean));
+  const testPct = Math.round(100 * (s.test_frac ?? 0.3)), trainPct = 100 - testPct;
+  const bullets = routingSummary(v);
+
+  $("routingMeta").innerHTML = `Run <code>${esc(v.run_id)}</code> · generated ${esc(stamp(v.generated_at_utc))} · ${s.n_questions} questions (${s.n_scored} with a reference answer) · model <code>${esc(s.model)}</code> · retriever <code>${esc(s.retriever)}</code>, top-${s.top_k}<br>
+    Question sets: ${(s.datasets || []).map(p => `<code>${esc(p)}</code>`).join(", ")}`;
+
+  $("routingWrap").innerHTML = `
+    <h4 style="margin:0 0 4px">Summary</h4>
+    <ul style="margin:0 0 10px;padding-left:20px;font-size:0.88rem">${bullets.map(b => `<li>${b}</li>`).join("")}</ul>
+    <table>
+      <thead><tr><th>Router</th><th class="num">Answer quality</th><th class="num">Retrieves on</th><th class="num">Tokens / question</th><th class="num">Latency / question</th><th class="num">Routing balanced accuracy</th></tr></thead>
+      <tbody>${order.map(k => { const m = P[k]; const isBest = k !== "oracle" && m.quality.mean === best; const [role, kind] = ROUTER_ROLE[k] || ["", ""];
+        return `<tr${k === "oracle" ? ' style="opacity:.7"' : ""}><td><b>${esc(ROUTER_LABEL[k] || k)}</b><br>${badge(role, kind)}</td>
+          <td class="num">${pm(m.quality)} ${isBest ? badge("highest", "ok") : ""}</td>
+          <td class="num">${Math.round(100 * m.retrieval_rate.mean)}%</td>
+          <td class="num">${Math.round(m.tokens.mean)}</td>
+          <td class="num">${ms(m.latency_ms.mean)}</td>
+          <td class="num">${["never", "always"].includes(k) ? "0.500 <span class=\"tiny\">(fixed)</span>" : pm(m.balanced_accuracy)}</td></tr>`; }).join("")}</tbody>
+    </table>
+    <p class="tiny" style="margin:6px 0 0"><b>Evaluation:</b> ${s.n_splits} repeated stratified ${trainPct}/${testPct} splits of the ${s.n_scored} scored questions (stratified on the retrieval-helps label, fixed seed; splits overlap, so the ± is split-to-split spread, not a confidence interval). The tuned threshold and the learned router are fitted on the ${trainPct}% training part only; every policy is scored on the ${testPct}% held-out part. Router inputs are the question text and the collection preflight; reference answers and helps/hurts labels are never router inputs.</p>
+    <p class="tiny" style="margin:4px 0 0"><b>Answer quality</b> = mean of token-level F1 and token-level recall against a short reference answer (0–1). It measures word overlap with the reference, not factual correctness, entailment or hallucination rate. <b>Routing balanced accuracy</b> asks a different question: did the router choose retrieval exactly when retrieval helped (helps = grounded answer scored ≥ ${s.gap ?? 0.1} higher)? It is separate from answer quality and from retrieval ranking quality.</p>
+    <p class="tiny" style="margin:4px 0 0"><span class="badge warn">Limits</span> A constructed workload (a mix of questions about the documents and general questions chosen by the author), one model, one corpus, one retriever, n = ${s.n_scored}. The reference answers were written for this evaluation. Results should not be generalised to other users, models or traffic.</p>
+    <details style="margin-top:8px"><summary>By question type</summary>
+      <table><thead><tr><th>Category</th><th class="num">n</th><th class="num">Closed-book quality</th><th class="num">Grounded quality</th><th class="num">Retrieval helps</th><th class="num">Retrieval hurts</th></tr></thead>
+      <tbody>${Object.entries(v.by_category || {}).map(([k, c]) => `<tr><td>${esc(CAT_LABEL[k] || k)}</td><td class="num">${c.n}</td><td class="num">${c.mean_quality_closed_book}</td><td class="num">${c.mean_quality_grounded}</td><td class="num">${c.helps}</td><td class="num">${c.hurts}</td></tr>`).join("")}</tbody></table>
+    </details>
+    <details style="margin-top:8px"><summary>Inspect answers, both ways (${(v.questions || []).length} questions)</summary>
+      <div class="row" style="margin:8px 0"><select id="rtFilter" onchange="renderRoutingQuestions()">
+        <option value="">All</option><option value="helps">Retrieval helped</option><option value="hurts">Retrieval hurt</option><option value="tie">Tie</option><option value="miss">Heuristic routed wrongly</option></select></div>
+      <div id="rtQuestions"></div></details>`;
+  renderRoutingQuestions();
+
+  const retr = bc.retrieval_ms, genB = bc.gen_b_ms;
+  $("costWrap").innerHTML = `<table>
+    <thead><tr><th>Mean over the ${(v.questions || []).length} scored questions</th><th class="num">Closed-book (A)</th><th class="num">With retrieval (B)</th></tr></thead>
+    <tbody>
+      <tr><td>Answer quality (0–1)</td><td class="num">${bc.quality_a}</td><td class="num">${bc.quality_b}</td></tr>
+      <tr><td>Tokens per answer</td><td class="num">${Math.round(bc.tokens_a)}</td><td class="num">${Math.round(bc.tokens_b)}</td></tr>
+      <tr><td>Generation time</td><td class="num">${ms(bc.gen_a_ms)}</td><td class="num">${ms(bc.gen_b_ms)}</td></tr>
+      <tr><td>Retrieval step (${esc(s.retriever)}, warm, per query)</td><td class="num">—</td><td class="num">${ms(retr)}</td></tr>
+    </tbody></table>
+    <p class="tiny">Means over all ${(v.questions || []).length} questions of run <code>${esc(v.run_id)}</code> (the router table above averages held-out splits instead, so its never/always rows differ slightly), on this machine's CPU with a local model. The retrieval step is ${ms(retr)} against ${ms(genB)} of generation, so the extra time and tokens of option B come from the longer prompt that the evidence creates, not from the search itself. Each row is a mean; per-question timings were not stored as trials, so no p95 is shown. The first call of a process also pays a one-off model load that these means may include.</p>`;
+}
+
+function renderRoutingQuestions() {
+  const v = state.routing; if (!v) return;
+  const f = $("rtFilter") ? $("rtFilter").value : "";
+  const rows = (v.questions || []).filter(r => {
+    const heurRetrieve = r.decision === "RETRIEVE";
+    if (f === "helps") return r.retrieval_helps;
+    if (f === "hurts") return r.retrieval_hurts;
+    if (f === "tie") return !r.retrieval_helps && !r.retrieval_hurts;
+    if (f === "miss") return heurRetrieve !== !!r.retrieval_helps;
+    return true;
+  });
+  $("rtQuestions").innerHTML = rows.slice(0, 80).map(r => `
+    <div class="card" style="margin:6px 0;padding:8px">
+      <b>${esc(r.question_id)}</b> · ${esc(CAT_LABEL[r.category] || r.category)} ·
+      ${r.b_fallback ? badge("no passage found: closed-book fallback", "warn") : ""}
+      ${r.retrieval_helps ? badge("retrieval helped", "ok") : r.retrieval_hurts ? badge("retrieval hurt", "bad") : badge("tie", "info")}
+      ${badge("router: " + (r.decision === "RETRIEVE" ? "retrieve" : "skip") + " (" + Number(r.heuristic_score).toFixed(2) + ")", (r.decision === "RETRIEVE") === !!r.retrieval_helps ? "ok" : "warn")}
+      <div style="margin:4px 0">${esc(r.question)}</div>
+      <div class="tiny"><b>Reference:</b> ${esc(r.reference_answer)}</div>
+      <div class="tiny"><b>Closed-book</b> (${Number(r.quality_a).toFixed(2)}): ${esc(r.answer_a)}</div>
+      <div class="tiny"><b>With evidence</b> (${Number(r.quality_b).toFixed(2)}): ${esc(r.answer_b)}</div>
+    </div>`).join("") || '<p class="k">No questions match.</p>';
+}
+
+/* ------------------------------------------------- Retrieval benchmark */
+function renderRetrievalExp(j, requested) {
   const v = j.view || {};
   const rows = v.comparison_table || [];
-  const best = v.best || {};
-  set("retRunId", v.run_id || "20261025_180311");
+  const best = rows.length > 1 ? (v.best || {}) : {};
+  const byMethod = Object.fromEntries(rows.map(r => [r.method, r]));
+  const sc = v.corpus || {};
+  const ds = v.dataset || {};
+  const runs = j.runs || [];
+  const first = rows[0] || {};
+  const newest = runs[0];
+  const notes = [];
+  if ((v.methods_missing || []).length) notes.push(`${badge("Partial run", "warn")} no results for ${esc(v.methods_missing.join(", "))} in this run.`);
+  if (sc.scope_warning) notes.push(`${badge("Scope mismatch", "bad")} ${esc(sc.scope_warning)}`);
+  if (!requested && newest && newest.run_id !== v.run_id) notes.push(`Showing the newest <b>complete</b> run. The newer run <code>${esc(newest.run_id)}</code> is ${newest.missing_methods.length ? "missing " + esc(newest.missing_methods.join(", ")) : "flagged"}${newest.scope_warning ? " and has a scope mismatch" : ""}; pick it below to inspect it.`);
+  const scopeNote = (state.activeChunks != null && sc.n_chunks != null && state.activeChunks !== sc.n_chunks)
+    ? ` The collection currently active in the app has <b>${state.activeChunks}</b> chunks, so these results do <b>not</b> describe it.` : "";
+
+  set("retRunId", v.run_id || "—");
+  $("retrievalMeta").innerHTML = `
+    Run <code id="retRunId">${esc(v.run_id || "—")}</code> · generated ${esc(stamp(v.generated_at_utc))} · dataset <code>${esc((ds.path || "").replace(/\\/g, "/"))}</code> (${first.n_scored_questions ?? "?"} answerable of ${first.n_questions ?? "?"} questions)<br>
+    <b>Corpus scope:</b> ${sc.n_chunks ?? "?"} chunks in ${(sc.document_ids || []).length} document(s) (<code>${esc((sc.document_ids || []).join(", "))}</code>).${scopeNote} All rows below come from this single run.
+    ${runs.length > 1 ? `<div class="row" style="margin-top:6px"><label class="k" for="retRunSelect">Other saved runs:</label>
+      <select id="retRunSelect" onchange="loadRetrievalRun(this.value)">${runs.map(r => `<option value="${esc(r.run_id)}"${r.run_id === v.run_id ? " selected" : ""}>${esc(r.run_id)} · ${esc((r.methods || []).join("+"))}${r.complete ? "" : " (partial/flagged)"}</option>`).join("")}</select></div>` : ""}
+    ${notes.length ? `<div style="margin-top:6px">${notes.join("<br>")}</div>` : ""}`;
 
   $("retrievalTableWrap").innerHTML = `
     <table>
       <thead>
         <tr>
-          <th>Retrieval Method</th>
+          <th>Method</th>
           <th class="num">Recall@5</th>
           <th class="num">MRR@10</th>
           <th class="num">nDCG@10</th>
           <th class="num">Hit@1</th>
-          <th class="num">Median Query</th>
-          <th class="num">Cold 1st Query</th>
-          <th class="num">Index Build</th>
+          <th class="num">Median query (warm)</th>
+          <th class="num">Cold first query</th>
+          <th class="num">Index / build time</th>
         </tr>
       </thead>
       <tbody>
-        ${rows.map(r => {
-          const isRecBest = (best.recall_at_5 || []).includes(r.method);
-          const isNdcgBest = (best.ndcg_at_10 || []).includes(r.method);
+        ${["bm25", "dense", "hybrid"].map(m => {
+          const r = byMethod[m];
+          if (!r) return `<tr><td><b>${esc(METHOD_LABEL[m])}</b></td><td colspan="7" class="k">Not available: no result for this method in run ${esc(v.run_id)}.</td></tr>`;
           return `<tr>
-            <td><b>${esc(METHOD_LABEL[r.method] || r.method)}</b><br><span class="tiny">${r.n_scored_questions || 67} scored answerable</span></td>
-            <td class="num"><b>${fix(r.recall_at_5, 4)}</b> ${isRecBest ? badge("best", "ok") : ""}</td>
-            <td class="num">${fix(r.mrr_at_10, 4)}</td>
-            <td class="num"><b>${fix(r.ndcg_at_10, 4)}</b> ${isNdcgBest ? badge("best", "ok") : ""}</td>
-            <td class="num">${fix(r.hit_rate_at_1, 4)}</td>
+            <td><b>${esc(METHOD_LABEL[m])}</b></td>
+            <td class="num"><b>${fix(r.recall_at_5, 4)}</b> ${(best.recall_at_5 || []).includes(m) ? badge("best", "ok") : ""}</td>
+            <td class="num">${fix(r.mrr_at_10, 4)} ${(best.mrr_at_10 || []).includes(m) ? badge("best", "ok") : ""}</td>
+            <td class="num"><b>${fix(r.ndcg_at_10, 4)}</b> ${(best.ndcg_at_10 || []).includes(m) ? badge("best", "ok") : ""}</td>
+            <td class="num">${fix(r.hit_rate_at_1, 4)} ${(best.hit_rate_at_1 || []).includes(m) ? badge("best", "ok") : ""}</td>
             <td class="num">${ms(r.median_query_ms)}</td>
-            <td class="num">${r.cold_first_query_ms ? Math.round(r.cold_first_query_ms) + " ms" : "—"}</td>
-            <td class="num">${r.build_ms ? Math.round(r.build_ms) + " ms" : "—"}</td>
+            <td class="num">${ms(r.cold_first_query_ms)}</td>
+            <td class="num">${ms(r.build_ms)}${r.model_load_ms ? `<br><span class="tiny">of which model load ${ms(r.model_load_ms)}</span>` : ""}</td>
           </tr>`;
         }).join("")}
       </tbody>
-    </table>`;
+    </table>
+    <p class="tiny" style="margin:6px 0 0">Ranking quality only: whether labelled relevant passages are ranked highly. It does not say whether a generated answer is correct. Latency is retrieval only (no LLM), median over the repeated passes of this run; build time can be large for dense because it includes loading the embedding model and encoding the corpus.</p>`;
 
   $("retrievalHelp").innerHTML = Object.entries(v.metric_help || {}).map(([k, t]) =>
     `<p class="tiny"><b>${esc(k)}</b>: ${esc(t)}</p>`
   ).join("");
 
-  // Populate category filter
   const cats = [...new Set((v.questions || []).map(q => q.category))];
-  $("expCatFilter").innerHTML = '<option value="">All Categories</option>' +
+  $("expCatFilter").innerHTML = '<option value="">All categories</option>' +
     cats.map(c => `<option value="${esc(c)}">${esc(CAT_LABEL[c] || c)}</option>`).join("");
   renderQuestionList();
 }
 
+/* ------------------------------------- Earlier corpus-coverage experiment */
 function renderPolicyExp(j) {
   const v = j.view || {};
   const pol = v.policies || {};
   const s = v.settings || {};
   const dq = v.decision_quality || {};
-  set("polRunId", v.run_id || "20261026_011553");
+  const nAns = s.n_answerable, nUn = s.n_unanswerable;
 
-  // Table 2: Policy Comparison
+  $("polMeta").innerHTML = `Run <code id="polRunId">${esc(v.run_id || "—")}</code> · generated ${esc(stamp(v.generated_at_utc))} · ${s.n_questions} questions (${nAns} answerable, ${nUn} unanswerable) · retriever <code>${esc(s.retriever)}</code>, top-${s.top_k} · answers were generated for only <b>${s.answers_run ?? 0}</b> questions.`;
+
   $("policyTableWrap").innerHTML = `
     <table>
       <thead>
         <tr>
           <th>Policy</th>
-          <th class="num">Evidence Recall@5</th>
-          <th class="num">Unanswerable Probe</th>
-          <th class="num">Retrieval Calls</th>
-          <th class="num">Mean Retrieval</th>
-          <th class="num">Path Latency</th>
+          <th class="num">Evidence recall@${s.k_recall ?? 5}</th>
+          <th class="num">Retrieves on unanswerable</th>
+          <th class="num">Retrieval calls</th>
+          <th class="num">Mean retrieval</th>
+          <th class="num">Path latency</th>
           <th class="num">Tokens</th>
-          <th class="num">Answer Quality (F1)</th>
+          <th class="num">Token-F1</th>
         </tr>
       </thead>
       <tbody>
@@ -973,83 +1101,47 @@ function renderPolicyExp(j) {
             <td><b>${esc(name)}</b><br><span class="tiny">${esc((v.policy_help || {})[name] || "")}</span></td>
             <td class="num"><b>${fix(p.evidence_recall_at_5, 3)}</b></td>
             <td class="num">${pct(p.unanswerable_probe_rate)}</td>
-            <td class="num">${p.retrieval_calls} / ${s.n_questions || 75}</td>
+            <td class="num">${p.retrieval_calls} / ${s.n_questions}</td>
             <td class="num">${ms(p.mean_retrieval_ms)}</td>
-            <td class="num">${ms(p.mean_latency_ms)} <span class="tiny">(n=${p.n_latency_samples || 0})</span></td>
-            <td class="num">${p.mean_total_tokens ?? "—"}</td>
-            <td class="num">${fix(p.mean_f1, 3)} ${p.small_sample_warning ? badge("n=4 Prelim", "warn") : ""}</td>
+            <td class="num">${ms(p.mean_latency_ms)} <span class="tiny">(n=${p.n_latency_samples ?? 0})</span></td>
+            <td class="num">${p.mean_total_tokens ?? "—"} <span class="tiny">(n=${p.n_token_samples ?? 0})</span></td>
+            <td class="num">${fix(p.mean_f1, 3)} ${p.small_sample_warning ? badge(`preliminary, n=${p.n_quality_samples ?? 0}`, "warn") : ""}</td>
           </tr>`).join("")}
       </tbody>
     </table>
-    <p class="tiny">Evidence Recall measures whether retrieved passages contain gold evidence (67 answerable questions). Oracle is an evaluation-only upper bound.</p>`;
+    <p class="tiny">Evidence recall is over the ${nAns} answerable questions and measures whether the retrieved passages contain the labelled evidence. Latency, tokens and token-F1 use only the ${s.answers_run ?? 0} questions that were answered, so they are not comparable with the main experiment's ${state.routing ? state.routing.settings.n_scored : ""} scored questions. Oracle is an evaluation-only upper bound.</p>`;
 
-  // Complete Confusion Matrix & Per-Class Metrics
-  const cm = dq.confusion_matrix || {};
-  const m = dq.metrics || {};
-  const baseAlways = dq.baseline_always_retrieve || {};
-  const baseNever = dq.baseline_never_retrieve || {};
-  const cmAlways = baseAlways.confusion_matrix || {};
-  const cmNever = baseNever.confusion_matrix || {};
-  const mAlways = baseAlways.metrics || {};
-  const mNever = baseNever.metrics || {};
-
+  const cm = dq.confusion_matrix || {}, m = dq.metrics || {};
+  const bA = dq.baseline_always_retrieve || {}, bN = dq.baseline_never_retrieve || {};
+  const cA = bA.confusion_matrix || {}, cN = bN.confusion_matrix || {};
+  const mA = bA.metrics || {}, mN = bN.metrics || {};
   $("confusionMatrixWrap").innerHTML = `
+    <p class="tiny">Positive class: <b>answerable</b> (a labelled relevant passage exists in the corpus). Predicted positive: <b>RETRIEVE</b>. This measures corpus coverage, not final answer correctness.</p>
     <div class="grid2">
       <div>
-        <h4>Confusion Matrix (All 75 Benchmark Questions)</h4>
         <table>
-          <thead>
-            <tr><th>Policy</th><th class="num">TP</th><th class="num">FN</th><th class="num">FP</th><th class="num">TN</th></tr>
-          </thead>
+          <thead><tr><th>Policy</th><th class="num">TP</th><th class="num">FN</th><th class="num">FP</th><th class="num">TN</th></tr></thead>
           <tbody>
-            <tr>
-              <td><b>Adaptive Policy</b></td>
-              <td class="num"><b>${cm.tp_retrieve_answerable ?? 65}</b></td>
-              <td class="num">${cm.fn_skip_answerable ?? 2}</td>
-              <td class="num">${cm.fp_retrieve_unanswerable ?? 1}</td>
-              <td class="num"><b>${cm.tn_skip_unanswerable ?? 7}</b></td>
-            </tr>
-            <tr>
-              <td>Always-Retrieve (Baseline)</td>
-              <td class="num">${cmAlways.tp_retrieve_answerable ?? 67}</td>
-              <td class="num">${cmAlways.fn_skip_answerable ?? 0}</td>
-              <td class="num">${cmAlways.fp_retrieve_unanswerable ?? 8}</td>
-              <td class="num">${cmAlways.tn_skip_unanswerable ?? 0}</td>
-            </tr>
-            <tr>
-              <td>Never-Retrieve (Baseline)</td>
-              <td class="num">${cmNever.tp_retrieve_answerable ?? 0}</td>
-              <td class="num">${cmNever.fn_skip_answerable ?? 67}</td>
-              <td class="num">${cmNever.fp_retrieve_unanswerable ?? 0}</td>
-              <td class="num">${cmNever.tn_skip_unanswerable ?? 8}</td>
-            </tr>
+            <tr><td><b>Adaptive</b></td><td class="num">${cm.tp_retrieve_answerable ?? "—"}</td><td class="num">${cm.fn_skip_answerable ?? "—"}</td><td class="num">${cm.fp_retrieve_unanswerable ?? "—"}</td><td class="num">${cm.tn_skip_unanswerable ?? "—"}</td></tr>
+            <tr><td>Always retrieve</td><td class="num">${cA.tp_retrieve_answerable ?? "—"}</td><td class="num">${cA.fn_skip_answerable ?? "—"}</td><td class="num">${cA.fp_retrieve_unanswerable ?? "—"}</td><td class="num">${cA.tn_skip_unanswerable ?? "—"}</td></tr>
+            <tr><td>Never retrieve</td><td class="num">${cN.tp_retrieve_answerable ?? "—"}</td><td class="num">${cN.fn_skip_answerable ?? "—"}</td><td class="num">${cN.fp_retrieve_unanswerable ?? "—"}</td><td class="num">${cN.tn_skip_unanswerable ?? "—"}</td></tr>
           </tbody>
         </table>
-        <p class="tiny">
-          TP: Correctly retrieved answerable · FN: Missed answerable (${(dq.skipped_but_answerable || []).join(", ") || "q52, q66"}) ·
-          FP: Wasted retrieval on unanswerable (${(dq.retrieved_but_unanswerable || []).join(", ") || "q68"}) · TN: Correctly skipped unanswerable.
-        </p>
+        <p class="tiny">FN (skipped but answerable): ${esc((dq.skipped_but_answerable || []).join(", ") || "none")} · FP (retrieved but unanswerable): ${esc((dq.retrieved_but_unanswerable || []).join(", ") || "none")}.</p>
       </div>
-
       <div>
-        <h4>Per-Class Decision Quality Metrics</h4>
         <table>
-          <thead>
-            <tr><th>Metric</th><th class="num">Adaptive</th><th class="num">Always-Retrieve</th><th class="num">Never-Retrieve</th></tr>
-          </thead>
+          <thead><tr><th>Metric</th><th class="num">Adaptive</th><th class="num">Always</th><th class="num">Never</th></tr></thead>
           <tbody>
-            <tr><td><b>Balanced Accuracy</b></td><td class="num"><b>${fix(m.balanced_accuracy ?? 0.9225, 4)}</b></td><td class="num">0.5000</td><td class="num">0.5000</td></tr>
-            <tr><td><b>Precision</b></td><td class="num"><b>${fix(m.precision ?? 0.9848, 4)}</b></td><td class="num">0.8933</td><td class="num">n/a</td></tr>
-            <tr><td><b>Recall / Sensitivity</b></td><td class="num"><b>${fix(m.recall ?? 0.9701, 4)}</b></td><td class="num">1.0000</td><td class="num">0.0000</td></tr>
-            <tr><td><b>F1 Score</b></td><td class="num"><b>${fix(m.f1 ?? 0.9774, 4)}</b></td><td class="num">0.9436</td><td class="num">n/a</td></tr>
-            <tr><td><b>Specificity</b></td><td class="num"><b>${fix(m.specificity ?? 0.8750, 4)}</b></td><td class="num">0.0000</td><td class="num">1.0000</td></tr>
-            <tr><td>Raw Accuracy</td><td class="num">${pct(m.accuracy ?? 0.960)}</td><td class="num">${pct(mAlways.accuracy ?? 0.893)}</td><td class="num">${pct(mNever.accuracy ?? 0.107)}</td></tr>
+            <tr><td><b>Balanced accuracy</b></td><td class="num"><b>${fix(m.balanced_accuracy, 4)}</b></td><td class="num">${fix(mA.balanced_accuracy, 4)}</td><td class="num">${fix(mN.balanced_accuracy, 4)}</td></tr>
+            <tr><td>Precision</td><td class="num">${fix(m.precision, 4)}</td><td class="num">${fix(mA.precision, 4)}</td><td class="num">${fix(mN.precision, 4)}</td></tr>
+            <tr><td>Recall</td><td class="num">${fix(m.recall, 4)}</td><td class="num">${fix(mA.recall, 4)}</td><td class="num">${fix(mN.recall, 4)}</td></tr>
+            <tr><td>F1</td><td class="num">${fix(m.f1, 4)}</td><td class="num">${fix(mA.f1, 4)}</td><td class="num">${fix(mN.f1, 4)}</td></tr>
+            <tr><td>Specificity</td><td class="num">${fix(m.specificity, 4)}</td><td class="num">${fix(mA.specificity, 4)}</td><td class="num">${fix(mN.specificity, 4)}</td></tr>
+            <tr><td>Raw accuracy</td><td class="num">${pct(m.accuracy)}</td><td class="num">${pct(mA.accuracy)}</td><td class="num">${pct(mN.accuracy)}</td></tr>
           </tbody>
         </table>
-        <p class="tiny">
-          <b>Why Balanced Accuracy Matters:</b> Raw accuracy (89.3%) is optimistic for Always-Retrieve due to class imbalance (67 answerable vs 8 unanswerable).
-          Balanced accuracy is <b>0.5000</b> for both fixed baselines, proving that only the adaptive policy provides genuine discrimination (<b>0.9225</b>).
-        </p>
+        <p class="tiny">Raw accuracy is optimistic under class imbalance (${nAns} answerable vs ${nUn} unanswerable): always-retrieve reaches ${pct(mA.accuracy)} while its balanced accuracy is ${fix(mA.balanced_accuracy, 3)}, i.e. no discrimination.</p>
       </div>
     </div>`;
 }
@@ -1117,6 +1209,7 @@ async function compareMethods() {
     const ov = j.overlap || {};
     $("overlapSummary").innerHTML = `
       <div class="highlight-card" style="margin-top:10px">
+        <p style="margin:0 0 4px;font-size:0.88rem">Question used: <i>${esc(question)}</i></p>
         <p style="margin:0;font-size:0.88rem">Passages shared by all 3 methods: <b>${(ov.shared_by_all || []).length}</b> · Shared by ≥2 methods: <b>${(ov.shared_by_two_or_more || []).length}</b>.</p>
       </div>`;
     $("methodColumns").innerHTML = (j.method_order || []).map(m => {
