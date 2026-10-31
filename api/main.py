@@ -69,6 +69,13 @@ RESULTS_POLICY_DIR = resolve_path("results/policy_eval")
 RESULTS_ROUTING_DIR = resolve_path("results/routing_eval")
 
 
+def _results_dir(kind: str, dataset: str):
+    """Saved-results folder for one dataset view: "dbms" (default, original runs) or "finance"."""
+    if dataset not in ("dbms", "finance"):
+        raise HTTPException(status_code=400, detail=f"unknown dataset {dataset!r}")
+    return resolve_path(f"results/finance/{kind}" if dataset == "finance" else f"results/{kind}")
+
+
 def _runner() -> ExperimentRunner:
     if _STATE["runner"] is None:
         cfg = load_config(os.environ.get("ADAPTIVE_QA_CONFIG", "configs/default.json"))
@@ -585,13 +592,18 @@ def _eval_files() -> List[Any]:
 
 
 @app.get("/demo/examples")
-def demo_examples() -> JSONResponse:
+def demo_examples(dataset: str = "dbms") -> JSONResponse:
     """Representative questions from the labelled evaluation set.
 
     Reference answers and chunk labels are deliberately NOT included: the demo
     only needs the question text, and the live engine must never see labels.
     """
     files = _eval_files()
+    if dataset == "finance":
+        files = [f for f in (EVAL_SET_DIR / "jpm_final_questions.jsonl",
+                             resolve_path("eval_data/routing_eval/jpm_general_questions.jsonl")) if f.exists()]
+    elif dataset != "dbms":
+        raise HTTPException(status_code=400, detail=f"unknown dataset {dataset!r}")
     if not files:
         return JSONResponse(
             {
@@ -602,7 +614,8 @@ def demo_examples() -> JSONResponse:
         )
     path = files[0]
     try:
-        examples = load_eval_examples(path)
+        # finance = corpus questions + general/unanswerable ones; dbms keeps its original single file
+        examples = [e for f in (files if dataset == "finance" else files[:1]) for e in load_eval_examples(f)]
     except Exception as exc:
         return JSONResponse(
             {"available": False, "reason": f"{type(exc).__name__}: {exc}", "categories": []}
@@ -692,9 +705,10 @@ def retrieval_compare(payload: Dict[str, Any] = None) -> JSONResponse:
 
 
 @app.get("/experiments/retrieval")
-def experiments_retrieval(run: Optional[str] = None) -> JSONResponse:
+def experiments_retrieval(run: Optional[str] = None, dataset: str = "dbms") -> JSONResponse:
     """Saved BM25 / dense / hybrid retrieval evaluation (read-only)."""
-    runs = list_retrieval_runs(RESULTS_RETRIEVAL_DIR)
+    rdir = _results_dir("retrieval_eval", dataset)
+    runs = list_retrieval_runs(rdir)
     if not runs:
         raise HTTPException(
             status_code=404,
@@ -703,7 +717,7 @@ def experiments_retrieval(run: Optional[str] = None) -> JSONResponse:
                 "scripts/eval_retrieval.py first"
             ),
         )
-    view = load_retrieval_view(RESULTS_RETRIEVAL_DIR, run_id=run)
+    view = load_retrieval_view(rdir, run_id=run)
     if view is None:
         raise HTTPException(status_code=404, detail=f"unknown run {run!r}")
     return JSONResponse({"available": True, "runs": runs, "view": view})
@@ -711,14 +725,14 @@ def experiments_retrieval(run: Optional[str] = None) -> JSONResponse:
 
 @app.get("/experiments/retrieval/question/{question_id}")
 def experiments_retrieval_question(
-    question_id: str, run: Optional[str] = None
+    question_id: str, run: Optional[str] = None, dataset: str = "dbms"
 ) -> JSONResponse:
     """Per-question inspector: retrieved passages, ranks and gold labels.
 
     EVALUATION ONLY. This is the only place labels are exposed; it is not on
     the live answering path.
     """
-    view = load_retrieval_view(RESULTS_RETRIEVAL_DIR, run_id=run)
+    view = load_retrieval_view(_results_dir("retrieval_eval", dataset), run_id=run)
     if view is None:
         raise HTTPException(status_code=404, detail="no retrieval-evaluation run")
     row = next(
@@ -766,27 +780,29 @@ def experiments_retrieval_question(
 
 
 @app.get("/experiments/policy")
-def experiments_policy(run: Optional[str] = None) -> JSONResponse:
+def experiments_policy(run: Optional[str] = None, dataset: str = "dbms") -> JSONResponse:
     """Saved adaptive-vs-never/always/oracle policy evaluation (read-only)."""
-    runs = list_policy_runs(RESULTS_POLICY_DIR)
+    pdir = _results_dir("policy_eval", dataset)
+    runs = list_policy_runs(pdir) if pdir.exists() else []
     if not runs:
         raise HTTPException(
             status_code=404,
             detail="no policy-evaluation results found; run scripts/eval_policy.py first",
         )
-    view = load_policy_view(RESULTS_POLICY_DIR, run_id=run)
+    view = load_policy_view(pdir, run_id=run)
     if view is None:
         raise HTTPException(status_code=404, detail=f"unknown run {run!r}")
     return JSONResponse({"available": True, "runs": runs, "view": view})
 
 
 @app.get("/experiments/routing")
-def experiments_routing(run: Optional[str] = None) -> JSONResponse:
+def experiments_routing(run: Optional[str] = None, dataset: str = "dbms") -> JSONResponse:
     """Saved routing evaluation: does the router retrieve when retrieval helps? (read-only)."""
     import json as _json
 
-    runs = sorted((d for d in RESULTS_ROUTING_DIR.glob("*") if (d / "routing_results.json").exists()),
-                  key=lambda d: d.stat().st_mtime, reverse=True) if RESULTS_ROUTING_DIR.exists() else []
+    rtdir = _results_dir("routing_eval", dataset)
+    runs = sorted((d for d in rtdir.glob("*") if (d / "routing_results.json").exists()),
+                  key=lambda d: d.stat().st_mtime, reverse=True) if rtdir.exists() else []
     if not runs:
         raise HTTPException(status_code=404,
                             detail="no routing results found; run scripts/eval_routing.py first")

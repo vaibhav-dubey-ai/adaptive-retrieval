@@ -1,0 +1,503 @@
+{
+  "generated_at_utc": "2026-10-25T11:55:24Z",
+  "model": "openrouter/free",
+  "base_url": "https://openrouter.ai/api/v1",
+  "dataset": "eval_data/retrieval_eval/ch6_er_model_questions.jsonl",
+  "top_k": 5,
+  "retriever_build_ms": {
+    "bm25": 28.537,
+    "dense": 321.793,
+    "hybrid": 50.622
+  },
+  "retriever_warmup_ms": {
+    "bm25": 0.087,
+    "dense": 23047.355,
+    "hybrid": 1734.603
+  },
+  "notes": [
+    "retriever_warmup_ms covers lazy model load / thread-pool init and is excluded from per-question retrieval latency.",
+    "F1 and EM are lexical (SQuAD normalization) and blind to paraphrase; low EM is expected for free-form answers.",
+    "evidence_coverage is lexical overlap with retrieved passages, NOT entailment or faithfulness.",
+    "retrieval latency excludes generation; total_ms includes retrieval for retrieval conditions."
+  ],
+  "summary": {
+    "closed_book": {
+      "n_questions": 4,
+      "n_succeeded": 1,
+      "n_failed": 3,
+      "mean_f1": 0.1724,
+      "mean_em": 0.0,
+      "mean_evidence_coverage": null,
+      "mean_retrieval_ms": null,
+      "mean_generation_ms": 19205.385,
+      "mean_total_ms": 19205.547,
+      "mean_total_tokens": 675.0,
+      "token_sources": [
+        "provider-reported"
+      ],
+      "retriever_build_ms": null,
+      "retriever_warmup_ms": null
+    },
+    "bm25": {
+      "n_questions": 4,
+      "n_succeeded": 1,
+      "n_failed": 3,
+      "mean_f1": 0.4286,
+      "mean_em": 0.0,
+      "mean_evidence_coverage": 0.7273,
+      "mean_retrieval_ms": 2.721,
+      "mean_generation_ms": 19137.631,
+      "mean_total_ms": 19140.42,
+      "mean_total_tokens": 1328.0,
+      "token_sources": [
+        "provider-reported"
+      ],
+      "retriever_build_ms": 28.537,
+      "retriever_warmup_ms": 0.087
+    },
+    "dense": {
+      "n_questions": 4,
+      "n_succeeded": 1,
+      "n_failed": 3,
+      "mean_f1": 0.1724,
+      "mean_em": 0.0,
+      "mean_evidence_coverage": 0.5484,
+      "mean_retrieval_ms": 81.344,
+      "mean_generation_ms": 15735.77,
+      "mean_total_ms": 15817.166,
+      "mean_total_tokens": 1475.0,
+      "token_sources": [
+        "provider-reported"
+      ],
+      "retriever_build_ms": 321.793,
+      "retriever_warmup_ms": 23047.355
+    },
+    "hybrid": {
+      "n_questions": 4,
+      "n_succeeded": 2,
+      "n_failed": 2,
+      "mean_f1": 0.3753,
+      "mean_em": 0.0,
+      "mean_evidence_coverage": 0.6047,
+      "mean_retrieval_ms": 97.831,
+      "mean_generation_ms": 31444.072,
+      "mean_total_ms": 31541.954,
+      "mean_total_tokens": 1519.0,
+      "token_sources": [
+        "provider-reported"
+      ],
+      "retriever_build_ms": 50.622,
+      "retriever_warmup_ms": 1734.603
+    }
+  },
+  "per_question": [
+    {
+      "question_id": "q01",
+      "question": "What does the initial design phase do?",
+      "condition": "closed_book",
+      "reference_answer": "It characterizes fully the data needs of the prospective database users.",
+      "retrieval_ms": null,
+      "retrieved_chunk_ids": [],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 20776.983,
+      "total_ms": 20776.995
+    },
+    {
+      "question_id": "q01",
+      "question": "What does the initial design phase do?",
+      "condition": "bm25",
+      "reference_answer": "It characterizes fully the data needs of the prospective database users.",
+      "retrieval_ms": 0.151,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0017",
+        "udoc_151a82bc49d3:0060"
+      ],
+      "retrieval_scores": [
+        9.7134,
+        6.533,
+        3.1699,
+        3.1452,
+        2.8711
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 21727.166,
+      "total_ms": 21727.182
+    },
+    {
+      "question_id": "q01",
+      "question": "What does the initial design phase do?",
+      "condition": "dense",
+      "reference_answer": "It characterizes fully the data needs of the prospective database users.",
+      "retrieval_ms": 58.775,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0004",
+        "udoc_151a82bc49d3:0068",
+        "udoc_151a82bc49d3:0000"
+      ],
+      "retrieval_scores": [
+        0.3413,
+        0.3291,
+        0.3133,
+        0.3011,
+        0.2939
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 24075.796,
+      "total_ms": 24075.811
+    },
+    {
+      "question_id": "q01",
+      "question": "What does the initial design phase do?",
+      "condition": "hybrid",
+      "reference_answer": "It characterizes fully the data needs of the prospective database users.",
+      "retrieval_ms": 68.443,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0068",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0004"
+      ],
+      "retrieval_scores": [
+        0.0328,
+        0.0323,
+        0.0308,
+        0.0301,
+        0.03
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 20972.85,
+      "total_ms": 20972.866
+    },
+    {
+      "question_id": "q02",
+      "question": "What is physical design in database design?",
+      "condition": "closed_book",
+      "reference_answer": "Physical design is deciding on the physical layout of the database.",
+      "retrieval_ms": null,
+      "retrieved_chunk_ids": [],
+      "ok": true,
+      "answer": "Physical design in database design is the process of translating the logical schema into a concrete implementation within a specific RDBMS by making critical decisions about how data is physically stored and accessed, such as choosing indexes, partitioning strategies, and clustering. Its primary focus is optimizing query performance, storage efficiency, and system manageability.",
+      "backend": "llm_closedbook",
+      "model": "openrouter/free",
+      "routed_model": "xingchen-agi/xing4.0-29b-a4b:free",
+      "generation_ms": 19205.385,
+      "total_ms": 19205.547,
+      "tokens": {
+        "input_tokens": 107,
+        "output_tokens": 568,
+        "total_tokens": 675,
+        "source": "provider-reported"
+      },
+      "f1": 0.1724,
+      "em": 0.0,
+      "evidence_coverage": null
+    },
+    {
+      "question_id": "q02",
+      "question": "What is physical design in database design?",
+      "condition": "bm25",
+      "reference_answer": "Physical design is deciding on the physical layout of the database.",
+      "retrieval_ms": 2.721,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0001"
+      ],
+      "retrieval_scores": [
+        12.7708,
+        6.1373,
+        5.4234,
+        5.1587,
+        5.0443
+      ],
+      "ok": true,
+      "answer": "Physical design in database design refers to deciding on the physical layout of the database. It is part of the final phase of the design process, which moves from an abstract data model to the implementation of the database. [1][5]",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "xingchen-agi/xing4.0-29b-a4b:free",
+      "generation_ms": 19137.631,
+      "total_ms": 19140.42,
+      "tokens": {
+        "input_tokens": 734,
+        "output_tokens": 594,
+        "total_tokens": 1328,
+        "source": "provider-reported"
+      },
+      "f1": 0.4286,
+      "em": 0.0,
+      "evidence_coverage": 0.7273
+    },
+    {
+      "question_id": "q02",
+      "question": "What is physical design in database design?",
+      "condition": "dense",
+      "reference_answer": "Physical design is deciding on the physical layout of the database.",
+      "retrieval_ms": 110.495,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0068"
+      ],
+      "retrieval_scores": [
+        0.6255,
+        0.5529,
+        0.5511,
+        0.5228,
+        0.4759
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Provider returned error\",\"code\":429,\"metadata\":{\"raw\":\"xingchen-agi/xing4.0-29b-a4b:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumul",
+      "generation_ms": 21900.316,
+      "total_ms": 21900.364
+    },
+    {
+      "question_id": "q02",
+      "question": "What is physical design in database design?",
+      "condition": "hybrid",
+      "reference_answer": "Physical design is deciding on the physical layout of the database.",
+      "retrieval_ms": 129.889,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0003"
+      ],
+      "retrieval_scores": [
+        0.0328,
+        0.032,
+        0.0313,
+        0.0313,
+        0.0312
+      ],
+      "ok": true,
+      "answer": "Physical design is the phase of database design that involves deciding on the physical layout of the database, including how data is stored on storage media and organized into files. [1]",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "xingchen-agi/xing4.0-29b-a4b:free",
+      "generation_ms": 26083.861,
+      "total_ms": 26213.819,
+      "tokens": {
+        "input_tokens": 734,
+        "output_tokens": 831,
+        "total_tokens": 1565,
+        "source": "provider-reported"
+      },
+      "f1": 0.4865,
+      "em": 0.0,
+      "evidence_coverage": 0.5556
+    },
+    {
+      "question_id": "q03",
+      "question": "Which two major pitfalls must a database schema design avoid?",
+      "condition": "closed_book",
+      "reference_answer": "Redundancy, where repeated information can lead to inconsistency, and incompleteness, where some aspects of the enterprise become difficult or impossible to model.",
+      "retrieval_ms": null,
+      "retrieved_chunk_ids": [],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 20240.837,
+      "total_ms": 20240.857
+    },
+    {
+      "question_id": "q03",
+      "question": "Which two major pitfalls must a database schema design avoid?",
+      "condition": "bm25",
+      "reference_answer": "Redundancy, where repeated information can lead to inconsistency, and incompleteness, where some aspects of the enterprise become difficult or impossible to model.",
+      "retrieval_ms": 1.145,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0000"
+      ],
+      "retrieval_scores": [
+        18.1225,
+        8.9399,
+        7.3571,
+        7.1538,
+        6.1373
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 19275.267,
+      "total_ms": 19275.288
+    },
+    {
+      "question_id": "q03",
+      "question": "Which two major pitfalls must a database schema design avoid?",
+      "condition": "dense",
+      "reference_answer": "Redundancy, where repeated information can lead to inconsistency, and incompleteness, where some aspects of the enterprise become difficult or impossible to model.",
+      "retrieval_ms": 105.855,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0004"
+      ],
+      "retrieval_scores": [
+        0.6903,
+        0.6207,
+        0.565,
+        0.5514,
+        0.5057
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 21186.932,
+      "total_ms": 21186.949
+    },
+    {
+      "question_id": "q03",
+      "question": "Which two major pitfalls must a database schema design avoid?",
+      "condition": "hybrid",
+      "reference_answer": "Redundancy, where repeated information can lead to inconsistency, and incompleteness, where some aspects of the enterprise become difficult or impossible to model.",
+      "retrieval_ms": 136.993,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0046"
+      ],
+      "retrieval_scores": [
+        0.0328,
+        0.0323,
+        0.0315,
+        0.0315,
+        0.0294
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Provider returned error\",\"code\":429,\"metadata\":{\"raw\":\"xingchen-agi/xing4.0-29b-a4b:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumul",
+      "generation_ms": 22279.573,
+      "total_ms": 22279.592
+    },
+    {
+      "question_id": "q04",
+      "question": "Which design approaches does the chapter discuss?",
+      "condition": "closed_book",
+      "reference_answer": "The entity-relationship model, which models an enterprise as entities and relationships, and normalization theory, which formalizes what designs are bad and tests for them.",
+      "retrieval_ms": null,
+      "retrieved_chunk_ids": [],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 17454.191,
+      "total_ms": 17454.207
+    },
+    {
+      "question_id": "q04",
+      "question": "Which design approaches does the chapter discuss?",
+      "condition": "bm25",
+      "reference_answer": "The entity-relationship model, which models an enterprise as entities and relationships, and normalization theory, which formalizes what designs are bad and tests for them.",
+      "retrieval_ms": 1.457,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0004",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0079",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0003"
+      ],
+      "retrieval_scores": [
+        9.98,
+        6.2595,
+        4.36,
+        3.4887,
+        3.1699
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 22334.901,
+      "total_ms": 22334.933
+    },
+    {
+      "question_id": "q04",
+      "question": "Which design approaches does the chapter discuss?",
+      "condition": "dense",
+      "reference_answer": "The entity-relationship model, which models an enterprise as entities and relationships, and normalization theory, which formalizes what designs are bad and tests for them.",
+      "retrieval_ms": 81.344,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0004",
+        "udoc_151a82bc49d3:0068",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0060"
+      ],
+      "retrieval_scores": [
+        0.4109,
+        0.4108,
+        0.3445,
+        0.3304,
+        0.3293
+      ],
+      "ok": true,
+      "answer": "The chapter discusses two primary design approaches: the Entity Relationship Model and Normalization Theory. Passage [2] explicitly lists these as the design approaches, while Passage [3] elaborates on the specific E-R design decisions that fall under the Entity Relationship Model approach.",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "xingchen-agi/xing4.0-29b-a4b:free",
+      "generation_ms": 15735.77,
+      "total_ms": 15817.166,
+      "tokens": {
+        "input_tokens": 720,
+        "output_tokens": 755,
+        "total_tokens": 1475,
+        "source": "provider-reported"
+      },
+      "f1": 0.1724,
+      "em": 0.0,
+      "evidence_coverage": 0.5484
+    },
+    {
+      "question_id": "q04",
+      "question": "Which design approaches does the chapter discuss?",
+      "condition": "hybrid",
+      "reference_answer": "The entity-relationship model, which models an enterprise as entities and relationships, and normalization theory, which formalizes what designs are bad and tests for them.",
+      "retrieval_ms": 65.773,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0004",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0068",
+        "udoc_151a82bc49d3:0060"
+      ],
+      "retrieval_scores": [
+        0.0325,
+        0.032,
+        0.0318,
+        0.0308,
+        0.0305
+      ],
+      "ok": true,
+      "answer": "The chapter discusses the Entity Relationship Model, Normalization Theory, and the Design Phases (Logical Design and Physical Design). These are supported by passages [1] and [2], while passage [4] details specific E-R design decisions.",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "xingchen-agi/xing4.0-29b-a4b:free",
+      "generation_ms": 36804.283,
+      "total_ms": 36870.089,
+      "tokens": {
+        "input_tokens": 720,
+        "output_tokens": 753,
+        "total_tokens": 1473,
+        "source": "provider-reported"
+      },
+      "f1": 0.2642,
+      "em": 0.0,
+      "evidence_coverage": 0.6538
+    }
+  ]
+}

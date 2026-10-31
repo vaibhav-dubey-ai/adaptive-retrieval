@@ -1,0 +1,89 @@
+{
+  "generated_at_utc": "2026-10-25T19:41:32Z",
+  "question": "What is an entity set?",
+  "top_k": 8,
+  "order_policy": "swapped every trial (A,B \u21c4 B,A)",
+  "summary": {
+    "n_trials": 2,
+    "n_complete_pairs": 2,
+    "n_failed": 0,
+    "branch_A": {
+      "median_path_ms_warm": 14299.791,
+      "median_generation_ms_warm": 14299.791,
+      "cold_first_call_ms": 14359.861,
+      "n_warm_samples": 1,
+      "mean_total_tokens": 169.5
+    },
+    "branch_B": {
+      "median_path_ms_warm": 21469.366,
+      "median_generation_ms_warm": 21469.189,
+      "cold_first_call_ms": 24299.825,
+      "n_warm_samples": 1,
+      "mean_total_tokens": 1387.5
+    },
+    "median_retrieval_ms": 0.477,
+    "median_decision_ms": 1.549,
+    "median_delta_warm_ms": 7169.575,
+    "read_note": "median_delta_warm_ms = warm B \u2212 warm A path latency (positive \u21d2 the retrieval path cost more). Cold first calls are excluded from these medians and reported separately; they measure model loading, not answering. Medians over interleaved trials with swapped order are the only latency comparison this project reports as evidence."
+  },
+  "trials": [
+    {
+      "trial": 1,
+      "order": "A,B",
+      "decision_ms": 0.874,
+      "ok_a": true,
+      "ok_b": true,
+      "a_ms": 14359.861,
+      "b_ms": 24299.825,
+      "a_cold": true,
+      "b_cold": true,
+      "a_tokens": {
+        "input_tokens": 111,
+        "output_tokens": 60,
+        "total_tokens": 171,
+        "source": "provider-reported"
+      },
+      "b_tokens": {
+        "input_tokens": 1311,
+        "output_tokens": 78,
+        "total_tokens": 1389,
+        "source": "provider-reported"
+      },
+      "retrieval_ms": 0.777,
+      "generation_a_ms": 14359.861,
+      "generation_b_ms": 24299.048
+    },
+    {
+      "trial": 2,
+      "order": "B,A",
+      "decision_ms": 2.224,
+      "ok_a": true,
+      "ok_b": true,
+      "a_ms": 14299.791,
+      "b_ms": 21469.366,
+      "a_cold": false,
+      "b_cold": false,
+      "a_tokens": {
+        "input_tokens": 111,
+        "output_tokens": 57,
+        "total_tokens": 168,
+        "source": "provider-reported"
+      },
+      "b_tokens": {
+        "input_tokens": 1311,
+        "output_tokens": 75,
+        "total_tokens": 1386,
+        "source": "provider-reported"
+      },
+      "retrieval_ms": 0.177,
+      "generation_a_ms": 14299.791,
+      "generation_b_ms": 21469.189
+    }
+  ],
+  "notes": [
+    "Latency uses timeutil.now_ns (monotonic clock), milliseconds.",
+    "A failed generation is never counted as a valid timing sample; failures are listed per trial under error_a / error_b.",
+    "The cold sample is one call per backend and describes load cost, not answering speed.",
+    "keep_alive keeps the local model resident between calls (verified honored by Ollama via the OpenAI-compatible endpoint)."
+  ]
+}

@@ -153,7 +153,7 @@
   .badge.bad { background: var(--badbg); border-color: #f3c9c5; color: var(--bad); }
   .badge.info { background: var(--accbg); border-color: #c7d8fb; color: var(--acc); }
   .badge.big { font-size: 0.95rem; padding: 5px 14px; font-weight: 700; }
-  .chip { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: #fff; font-size: 0.8rem; cursor: pointer; }
+  .chip { max-width:100%; white-space:normal; text-align:left; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: #fff; font-size: 0.8rem; cursor: pointer; }
   .chip:hover { border-color: var(--acc); color: var(--acc); background: var(--accbg); }
   .chip.active { background: var(--accbg); border-color: var(--acc); color: var(--acc); font-weight: 600; }
 
@@ -243,6 +243,10 @@ details[data-dev]{display:none}
     <textarea id="q" placeholder="e.g., What is an entity set? or What does the initial design phase do?"></textarea>
 
     <div class="row" style="margin-top:8px">
+      <select id="datasetSelAsk" onchange="setDataset(this.value)" title="Which corpus the sample questions come from">
+        <option value="dbms">DBMS slides</option>
+        <option value="finance">JPMorgan filings</option>
+      </select>
       <span class="k" style="font-weight:600">Try:</span>
       <span id="quickChips" class="row"></span>
     </div>
@@ -251,7 +255,7 @@ details[data-dev]{display:none}
       <div class="row" style="margin-top:8px"><span id="exampleTabs" class="row"></span></div>
       <div class="row" id="exampleChips" style="margin-top:6px"></div>
       <div class="row" style="margin-top:6px">
-        <select id="exampleSelect" style="max-width:100%"><option value="">… or pick any benchmark question</option></select>
+        <select id="exampleSelect" style="width:100%;min-width:0"><option value="">… or pick any benchmark question</option></select>
       </div>
     </details>
 
@@ -325,6 +329,10 @@ details[data-dev]{display:none}
         <p class="k" style="margin:4px 0 0">Aggregates over fixed, labelled question sets, read from completed runs under <code>results/</code>. They do not change when you ask a question on the other tab.</p>
       </div>
       <div class="row">
+        <select id="datasetSel" onchange="setDataset(this.value)" title="Which corpus the saved results come from">
+          <option value="dbms">Dataset: DBMS slides</option>
+          <option value="finance">Dataset: JPMorgan filings</option>
+        </select>
         <button onclick="loadExperiments()">Reload saved results</button>
         <span id="expStatus" class="k"></span>
       </div>
@@ -432,7 +440,8 @@ const CAT_LABEL = {
   general_knowledge: "General Knowledge (not in slides)", general_in_domain: "Textbook Definition (also in slides)"
 };
 
-let state = { question: "", lastAsk: null, demo: null, exp: null, pol: null, routing: null, activeSection: "ask" };
+const dq = (sep = "?") => state.dataset === "dbms" ? "" : sep + "dataset=" + state.dataset;
+let state = { question: "", lastAsk: null, demo: null, exp: null, pol: null, routing: null, activeSection: "ask", dataset: "dbms" };
 
 async function api(path, opts) {
   const r = await fetch(path, opts);
@@ -543,7 +552,7 @@ async function delDoc(id) {
 /* ------------------------------------------------------- Sample Questions */
 async function loadDemoExamples() {
   try {
-    const j = await api("/demo/examples");
+    const j = await api("/demo/examples" + dq());
     if (!j.available) return;
     state.demo = j;
     $("exampleTabs").innerHTML = j.categories.map(c =>
@@ -551,22 +560,27 @@ async function loadDemoExamples() {
     ).join("");
     // compact default: one example from each of the first four categories
     $("quickChips").innerHTML = j.categories.filter(c => c.examples.length).slice(0, 4).map(c =>
-      `<button class="chip" title="${esc(CAT_LABEL[c.name] || c.name)}" onclick="useExample(decodeURIComponent('${encodeURIComponent(c.examples[0].question)}'))">${esc(c.examples[0].question)}</button>`
+      `<button class="chip" title="${esc(CAT_LABEL[c.name] || c.name)}" data-q="${esc(c.examples[0].question)}" onclick="useExample(this.dataset.q)">${esc(c.examples[0].question)}</button>`
     ).join("");
     $("exampleSelect").innerHTML = `<option value="">… or pick any of the ${j.n_questions} benchmark questions</option>` +
       j.categories.map(c => `<optgroup label="${esc(CAT_LABEL[c.name] || c.name)}">` +
-        c.examples.map(e => `<option value="${esc(e.question)}">${esc(e.question_id)}: ${esc(e.question)}</option>`).join("") +
+        c.examples.map(e => `<option value="${esc(e.question)}" title="${esc(e.question)}">${esc(e.question_id)}: ${esc(e.question.length > 95 ? e.question.slice(0, 92) + "…" : e.question)}</option>`).join("") +
         "</optgroup>").join("");
     $("exampleSelect").onchange = e => { if (e.target.value) { $("q").value = e.target.value; } };
     pickCategory(j.categories[0] && j.categories[0].name);
   } catch (e) {}
+}
+function setDataset(v) {
+  state.dataset = v;
+  ["datasetSel", "datasetSelAsk"].forEach(id => { const el = $(id); if (el) el.value = v; });
+  loadDemoExamples(); loadExperiments();
 }
 function pickCategory(name) {
   document.querySelectorAll("#exampleTabs .chip").forEach(b => b.classList.toggle("active", b.dataset.cat === name));
   const cat = (state.demo && state.demo.categories || []).find(c => c.name === name);
   if (!cat) { $("exampleChips").innerHTML = ""; return; }
   $("exampleChips").innerHTML = cat.examples.slice(0, 6).map(e =>
-    `<button class="chip" onclick="useExample(decodeURIComponent('${encodeURIComponent(e.question)}'))">${esc(e.question)}</button>`
+    `<button class="chip" data-q="${esc(e.question)}" onclick="useExample(this.dataset.q)">${esc(e.question)}</button>`
   ).join("");
 }
 function useExample(q) { $("q").value = q; }
@@ -861,7 +875,7 @@ async function loadExperiments() {
       state.activeChunks = (d.documents || []).filter(x => x.active).reduce((n, x) => n + (x.n_chunks || 0), 0);
     } catch (e) { state.activeChunks = null; }
     loadRouting();
-    const results = await Promise.allSettled([api("/experiments/retrieval"), api("/experiments/policy")]);
+    const results = await Promise.allSettled([api("/experiments/retrieval" + dq()), api("/experiments/policy" + dq())]);
     const [rRet, rPol] = results;
     if (rRet.status === "fulfilled") { state.exp = rRet.value; renderRetrievalExp(rRet.value); }
     else $("retrievalTableWrap").innerHTML = `<p class="k">No retrieval results: ${esc(rRet.reason.message)}</p>`;
@@ -875,7 +889,7 @@ async function loadExperiments() {
 
 async function loadRetrievalRun(run) {
   try {
-    const j = await api("/experiments/retrieval" + (run ? "?run=" + encodeURIComponent(run) : ""));
+    const j = await api("/experiments/retrieval" + (run ? "?run=" + encodeURIComponent(run) + dq("&") : dq()));
     state.exp = j;
     renderRetrievalExp(j, !!run);
   } catch (e) { set("expStatus", "Error loading run: " + e.message); }
@@ -897,7 +911,7 @@ const stamp = iso => (iso ? new Date(iso).toLocaleString() : "—");
 
 async function loadRouting() {
   try {
-    const j = await api("/experiments/routing");
+    const j = await api("/experiments/routing" + dq());
     state.routing = j.view;
     renderRoutingExp(j.view);
   } catch (e) {
@@ -908,27 +922,11 @@ async function loadRouting() {
 
 function routingSummary(v) {
   const s = v.settings || {}, P = v.policies || {};
-  const { never: nev, always: alw, learned, oracle } = P;
-  const heur = P["heuristic@0.5"];
-  const Q = k => P[k].quality;
-  // "within noise": the gap is no larger than the split-to-split sd of either policy (not a significance test).
-  const noisy = (x, y) => Math.abs(x.mean - y.mean) <= Math.max(x.sd || 0, y.sd || 0);
-  const d = (x, y, dig = 3) => (x - y >= 0 ? "+" : "−") + Math.abs(x - y).toFixed(dig);
-  const cats = Object.entries(v.by_category || {});
-  const hurtCats = cats.filter(([, c]) => c.hurts > c.helps).map(([k]) => CAT_LABEL[k] || k);
+  const { never: nev, always: alw, learned } = P, heur = P["heuristic@0.5"];
   const out = [];
-
-  if (nev && alw) {
-    out.push(`<b>Does retrieval improve answer quality here?</b> On average, yes: ${nev.quality.mean.toFixed(3)} closed-book vs ${alw.quality.mean.toFixed(3)} always-retrieve. It is not uniform: retrieval helped on ${s.n_retrieval_helps} of ${s.n_scored} scored questions, hurt on ${s.n_retrieval_hurts}${hurtCats.length ? ` (mostly <i>${esc(hurtCats.join(", "))}</i>)` : ""}, and tied on ${v.outcome_counts ? v.outcome_counts.ties : "the rest"}${v.outcome_counts ? ` (${v.outcome_counts.ties_no_passage_fallback} of those because BM25 found no passage, so the retrieve path reused the closed-book answer; ${v.outcome_counts.ties - v.outcome_counts.ties_no_passage_fallback} are genuine ties with passages retrieved)` : ""}.`);
-    out.push(`<b>What does it cost?</b> Always-retrieve uses about ${(alw.tokens.mean / nev.tokens.mean).toFixed(1)}× the tokens (${Math.round(alw.tokens.mean)} vs ${Math.round(nev.tokens.mean)} per question) and about ${(alw.latency_ms.mean / nev.latency_ms.mean).toFixed(1)}× the latency (${ms(alw.latency_ms.mean)} vs ${ms(nev.latency_ms.mean)}) on this machine.`);
-  }
-  if (heur && alw && nev) {
-    out.push(`<b>Shipped heuristic vs the fixed policies.</b> It retrieves on ${Math.round(100 * heur.retrieval_rate.mean)}% of questions and scores ${heur.quality.mean.toFixed(3)} (${d(heur.quality.mean, alw.quality.mean)} vs always-retrieve, ${d(heur.quality.mean, nev.quality.mean)} vs never) with ${Math.round(100 * (1 - heur.tokens.mean / alw.tokens.mean))}% fewer tokens than always-retrieve. Its gain over always-retrieve is ${noisy(heur.quality, alw.quality) ? "within" : "larger than"} the split-to-split sd (±${Math.max(heur.quality.sd, alw.quality.sd).toFixed(3)}). ${oracle ? `The oracle upper bound is ${oracle.quality.mean.toFixed(3)}.` : ""}`);
-  }
-  if (heur && learned) {
-    const same = noisy(learned.quality, heur.quality);
-    out.push(`<b>Learned router vs shipped heuristic.</b> Quality ${learned.quality.mean.toFixed(3)} vs ${heur.quality.mean.toFixed(3)} (${d(learned.quality.mean, heur.quality.mean)}), ${Math.round(learned.tokens.mean)} vs ${Math.round(heur.tokens.mean)} tokens, routing balanced accuracy ${learned.balanced_accuracy.mean.toFixed(3)} vs ${heur.balanced_accuracy.mean.toFixed(3)}. The quality gap is ${same ? "within" : "larger than"} the split-to-split sd, so ${same ? "this is a cost/quality trade-off, not a demonstrated improvement" : "it is a measurable difference on this workload"}.`);
-  }
+  if (nev && alw) out.push(`<b>Retrieval:</b> quality ${nev.quality.mean.toFixed(2)} → ${alw.quality.mean.toFixed(2)}; helped on ${s.n_retrieval_helps} of ${s.n_scored} questions, hurt on ${s.n_retrieval_hurts}. Costs about ${(alw.tokens.mean / nev.tokens.mean).toFixed(0)}× the tokens and ${(alw.latency_ms.mean / nev.latency_ms.mean).toFixed(1)}× the time.`);
+  if (heur) out.push(`<b>Shipped heuristic:</b> retrieves on ${Math.round(100 * heur.retrieval_rate.mean)}% of questions, quality ${heur.quality.mean.toFixed(2)}.`);
+  if (learned && alw) out.push(`<b>Learned router:</b> quality ${learned.quality.mean.toFixed(2)} with ${Math.round(100 * (1 - learned.tokens.mean / alw.tokens.mean))}% fewer tokens than always-retrieve (experimental).`);
   return out;
 }
 
@@ -940,9 +938,9 @@ function renderRoutingExp(v) {
   const bullets = routingSummary(v);
 
   $("routingMeta").innerHTML = `Run <code>${esc(v.run_id)}</code> · generated ${esc(stamp(v.generated_at_utc))} · ${s.n_questions} questions (${s.n_scored} with a reference answer) · model <code>${esc(s.model)}</code> · retriever <code>${esc(s.retriever)}</code>, top-${s.top_k}<br>
-    Question sets: ${(s.datasets || []).map(p => `<code>${esc(p)}</code>`).join(", ")}<br>
-    Corpus: DBMS chapters 6 + 7 (two documents, 173 chunks; this count comes from REPORT §9.0 because the results file does not store it). This is the 125-question answer-quality experiment; it is a different experiment from the 75-question Chapter 6 retrieval-ranking benchmark below (80 chunks).<br>
-    Model: the run recorded the Ollama model name <code>${esc(s.model)}</code>, a capped-resources setup of the same <code>qwen3:4b-instruct</code> weights the live app uses (3 threads, 2048-token window per REPORT §9.0); temperature 0 and the prompts are identical to the app's. The alias is not installed any more, so this equivalence is as reported, not re-checked.`;
+    <details data-dev><summary>Run details</summary>Question sets: ${(s.datasets || []).map(p => `<code>${esc(p)}</code>`).join(", ")}<br>
+    ${state.dataset === "dbms" ? `Corpus: DBMS chapters 6 + 7 (173 chunks, per REPORT §9.0). A different experiment from the Chapter 6 retrieval benchmark below.<br>` : `Corpus: JPMorgan 2022 10-K and Q1 2022 10-Q (the active documents).<br>`}
+    Model: <code>${esc(s.model)}</code>, temperature 0, prompts identical to the app's.</details>`;
 
   $("routingWrap").innerHTML = `
     <h4 style="margin:0 0 4px">Summary</h4>
@@ -957,9 +955,12 @@ function renderRoutingExp(v) {
           <td class="num">${ms(m.latency_ms.mean)}</td>
           <td class="num">${["never", "always"].includes(k) ? "0.500 <span class=\"tiny\">(fixed)</span>" : pm(m.balanced_accuracy)}</td></tr>`; }).join("")}</tbody>
     </table>
+    <p class="tiny" style="margin:6px 0 0">Quality = word overlap with a short reference answer (0–1), not factual correctness. ${s.n_scored} scored questions, a constructed question mix, one model.</p>
+    <details data-dev><summary>Method notes and limits</summary>
     <p class="tiny" style="margin:6px 0 0"><b>Evaluation:</b> ${s.n_splits} repeated stratified ${trainPct}/${testPct} splits of the ${s.n_scored} scored questions (stratified on the retrieval-helps label, fixed seed; splits overlap, so the ± is split-to-split spread, not a confidence interval). The tuned threshold and the learned router are fitted on the ${trainPct}% training part only; every policy is scored on the ${testPct}% held-out part. Router inputs are the question text and the collection preflight; reference answers and helps/hurts labels are never router inputs.</p>
     <p class="tiny" style="margin:4px 0 0"><b>Answer quality</b> = mean of token-level F1 and token-level recall against a short reference answer (0–1). It measures word overlap with the reference, not factual correctness, entailment or hallucination rate. <b>Routing balanced accuracy</b> asks a different question: did the router choose retrieval exactly when retrieval helped (helps = grounded answer scored ≥ ${s.gap ?? 0.1} higher)? It is separate from answer quality and from retrieval ranking quality.</p>
     <p class="tiny" style="margin:4px 0 0"><span class="badge warn">Limits</span> A constructed workload (a mix of questions about the documents and general questions chosen by the author), one model, one corpus, one retriever, n = ${s.n_scored}. The reference answers were written for this evaluation. Results should not be generalised to other users, models or traffic.</p>
+    </details>
     <details data-dev style="margin-top:8px"><summary>By question type</summary>
       <table><thead><tr><th>Category</th><th class="num">n</th><th class="num">Closed-book quality</th><th class="num">Grounded quality</th><th class="num">Retrieval helps</th><th class="num">Retrieval hurts</th></tr></thead>
       <tbody>${Object.entries(v.by_category || {}).map(([k, c]) => `<tr><td>${esc(CAT_LABEL[k] || k)}</td><td class="num">${c.n}</td><td class="num">${c.mean_quality_closed_book}</td><td class="num">${c.mean_quality_grounded}</td><td class="num">${c.helps}</td><td class="num">${c.hurts}</td></tr>`).join("")}</tbody></table>
@@ -979,7 +980,7 @@ function renderRoutingExp(v) {
       <tr><td>Generation time</td><td class="num">${ms(bc.gen_a_ms)}</td><td class="num">${ms(bc.gen_b_ms)}</td></tr>
       <tr><td>Retrieval step (${esc(s.retriever)}, warm, per query)</td><td class="num">—</td><td class="num">${ms(retr)}</td></tr>
     </tbody></table>
-    <p class="tiny">Means over all ${(v.questions || []).length} questions of run <code>${esc(v.run_id)}</code> (the router table above averages held-out splits instead, so its never/always rows differ slightly), on this machine's CPU with a local model. The retrieval step is ${ms(retr)} against ${ms(genB)} of generation, so the extra time and tokens of option B come from the longer prompt that the evidence creates, not from the search itself. Each row is a mean; per-question timings were not stored as trials, so no p95 is shown. The first call of a process also pays a one-off model load that these means may include.</p>`;
+    <p class="tiny">Means over ${(v.questions || []).length} questions; the extra time and tokens of B come from the longer prompt, not the search (${ms(retr)} vs ${ms(genB)}).</p>`;
 }
 
 function renderRoutingQuestions() {
@@ -1027,7 +1028,7 @@ function renderRetrievalExp(j, requested) {
   set("retRunId", v.run_id || "—");
   $("retrievalMeta").innerHTML = `
     Run <code id="retRunId">${esc(v.run_id || "—")}</code> · generated ${esc(stamp(v.generated_at_utc))} · dataset <code>${esc((ds.path || "").replace(/\\/g, "/"))}</code> (${first.n_scored_questions ?? "?"} answerable of ${first.n_questions ?? "?"} questions)<br>
-    <b>Corpus scope:</b> ${sc.n_chunks ?? "?"} chunks in ${(sc.document_ids || []).length} document(s) (<code>${esc((sc.document_ids || []).join(", "))}</code>).${scopeNote} All rows below come from this single run.
+    <b>Corpus scope:</b> ${sc.n_chunks ?? "?"} chunks in ${(sc.document_ids || []).length} document(s) .${scopeNote}
     ${runs.length > 1 ? `<div class="row" style="margin-top:6px"><label class="k" for="retRunSelect">Other saved runs:</label>
       <select id="retRunSelect" onchange="loadRetrievalRun(this.value)">${runs.map(r => `<option value="${esc(r.run_id)}"${r.run_id === v.run_id ? " selected" : ""}>${esc(r.run_id)} · ${esc((r.methods || []).join("+"))}${r.complete ? "" : " (partial/flagged)"}</option>`).join("")}</select></div>` : ""}
     ${notes.length ? `<div style="margin-top:6px">${notes.join("<br>")}</div>` : ""}`;
@@ -1063,7 +1064,7 @@ function renderRetrievalExp(j, requested) {
         }).join("")}
       </tbody>
     </table>
-    <p class="tiny" style="margin:6px 0 0">Ranking quality only: whether labelled relevant passages are ranked highly. It does not say whether a generated answer is correct. Latency is retrieval only (no LLM), median over the repeated passes of this run; build time can be large for dense because it includes loading the embedding model and encoding the corpus. "First query after build" is timed after the retriever is built: dense loads its model during the build, so its first query excludes the model load (full dense cold start = build + first query); hybrid loads its model lazily, so its first query includes it.</p>`;
+    <details data-dev><summary>Notes</summary><p class="tiny" style="margin:6px 0 0">Ranking quality only: whether labelled relevant passages are ranked highly. It does not say whether a generated answer is correct. Latency is retrieval only (no LLM), median over the repeated passes of this run; build time can be large for dense because it includes loading the embedding model and encoding the corpus. "First query after build" is timed after the retriever is built: dense loads its model during the build, so its first query excludes the model load (full dense cold start = build + first query); hybrid loads its model lazily, so its first query includes it.</p></details>`;
 
   $("retrievalHelp").innerHTML = Object.entries(v.metric_help || {}).map(([k, t]) =>
     `<p class="tiny"><b>${esc(k)}</b>: ${esc(t)}</p>`
@@ -1177,7 +1178,7 @@ async function inspectQuestion(qid) {
   document.querySelectorAll(".qrow").forEach(el => el.classList.toggle("active", el.dataset.qid === qid));
   $("expInspector").innerHTML = '<p class="k">Loading question details…</p>';
   try {
-    const j = await api("/experiments/retrieval/question/" + encodeURIComponent(qid));
+    const j = await api("/experiments/retrieval/question/" + encodeURIComponent(qid) + dq());
     const rel = j.relevant_passages || [];
     const cols = Object.entries(j.methods || {}).map(([m, res]) => `
       <div style="margin-top:6px;padding:8px;border:1px solid var(--line);border-radius:6px;background:#fff">

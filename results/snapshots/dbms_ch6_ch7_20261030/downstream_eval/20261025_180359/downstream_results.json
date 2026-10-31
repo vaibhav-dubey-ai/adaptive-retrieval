@@ -1,0 +1,687 @@
+{
+  "generated_at_utc": "2026-10-25T12:41:25Z",
+  "model": "openrouter/free",
+  "base_url": "https://openrouter.ai/api/v1",
+  "dataset": "eval_data/retrieval_eval/ch6_er_model_questions.jsonl",
+  "top_k": 5,
+  "retriever_build_ms": {
+    "bm25": 27.646,
+    "dense": 198.582,
+    "hybrid": 30.544
+  },
+  "retriever_warmup_ms": {
+    "bm25": 0.072,
+    "dense": 15154.42,
+    "hybrid": 1251.951
+  },
+  "notes": [
+    "retriever_warmup_ms covers lazy model load / thread-pool init and is excluded from per-question retrieval latency.",
+    "F1 and EM are lexical (SQuAD normalization) and blind to paraphrase; low EM is expected for free-form answers.",
+    "evidence_coverage is lexical overlap with retrieved passages, NOT entailment or faithfulness.",
+    "retrieval latency excludes generation; total_ms includes retrieval for retrieval conditions."
+  ],
+  "summary": {
+    "closed_book": {
+      "n_questions": 6,
+      "n_succeeded": 2,
+      "n_failed": 4,
+      "mean_f1": 0.3638,
+      "mean_em": 0.0,
+      "mean_evidence_coverage": null,
+      "mean_retrieval_ms": null,
+      "mean_generation_ms": 23295.076,
+      "mean_total_ms": 23295.096,
+      "mean_total_tokens": 353.0,
+      "token_sources": [
+        "provider-reported"
+      ],
+      "retriever_build_ms": null,
+      "retriever_warmup_ms": null
+    },
+    "bm25": {
+      "n_questions": 6,
+      "n_succeeded": 2,
+      "n_failed": 4,
+      "mean_f1": 0.4986,
+      "mean_em": 0.0,
+      "mean_evidence_coverage": 0.8182,
+      "mean_retrieval_ms": 0.722,
+      "mean_generation_ms": 9249.527,
+      "mean_total_ms": 9250.278,
+      "mean_total_tokens": 1313.5,
+      "token_sources": [
+        "provider-reported"
+      ],
+      "retriever_build_ms": 27.646,
+      "retriever_warmup_ms": 0.072
+    },
+    "dense": {
+      "n_questions": 6,
+      "n_succeeded": 0,
+      "n_failed": 6,
+      "mean_f1": null,
+      "mean_em": null,
+      "mean_evidence_coverage": null,
+      "mean_retrieval_ms": null,
+      "mean_generation_ms": null,
+      "mean_total_ms": null,
+      "mean_total_tokens": null,
+      "token_sources": [],
+      "retriever_build_ms": 198.582,
+      "retriever_warmup_ms": 15154.42
+    },
+    "hybrid": {
+      "n_questions": 6,
+      "n_succeeded": 2,
+      "n_failed": 4,
+      "mean_f1": 0.4,
+      "mean_em": 0.0,
+      "mean_evidence_coverage": 0.7084,
+      "mean_retrieval_ms": 179.117,
+      "mean_generation_ms": 7705.966,
+      "mean_total_ms": 7885.128,
+      "mean_total_tokens": 1824.5,
+      "token_sources": [
+        "provider-reported"
+      ],
+      "retriever_build_ms": 30.544,
+      "retriever_warmup_ms": 1251.951
+    }
+  },
+  "per_question": [
+    {
+      "question_id": "q01",
+      "question": "What does the initial design phase do?",
+      "condition": "closed_book",
+      "reference_answer": "It characterizes fully the data needs of the prospective database users.",
+      "retrieval_ms": null,
+      "retrieved_chunk_ids": [],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 20729.908,
+      "total_ms": 20729.919
+    },
+    {
+      "question_id": "q01",
+      "question": "What does the initial design phase do?",
+      "condition": "bm25",
+      "reference_answer": "It characterizes fully the data needs of the prospective database users.",
+      "retrieval_ms": 0.063,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0017",
+        "udoc_151a82bc49d3:0060"
+      ],
+      "retrieval_scores": [
+        9.7134,
+        6.533,
+        3.1699,
+        3.1452,
+        2.8711
+      ],
+      "ok": true,
+      "answer": "The initial design phase characterizes fully the data needs of the prospective database users. [1]",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "xingchen-agi/xing4.0-29b-a4b:free",
+      "generation_ms": 13016.114,
+      "total_ms": 13016.199,
+      "tokens": {
+        "input_tokens": 746,
+        "output_tokens": 539,
+        "total_tokens": 1285,
+        "source": "provider-reported"
+      },
+      "f1": 0.7619,
+      "em": 0.0,
+      "evidence_coverage": 0.8182
+    },
+    {
+      "question_id": "q01",
+      "question": "What does the initial design phase do?",
+      "condition": "dense",
+      "reference_answer": "It characterizes fully the data needs of the prospective database users.",
+      "retrieval_ms": 13.05,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0004",
+        "udoc_151a82bc49d3:0068",
+        "udoc_151a82bc49d3:0000"
+      ],
+      "retrieval_scores": [
+        0.3413,
+        0.3291,
+        0.3133,
+        0.3011,
+        0.2939
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Provider returned error\",\"code\":429,\"metadata\":{\"raw\":\"xingchen-agi/xing4.0-29b-a4b:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumul",
+      "generation_ms": 22726.274,
+      "total_ms": 22726.287
+    },
+    {
+      "question_id": "q01",
+      "question": "What does the initial design phase do?",
+      "condition": "hybrid",
+      "reference_answer": "It characterizes fully the data needs of the prospective database users.",
+      "retrieval_ms": 66.598,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0068",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0004"
+      ],
+      "retrieval_scores": [
+        0.0328,
+        0.0323,
+        0.0308,
+        0.0301,
+        0.03
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 20607.012,
+      "total_ms": 20607.073
+    },
+    {
+      "question_id": "q02",
+      "question": "What is physical design in database design?",
+      "condition": "closed_book",
+      "reference_answer": "Physical design is deciding on the physical layout of the database.",
+      "retrieval_ms": null,
+      "retrieved_chunk_ids": [],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 21025.477,
+      "total_ms": 21025.493
+    },
+    {
+      "question_id": "q02",
+      "question": "What is physical design in database design?",
+      "condition": "bm25",
+      "reference_answer": "Physical design is deciding on the physical layout of the database.",
+      "retrieval_ms": 5.654,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0001"
+      ],
+      "retrieval_scores": [
+        12.7708,
+        6.1373,
+        5.4234,
+        5.1587,
+        5.0443
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 17246.108,
+      "total_ms": 17246.134
+    },
+    {
+      "question_id": "q02",
+      "question": "What is physical design in database design?",
+      "condition": "dense",
+      "reference_answer": "Physical design is deciding on the physical layout of the database.",
+      "retrieval_ms": 130.523,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0068"
+      ],
+      "retrieval_scores": [
+        0.6255,
+        0.5529,
+        0.5511,
+        0.5228,
+        0.4759
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 17006.813,
+      "total_ms": 17006.829
+    },
+    {
+      "question_id": "q02",
+      "question": "What is physical design in database design?",
+      "condition": "hybrid",
+      "reference_answer": "Physical design is deciding on the physical layout of the database.",
+      "retrieval_ms": 284.801,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0003"
+      ],
+      "retrieval_scores": [
+        0.0328,
+        0.032,
+        0.0313,
+        0.0313,
+        0.0312
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider returned no usable answer after 4 attempts (retried 3x). The model either produced no answer text, only internal reasoning, or a non-answer classification. Details: model='openrouter/free', finish_reason=None. This is typical when a routing alias (e.g. openrouter/free) picks a specialist model that is not a general assistant \u2014 pin a concrete, general-purpose model id in .env (LLM_MODEL).",
+      "generation_ms": 25309.067,
+      "total_ms": 25309.083
+    },
+    {
+      "question_id": "q03",
+      "question": "Which two major pitfalls must a database schema design avoid?",
+      "condition": "closed_book",
+      "reference_answer": "Redundancy, where repeated information can lead to inconsistency, and incompleteness, where some aspects of the enterprise become difficult or impossible to model.",
+      "retrieval_ms": null,
+      "retrieved_chunk_ids": [],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 20486.202,
+      "total_ms": 20486.23
+    },
+    {
+      "question_id": "q03",
+      "question": "Which two major pitfalls must a database schema design avoid?",
+      "condition": "bm25",
+      "reference_answer": "Redundancy, where repeated information can lead to inconsistency, and incompleteness, where some aspects of the enterprise become difficult or impossible to model.",
+      "retrieval_ms": 1.31,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0000"
+      ],
+      "retrieval_scores": [
+        18.1225,
+        8.9399,
+        7.3571,
+        7.1538,
+        6.1373
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 21291.336,
+      "total_ms": 21291.405
+    },
+    {
+      "question_id": "q03",
+      "question": "Which two major pitfalls must a database schema design avoid?",
+      "condition": "dense",
+      "reference_answer": "Redundancy, where repeated information can lead to inconsistency, and incompleteness, where some aspects of the enterprise become difficult or impossible to model.",
+      "retrieval_ms": 2031.29,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0004"
+      ],
+      "retrieval_scores": [
+        0.6903,
+        0.6207,
+        0.565,
+        0.5514,
+        0.5057
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 22191.37,
+      "total_ms": 22191.43
+    },
+    {
+      "question_id": "q03",
+      "question": "Which two major pitfalls must a database schema design avoid?",
+      "condition": "hybrid",
+      "reference_answer": "Redundancy, where repeated information can lead to inconsistency, and incompleteness, where some aspects of the enterprise become difficult or impossible to model.",
+      "retrieval_ms": 273.499,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0046"
+      ],
+      "retrieval_scores": [
+        0.0328,
+        0.0323,
+        0.0315,
+        0.0315,
+        0.0294
+      ],
+      "ok": true,
+      "answer": "A database schema design must avoid two major pitfalls: Redundancy and Incompleteness. Redundancy results in repeat information across multiple copies, which can lead to data inconsistency, whereas Incompleteness makes certain aspects of the enterprise difficult or impossible to model. Avoiding these pitfalls is necessary but not sufficient, as a large number of good designs may still exist from which to choose. [1]",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "xingchen-agi/xing4.0-29b-a4b:free",
+      "generation_ms": 8572.311,
+      "total_ms": 8845.881,
+      "tokens": {
+        "input_tokens": 810,
+        "output_tokens": 793,
+        "total_tokens": 1603,
+        "source": "provider-reported"
+      },
+      "f1": 0.4,
+      "em": 0.0,
+      "evidence_coverage": 0.75
+    },
+    {
+      "question_id": "q04",
+      "question": "Which design approaches does the chapter discuss?",
+      "condition": "closed_book",
+      "reference_answer": "The entity-relationship model, which models an enterprise as entities and relationships, and normalization theory, which formalizes what designs are bad and tests for them.",
+      "retrieval_ms": null,
+      "retrieved_chunk_ids": [],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Provider returned error\",\"code\":429,\"metadata\":{\"raw\":\"xingchen-agi/xing4.0-29b-a4b:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumul",
+      "generation_ms": 24091.174,
+      "total_ms": 24091.19
+    },
+    {
+      "question_id": "q04",
+      "question": "Which design approaches does the chapter discuss?",
+      "condition": "bm25",
+      "reference_answer": "The entity-relationship model, which models an enterprise as entities and relationships, and normalization theory, which formalizes what designs are bad and tests for them.",
+      "retrieval_ms": 1.381,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0004",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0079",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0003"
+      ],
+      "retrieval_scores": [
+        9.98,
+        6.2595,
+        4.36,
+        3.4887,
+        3.1699
+      ],
+      "ok": true,
+      "answer": "The chapter discusses two design approaches: the Entity Relationship Model and Normalization Theory [1].",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "xingchen-agi/xing4.0-29b-a4b:free",
+      "generation_ms": 5482.94,
+      "total_ms": 5484.356,
+      "tokens": {
+        "input_tokens": 723,
+        "output_tokens": 619,
+        "total_tokens": 1342,
+        "source": "provider-reported"
+      },
+      "f1": 0.2353,
+      "em": 0.0,
+      "evidence_coverage": 0.8182
+    },
+    {
+      "question_id": "q04",
+      "question": "Which design approaches does the chapter discuss?",
+      "condition": "dense",
+      "reference_answer": "The entity-relationship model, which models an enterprise as entities and relationships, and normalization theory, which formalizes what designs are bad and tests for them.",
+      "retrieval_ms": 147.883,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0004",
+        "udoc_151a82bc49d3:0068",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0060"
+      ],
+      "retrieval_scores": [
+        0.4109,
+        0.4108,
+        0.3445,
+        0.3304,
+        0.3293
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 19927.289,
+      "total_ms": 19927.299
+    },
+    {
+      "question_id": "q04",
+      "question": "Which design approaches does the chapter discuss?",
+      "condition": "hybrid",
+      "reference_answer": "The entity-relationship model, which models an enterprise as entities and relationships, and normalization theory, which formalizes what designs are bad and tests for them.",
+      "retrieval_ms": 85.318,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0004",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0068",
+        "udoc_151a82bc49d3:0060"
+      ],
+      "retrieval_scores": [
+        0.0325,
+        0.032,
+        0.0318,
+        0.0308,
+        0.0305
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 17349.439,
+      "total_ms": 17349.459
+    },
+    {
+      "question_id": "q05",
+      "question": "What is an entity set?",
+      "condition": "closed_book",
+      "reference_answer": "An entity set is a set of entities of the same type that share the same properties, for example the set of all persons or all companies.",
+      "retrieval_ms": null,
+      "retrieved_chunk_ids": [],
+      "ok": true,
+      "answer": "An entity set is a collection of entities that share the same attributes and are instances of a particular entity type, often used in database design and knowledge representation to group related objects together.",
+      "backend": "llm_closedbook",
+      "model": "openrouter/free",
+      "routed_model": "xingchen-agi/xing4.0-29b-a4b:free",
+      "generation_ms": 28368.893,
+      "total_ms": 28368.916,
+      "tokens": {
+        "input_tokens": 105,
+        "output_tokens": 366,
+        "total_tokens": 471,
+        "source": "provider-reported"
+      },
+      "f1": 0.3846,
+      "em": 0.0,
+      "evidence_coverage": null
+    },
+    {
+      "question_id": "q05",
+      "question": "What is an entity set?",
+      "condition": "bm25",
+      "reference_answer": "An entity set is a set of entities of the same type that share the same properties, for example the set of all persons or all companies.",
+      "retrieval_ms": 20.005,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0035",
+        "udoc_151a82bc49d3:0006",
+        "udoc_151a82bc49d3:0036",
+        "udoc_151a82bc49d3:0049",
+        "udoc_151a82bc49d3:0068"
+      ],
+      "retrieval_scores": [
+        2.7973,
+        2.4925,
+        2.4917,
+        2.3957,
+        2.3625
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 17855.061,
+      "total_ms": 17855.077
+    },
+    {
+      "question_id": "q05",
+      "question": "What is an entity set?",
+      "condition": "dense",
+      "reference_answer": "An entity set is a set of entities of the same type that share the same properties, for example the set of all persons or all companies.",
+      "retrieval_ms": 93.296,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0006",
+        "udoc_151a82bc49d3:0030",
+        "udoc_151a82bc49d3:0068",
+        "udoc_151a82bc49d3:0007",
+        "udoc_151a82bc49d3:0035"
+      ],
+      "retrieval_scores": [
+        0.7201,
+        0.6316,
+        0.6245,
+        0.6087,
+        0.5758
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 19843.004,
+      "total_ms": 19843.027
+    },
+    {
+      "question_id": "q05",
+      "question": "What is an entity set?",
+      "condition": "hybrid",
+      "reference_answer": "An entity set is a set of entities of the same type that share the same properties, for example the set of all persons or all companies.",
+      "retrieval_ms": 84.735,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0006",
+        "udoc_151a82bc49d3:0035",
+        "udoc_151a82bc49d3:0068",
+        "udoc_151a82bc49d3:0030",
+        "udoc_151a82bc49d3:0036"
+      ],
+      "retrieval_scores": [
+        0.0325,
+        0.0318,
+        0.0313,
+        0.0304,
+        0.0302
+      ],
+      "ok": true,
+      "answer": "An entity set is a set of entities of the same type that share the same properties (Passage [1]). Each entity within the set is represented by a set of attributes, and a subset of these attributes forms the primary key to uniquely identify each member (Passage [1]). Entity sets can be classified as either strong or weak depending on their existence dependencies (Passages [2], [3]).",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "xingchen-agi/xing4.0-29b-a4b:free",
+      "generation_ms": 6839.62,
+      "total_ms": 6924.375,
+      "tokens": {
+        "input_tokens": 984,
+        "output_tokens": 1062,
+        "total_tokens": 2046,
+        "source": "provider-reported"
+      },
+      "f1": 0.4,
+      "em": 0.0,
+      "evidence_coverage": 0.6667
+    },
+    {
+      "question_id": "q06",
+      "question": "Which shape represents an entity set in an ER diagram, and how are its attributes shown?",
+      "condition": "closed_book",
+      "reference_answer": "Rectangles represent entity sets, attributes are listed inside the rectangle, and primary key attributes are underlined.",
+      "retrieval_ms": null,
+      "retrieved_chunk_ids": [],
+      "ok": true,
+      "answer": "An entity set is represented by a rectangle in an ER diagram. Its attributes are shown as ovals or underlined names inside the rectangle.",
+      "backend": "llm_closedbook",
+      "model": "openrouter/free",
+      "routed_model": "xingchen-agi/xing4.0-29b-a4b:free",
+      "generation_ms": 18221.26,
+      "total_ms": 18221.275,
+      "tokens": {
+        "input_tokens": 117,
+        "output_tokens": 118,
+        "total_tokens": 235,
+        "source": "provider-reported"
+      },
+      "f1": 0.3429,
+      "em": 0.0,
+      "evidence_coverage": null
+    },
+    {
+      "question_id": "q06",
+      "question": "Which shape represents an entity set in an ER diagram, and how are its attributes shown?",
+      "condition": "bm25",
+      "reference_answer": "Rectangles represent entity sets, attributes are listed inside the rectangle, and primary key attributes are underlined.",
+      "retrieval_ms": 6.944,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0007",
+        "udoc_151a82bc49d3:0018",
+        "udoc_151a82bc49d3:0058",
+        "udoc_151a82bc49d3:0055",
+        "udoc_151a82bc49d3:0075"
+      ],
+      "retrieval_scores": [
+        7.0889,
+        6.6864,
+        6.4434,
+        5.6004,
+        5.2954
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 18019.976,
+      "total_ms": 18019.989
+    },
+    {
+      "question_id": "q06",
+      "question": "Which shape represents an entity set in an ER diagram, and how are its attributes shown?",
+      "condition": "dense",
+      "reference_answer": "Rectangles represent entity sets, attributes are listed inside the rectangle, and primary key attributes are underlined.",
+      "retrieval_ms": 36.365,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0007",
+        "udoc_151a82bc49d3:0018",
+        "udoc_151a82bc49d3:0010",
+        "udoc_151a82bc49d3:0036",
+        "udoc_151a82bc49d3:0075"
+      ],
+      "retrieval_scores": [
+        0.8428,
+        0.7574,
+        0.655,
+        0.5927,
+        0.5918
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 18046.854,
+      "total_ms": 18046.866
+    },
+    {
+      "question_id": "q06",
+      "question": "Which shape represents an entity set in an ER diagram, and how are its attributes shown?",
+      "condition": "hybrid",
+      "reference_answer": "Rectangles represent entity sets, attributes are listed inside the rectangle, and primary key attributes are underlined.",
+      "retrieval_ms": 41.908,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0007",
+        "udoc_151a82bc49d3:0018",
+        "udoc_151a82bc49d3:0075",
+        "udoc_151a82bc49d3:0022",
+        "udoc_151a82bc49d3:0004"
+      ],
+      "retrieval_scores": [
+        0.0328,
+        0.0323,
+        0.0308,
+        0.0296,
+        0.029
+      ],
+      "ok": false,
+      "error": "AnswerBackendError: Provider unavailable after 4 attempts (retried 3x with backoff): HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remain",
+      "generation_ms": 21111.094,
+      "total_ms": 21111.103
+    }
+  ]
+}

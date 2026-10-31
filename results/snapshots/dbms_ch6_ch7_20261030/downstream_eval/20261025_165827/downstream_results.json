@@ -1,0 +1,485 @@
+{
+  "generated_at_utc": "2026-10-25T11:30:42Z",
+  "model": "openrouter/free",
+  "base_url": "https://openrouter.ai/api/v1",
+  "dataset": "eval_data/retrieval_eval/ch6_er_model_questions.jsonl",
+  "top_k": 5,
+  "notes": [
+    "F1 and EM are lexical (SQuAD normalization) and blind to paraphrase; low EM is expected for free-form answers.",
+    "evidence_coverage is lexical overlap with retrieved passages, NOT entailment or faithfulness.",
+    "retrieval latency excludes generation; total_ms includes retrieval for retrieval conditions."
+  ],
+  "summary": {
+    "closed_book": {
+      "n_questions": 3,
+      "n_succeeded": 3,
+      "n_failed": 0,
+      "mean_f1": 0.1248,
+      "mean_em": 0.0,
+      "mean_evidence_coverage": null,
+      "mean_retrieval_ms": null,
+      "mean_generation_ms": 4949.087,
+      "mean_total_ms": 4949.119,
+      "mean_total_tokens": 343.3,
+      "token_sources": [
+        "provider-reported"
+      ],
+      "retriever_build_ms": null
+    },
+    "bm25": {
+      "n_questions": 3,
+      "n_succeeded": 3,
+      "n_failed": 0,
+      "mean_f1": 0.5511,
+      "mean_em": 0.0,
+      "mean_evidence_coverage": 0.6994,
+      "mean_retrieval_ms": 0.322,
+      "mean_generation_ms": 7076.482,
+      "mean_total_ms": 7076.887,
+      "mean_total_tokens": 1271.7,
+      "token_sources": [
+        "provider-reported"
+      ],
+      "retriever_build_ms": 28.322
+    },
+    "dense": {
+      "n_questions": 3,
+      "n_succeeded": 3,
+      "n_failed": 0,
+      "mean_f1": 0.4846,
+      "mean_em": 0.0,
+      "mean_evidence_coverage": 0.6603,
+      "mean_retrieval_ms": 15019.176,
+      "mean_generation_ms": 6494.36,
+      "mean_total_ms": 21513.637,
+      "mean_total_tokens": 1182.7,
+      "token_sources": [
+        "provider-reported"
+      ],
+      "retriever_build_ms": 298.159
+    },
+    "hybrid": {
+      "n_questions": 3,
+      "n_succeeded": 3,
+      "n_failed": 0,
+      "mean_f1": 0.5139,
+      "mean_em": 0.0,
+      "mean_evidence_coverage": 0.6792,
+      "mean_retrieval_ms": 664.047,
+      "mean_generation_ms": 10805.376,
+      "mean_total_ms": 11469.483,
+      "mean_total_tokens": 1464.0,
+      "token_sources": [
+        "provider-reported"
+      ],
+      "retriever_build_ms": 28.229
+    }
+  },
+  "per_question": [
+    {
+      "question_id": "q01",
+      "question": "What does the initial design phase do?",
+      "condition": "closed_book",
+      "reference_answer": "It characterizes fully the data needs of the prospective database users.",
+      "retrieval_ms": null,
+      "retrieved_chunk_ids": [],
+      "ok": true,
+      "answer": "The initial design phase translates high\u2011level goals into a concrete plan, defining the system\u2019s architecture, major components, and interfaces while identifying constraints and risks. It establishes the overall structure and provides a roadmap that guides the subsequent detailed design work.",
+      "backend": "llm_closedbook",
+      "model": "openrouter/free",
+      "routed_model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+      "generation_ms": 5559.097,
+      "total_ms": 5559.131,
+      "tokens": {
+        "input_tokens": 117,
+        "output_tokens": 170,
+        "total_tokens": 287,
+        "source": "provider-reported"
+      },
+      "f1": 0.0465,
+      "em": 0.0,
+      "evidence_coverage": null
+    },
+    {
+      "question_id": "q01",
+      "question": "What does the initial design phase do?",
+      "condition": "bm25",
+      "reference_answer": "It characterizes fully the data needs of the prospective database users.",
+      "retrieval_ms": 0.232,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0017",
+        "udoc_151a82bc49d3:0060"
+      ],
+      "retrieval_scores": [
+        9.7134,
+        6.533,
+        3.1699,
+        3.1452,
+        2.8711
+      ],
+      "ok": true,
+      "answer": "The initial design phase characterizes fully the data needs of the prospective database users. [1]",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "nvidia/nemotron-3.5-super-vl:free",
+      "generation_ms": 3633.37,
+      "total_ms": 3633.698,
+      "tokens": {
+        "input_tokens": 732,
+        "output_tokens": 99,
+        "total_tokens": 831,
+        "source": "provider-reported"
+      },
+      "f1": 0.7619,
+      "em": 0.0,
+      "evidence_coverage": 0.8182
+    },
+    {
+      "question_id": "q01",
+      "question": "What does the initial design phase do?",
+      "condition": "dense",
+      "reference_answer": "It characterizes fully the data needs of the prospective database users.",
+      "retrieval_ms": 44914.029,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0004",
+        "udoc_151a82bc49d3:0068",
+        "udoc_151a82bc49d3:0000"
+      ],
+      "retrieval_scores": [
+        0.3413,
+        0.3291,
+        0.3133,
+        0.3011,
+        0.2939
+      ],
+      "ok": true,
+      "answer": "The initial design phase characterizes fully the data needs of the prospective database users [1].",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "generation_ms": 3006.556,
+      "total_ms": 47920.661,
+      "tokens": {
+        "input_tokens": 800,
+        "output_tokens": 121,
+        "total_tokens": 921,
+        "source": "provider-reported"
+      },
+      "f1": 0.7619,
+      "em": 0.0,
+      "evidence_coverage": 0.8182
+    },
+    {
+      "question_id": "q01",
+      "question": "What does the initial design phase do?",
+      "condition": "hybrid",
+      "reference_answer": "It characterizes fully the data needs of the prospective database users.",
+      "retrieval_ms": 1898.858,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0068",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0004"
+      ],
+      "retrieval_scores": [
+        0.0328,
+        0.0323,
+        0.0308,
+        0.0301,
+        0.03
+      ],
+      "ok": true,
+      "answer": "The initial design phase characterizes fully the data needs of the prospective database users [1].",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "generation_ms": 3835.212,
+      "total_ms": 5734.112,
+      "tokens": {
+        "input_tokens": 800,
+        "output_tokens": 121,
+        "total_tokens": 921,
+        "source": "provider-reported"
+      },
+      "f1": 0.7619,
+      "em": 0.0,
+      "evidence_coverage": 0.8182
+    },
+    {
+      "question_id": "q02",
+      "question": "What is physical design in database design?",
+      "condition": "closed_book",
+      "reference_answer": "Physical design is deciding on the physical layout of the database.",
+      "retrieval_ms": null,
+      "retrieved_chunk_ids": [],
+      "ok": true,
+      "answer": "Physical design in database design refers to the process of defining the specific implementation details of a database schema, such as storage structures, indexing, partitioning, and access methods, to optimize performance and storage efficiency. It involves translating the logical design into a physical storage layout that supports efficient data retrieval and manipulation. The goal is to balance factors like query speed, storage cost, and maintenance overhead.",
+      "backend": "llm_closedbook",
+      "model": "openrouter/free",
+      "routed_model": "nvidia/nemotron-3.5-lightning:free",
+      "generation_ms": 3188.965,
+      "total_ms": 3188.992,
+      "tokens": {
+        "input_tokens": 117,
+        "output_tokens": 244,
+        "total_tokens": 361,
+        "source": "provider-reported"
+      },
+      "f1": 0.2029,
+      "em": 0.0,
+      "evidence_coverage": null
+    },
+    {
+      "question_id": "q02",
+      "question": "What is physical design in database design?",
+      "condition": "bm25",
+      "reference_answer": "Physical design is deciding on the physical layout of the database.",
+      "retrieval_ms": 0.41,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0001"
+      ],
+      "retrieval_scores": [
+        12.7708,
+        6.1373,
+        5.4234,
+        5.1587,
+        5.0443
+      ],
+      "ok": true,
+      "answer": "Physical design is the phase that decides on the physical layout of the database, transitioning from an abstract data model to its implementation. It involves determining how data is stored, organized, and accessed on storage media. [1] ch6.pdf (page 3)",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "nvidia/nemotron-3.5-lightning:free",
+      "generation_ms": 9506.885,
+      "total_ms": 9507.392,
+      "tokens": {
+        "input_tokens": 723,
+        "output_tokens": 1004,
+        "total_tokens": 1727,
+        "source": "provider-reported"
+      },
+      "f1": 0.3556,
+      "em": 0.0,
+      "evidence_coverage": 0.44
+    },
+    {
+      "question_id": "q02",
+      "question": "What is physical design in database design?",
+      "condition": "dense",
+      "reference_answer": "Physical design is deciding on the physical layout of the database.",
+      "retrieval_ms": 92.935,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0068"
+      ],
+      "retrieval_scores": [
+        0.6255,
+        0.5529,
+        0.5511,
+        0.5228,
+        0.4759
+      ],
+      "ok": true,
+      "answer": "Based on the provided passages, physical design is the final phase of database design that involves \"deciding on the physical layout of the database\" [1]. This follows logical design (deciding on the database schema) and represents the move from an abstract data model to actual implementation [1]. The passages do not provide further details about what physical layout entails (e.g., indexing, storage structures, partitioning).",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "generation_ms": 5330.708,
+      "total_ms": 5423.763,
+      "tokens": {
+        "input_tokens": 819,
+        "output_tokens": 238,
+        "total_tokens": 1057,
+        "source": "provider-reported"
+      },
+      "f1": 0.2769,
+      "em": 0.0,
+      "evidence_coverage": 0.5227
+    },
+    {
+      "question_id": "q02",
+      "question": "What is physical design in database design?",
+      "condition": "hybrid",
+      "reference_answer": "Physical design is deciding on the physical layout of the database.",
+      "retrieval_ms": 47.21,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0000",
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0003"
+      ],
+      "retrieval_scores": [
+        0.0328,
+        0.032,
+        0.0313,
+        0.0313,
+        0.0312
+      ],
+      "ok": true,
+      "answer": "Physical design is the stage where the database designer decides on the physical layout of the database [1]. It follows the logical design and is part of the final phase that moves from an abstract data model to implementation [1][4]. The specific storage structures and access methods are not detailed in the provided text. (These details are not document-supported.)",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "dots-studio/dots-3-note-preview:free",
+      "generation_ms": 24368.959,
+      "total_ms": 24416.246,
+      "tokens": {
+        "input_tokens": 668,
+        "output_tokens": 1904,
+        "total_tokens": 2572,
+        "source": "provider-reported"
+      },
+      "f1": 0.2712,
+      "em": 0.0,
+      "evidence_coverage": 0.4118
+    },
+    {
+      "question_id": "q03",
+      "question": "Which two major pitfalls must a database schema design avoid?",
+      "condition": "closed_book",
+      "reference_answer": "Redundancy, where repeated information can lead to inconsistency, and incompleteness, where some aspects of the enterprise become difficult or impossible to model.",
+      "retrieval_ms": null,
+      "retrieved_chunk_ids": [],
+      "ok": true,
+      "answer": "A database schema must avoid data redundancy, which leads to update, insert, and delete anomalies, and it should also avoid over\u2011normalization that creates excessive joins and hampers performance.",
+      "backend": "llm_closedbook",
+      "model": "openrouter/free",
+      "routed_model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+      "generation_ms": 6099.199,
+      "total_ms": 6099.233,
+      "tokens": {
+        "input_tokens": 121,
+        "output_tokens": 261,
+        "total_tokens": 382,
+        "source": "provider-reported"
+      },
+      "f1": 0.125,
+      "em": 0.0,
+      "evidence_coverage": null
+    },
+    {
+      "question_id": "q03",
+      "question": "Which two major pitfalls must a database schema design avoid?",
+      "condition": "bm25",
+      "reference_answer": "Redundancy, where repeated information can lead to inconsistency, and incompleteness, where some aspects of the enterprise become difficult or impossible to model.",
+      "retrieval_ms": 0.323,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0000"
+      ],
+      "retrieval_scores": [
+        18.1225,
+        8.9399,
+        7.3571,
+        7.1538,
+        6.1373
+      ],
+      "ok": true,
+      "answer": "According to the text, a database schema design must avoid two major pitfalls: redundancy, which can lead to data inconsistency through repeat information, and incompleteness, which may make certain enterprise aspects difficult or impossible to model. [1]",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "nvidia/nemotron-3.5-lightning:free",
+      "generation_ms": 8089.192,
+      "total_ms": 8089.571,
+      "tokens": {
+        "input_tokens": 727,
+        "output_tokens": 530,
+        "total_tokens": 1257,
+        "source": "provider-reported"
+      },
+      "f1": 0.5357,
+      "em": 0.0,
+      "evidence_coverage": 0.84
+    },
+    {
+      "question_id": "q03",
+      "question": "Which two major pitfalls must a database schema design avoid?",
+      "condition": "dense",
+      "reference_answer": "Redundancy, where repeated information can lead to inconsistency, and incompleteness, where some aspects of the enterprise become difficult or impossible to model.",
+      "retrieval_ms": 50.564,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0004"
+      ],
+      "retrieval_scores": [
+        0.6903,
+        0.6207,
+        0.565,
+        0.5514,
+        0.5057
+      ],
+      "ok": true,
+      "answer": "The two major pitfalls are redundancy and incompleteness [1]. Redundancy occurs when information is repeated, leading to potential inconsistency among copies, while incompleteness arises when a design cannot model certain aspects of the enterprise [1].",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "dots-studio/dots-3-note-preview:free",
+      "generation_ms": 11145.815,
+      "total_ms": 11196.488,
+      "tokens": {
+        "input_tokens": 751,
+        "output_tokens": 819,
+        "total_tokens": 1570,
+        "source": "provider-reported"
+      },
+      "f1": 0.4151,
+      "em": 0.0,
+      "evidence_coverage": 0.64
+    },
+    {
+      "question_id": "q03",
+      "question": "Which two major pitfalls must a database schema design avoid?",
+      "condition": "hybrid",
+      "reference_answer": "Redundancy, where repeated information can lead to inconsistency, and incompleteness, where some aspects of the enterprise become difficult or impossible to model.",
+      "retrieval_ms": 46.072,
+      "retrieved_chunk_ids": [
+        "udoc_151a82bc49d3:0003",
+        "udoc_151a82bc49d3:0002",
+        "udoc_151a82bc49d3:0001",
+        "udoc_151a82bc49d3:0078",
+        "udoc_151a82bc49d3:0046"
+      ],
+      "retrieval_scores": [
+        0.0328,
+        0.0323,
+        0.0315,
+        0.0315,
+        0.0294
+      ],
+      "ok": true,
+      "answer": "The two major pitfalls a database schema design must avoid are **redundancy** and **incompleteness**. Redundancy can cause repeated information and data inconsistency, while incompleteness may make certain aspects of the enterprise difficult or impossible to model. This is supported by [1].",
+      "backend": "llm_grounded",
+      "model": "openrouter/free",
+      "routed_model": "recursive/flint-v1.0:free",
+      "generation_ms": 4211.958,
+      "total_ms": 4258.09,
+      "tokens": {
+        "input_tokens": 717,
+        "output_tokens": 182,
+        "total_tokens": 899,
+        "source": "provider-reported"
+      },
+      "f1": 0.5085,
+      "em": 0.0,
+      "evidence_coverage": 0.8077
+    }
+  ]
+}
