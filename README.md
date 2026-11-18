@@ -14,11 +14,25 @@ It includes:
 
 ## Screenshots
 
-<!-- Add after running the dashboard, e.g. ![Ask a question](docs/images/ask.png) -->
+**Ask a question**: the router decides, then both answers are shown.
 
-| Ask a question | Research results | Documents |
-|---|---|---|
-| _screenshot_ | _screenshot_ | _screenshot_ |
+![Ask a question](docs/images/ask.png)
+
+**Decision and answers** (Option A closed-book vs Option B with retrieved evidence and citations):
+
+![Decision and answers](docs/images/answers.png)
+
+**Timing, tokens and retrieved passages** for the same question:
+
+![Timing and passages](docs/images/timing.png)
+
+**Research results**: saved routing experiment comparing the policies.
+
+![Research results](docs/images/results.png)
+
+**Documents**: upload and manage the collection.
+
+![Documents](docs/images/documents.png)
 
 ## Setup
 
