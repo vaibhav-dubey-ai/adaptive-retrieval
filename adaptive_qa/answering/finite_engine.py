@@ -1,6 +1,6 @@
 """Method A: closed-book answering with simulated parametric memory.
 
-Honest role of this engine (documented in PLAN.md § Limitations): it is NOT a
+Honest role of this engine (see README § Limitations): it is NOT a
 neural LLM. It emulates an LLM's closed-book behavior deterministically:
 - it "knows" only facts present in its parametric store (built from disjoint
   HotpotQA train rows - the model's "pretraining data");

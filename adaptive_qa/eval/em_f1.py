@@ -1,7 +1,7 @@
 """Exact-match and token-F1 (SQuAD-style normalization).
 
 Normalization: lower-case, strip punctuation, drop articles (a/an/the) and
-collapse whitespace. Documented limitation (PLAN.md): these metrics suit
+collapse whitespace. Documented limitation (see README): these metrics suit
 HotpotQA's short-answer style and are blind to paraphrase.
 """
 

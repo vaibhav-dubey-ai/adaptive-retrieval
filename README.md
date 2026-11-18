@@ -175,5 +175,3 @@ Full outputs are in `results/`.
 - The downstream QA run is a small smoke test. Re-run with a pinned model and all questions for reportable numbers.
 - Dense and hybrid always return k passages, so they cannot signal "nothing found".
 - The routing workload mixes corpus and general questions by construction, so savings describe that mix, not real traffic.
-
-See `docs/report_template.md` for the report skeleton.
