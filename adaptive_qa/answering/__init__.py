@@ -6,7 +6,7 @@
   passages; deterministic, free, no network.
 - ``OpenAICompatBackend``: optional hosted adapter for either method.
 
-Both deterministic backends share ``span_extraction`` so that quality differs
+Both deterministic backends share the simulated answerers' span extraction so that quality differs
 only through *what evidence is available*, which is exactly what the research
 question manipulates.
 """
@@ -16,7 +16,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Optional, Sequence
 
-from ..types import GeneratedAnswer, RetrievalHit
+from ..common import GeneratedAnswer, RetrievalHit
 
 
 class AnsweringMethod(ABC):
@@ -28,13 +28,13 @@ class AnsweringMethod(ABC):
 
 
 def build_method_a(cfg: "dict", **kwargs) -> "AnsweringMethod":
-    from .finite_engine import build_finite_engine
+    from .simulated import build_finite_engine
 
     backend = cfg["answering"]["method_a_backend"]
     if backend == "finite_engine":
         return build_finite_engine(cfg, **kwargs)
     if backend == "openai_compatible":
-        from .openai_compat import OpenAICompatBackend
+        from .llm_backend import OpenAICompatBackend
 
         sub = cfg["answering"]["openai_compatible"]
         return OpenAICompatBackend(grounded=False, cfg=sub)
@@ -44,11 +44,11 @@ def build_method_a(cfg: "dict", **kwargs) -> "AnsweringMethod":
 def build_method_b(cfg: dict) -> "AnsweringMethod":
     backend = cfg["answering"]["method_b_backend"]
     if backend == "span_absorber":
-        from .span_absorber import SpanAbsorber
+        from .simulated import SpanAbsorber
 
         return SpanAbsorber(cfg["answering"]["span_absorber"])
     if backend == "openai_compatible":
-        from .openai_compat import OpenAICompatBackend
+        from .llm_backend import OpenAICompatBackend
 
         sub = cfg["answering"]["openai_compatible"]
         return OpenAICompatBackend(grounded=True, cfg=sub)

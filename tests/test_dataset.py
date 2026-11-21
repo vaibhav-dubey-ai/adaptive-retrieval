@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from adaptive_qa.dataset import (
+from adaptive_qa.hotpot.data import (
     assign_splits,
     choose_offset,
     normalize_hotpot_row,

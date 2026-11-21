@@ -35,10 +35,10 @@ from typing import Any, Dict, List, Sequence
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from adaptive_qa.config import load_config, resolve_path  # noqa: E402
+from adaptive_qa.common import load_config, resolve_path  # noqa: E402
 from adaptive_qa.decision import build_decision_engine  # noqa: E402
 from adaptive_qa.decision.preflight import CollectionPreflight  # noqa: E402
-from adaptive_qa.documents import DocumentStore  # noqa: E402
+from adaptive_qa.live.documents import DocumentStore  # noqa: E402
 from adaptive_qa.eval.policy import evaluate_policies  # noqa: E402
 from adaptive_qa.eval.retrieval_eval import (  # noqa: E402
     EvalExample,
@@ -46,7 +46,7 @@ from adaptive_qa.eval.retrieval_eval import (  # noqa: E402
     validate_labels,
 )
 from adaptive_qa.retrieval import normalize_method  # noqa: E402
-from adaptive_qa.types import CorpusDoc  # noqa: E402
+from adaptive_qa.common import CorpusDoc  # noqa: E402
 
 
 def _spread_by_category(examples: Sequence[EvalExample], n: int) -> List[EvalExample]:

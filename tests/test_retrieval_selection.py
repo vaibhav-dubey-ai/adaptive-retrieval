@@ -17,7 +17,7 @@ import pytest
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from adaptive_qa.documents import DocumentStore, chunk_pages  # noqa: E402
+from adaptive_qa.live.documents import DocumentStore, chunk_pages  # noqa: E402
 from adaptive_qa.retrieval import (  # noqa: E402
     DEFAULT_METHOD,
     RETRIEVAL_METHODS,
@@ -25,7 +25,7 @@ from adaptive_qa.retrieval import (  # noqa: E402
     load_retriever,
     normalize_method,
 )
-from adaptive_qa.types import CorpusDoc, Decision, GeneratedAnswer, RetrievalHit  # noqa: E402
+from adaptive_qa.common import CorpusDoc, Decision, GeneratedAnswer, RetrievalHit  # noqa: E402
 
 
 class FakeEmbedder:
@@ -160,7 +160,7 @@ def test_reindex_keeps_alive_and_rewrites_unique_ids(tmp_path):
 # -------------------------------------------------------------------- HTTP API
 def test_branch_b_diagnostics_are_collected_after_the_query():
     """Diagnostics must describe the call that happened (model loaded, cache used)."""
-    from adaptive_qa.serve import ServeFlow
+    from adaptive_qa.live.serve import ServeFlow
 
     class DiagRetriever:
         method = "dense"
@@ -197,6 +197,8 @@ def test_api_retrieval_config_lists_methods():
 
     import api.main as api_main
 
+    from api import deps
+
     client = TestClient(api_main.app)
     body = client.get("/retrieval/config").json()
     assert body["methods"] == ["bm25", "dense", "hybrid"]
@@ -207,6 +209,8 @@ def test_api_rejects_unknown_retrieval_method():
     from fastapi.testclient import TestClient
 
     import api.main as api_main
+
+    from api import deps
 
     client = TestClient(api_main.app)
     resp = client.post(
@@ -222,7 +226,9 @@ def test_api_passes_requested_method_to_the_flow(monkeypatch):
     from fastapi.testclient import TestClient
 
     import api.main as api_main
-    from adaptive_qa.serve import ServeFlow
+
+    from api import deps
+    from adaptive_qa.live.serve import ServeFlow
 
     captured = {}
 
@@ -263,7 +269,7 @@ def test_api_passes_requested_method_to_the_flow(monkeypatch):
             collection_retriever=ScopedRetriever(retrieval_method or "bm25"),
         )
 
-    monkeypatch.setattr(api_main, "_serve_flow", fake_serve_flow)
+    monkeypatch.setattr(deps, "_serve_flow", fake_serve_flow)
     client = TestClient(api_main.app)
 
     resp = client.post("/ask?mode=compare", json={"question": "Q?", "retrieval_method": "hybrid"})

@@ -20,8 +20,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from adaptive_qa.config import load_config  # noqa: E402
-from adaptive_qa.experiment import ExperimentRunner  # noqa: E402
+from adaptive_qa.common import load_config  # noqa: E402
+from adaptive_qa.hotpot.experiment import ExperimentRunner  # noqa: E402
 
 
 def main() -> None:

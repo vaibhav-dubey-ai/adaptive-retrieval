@@ -16,7 +16,7 @@ import re
 from typing import Dict, List, Sequence, Tuple
 
 from . import Retriever
-from ..types import CorpusDoc, RetrievalHit
+from ..common import CorpusDoc, RetrievalHit
 
 _TOKEN_RE = re.compile(r"[a-z0-9]+")
 

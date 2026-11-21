@@ -10,8 +10,8 @@ import pytest
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from adaptive_qa.serve import ServeFlow  # noqa: E402
-from adaptive_qa.types import Decision, GeneratedAnswer, RetrievalHit  # noqa: E402
+from adaptive_qa.live.serve import ServeFlow  # noqa: E402
+from adaptive_qa.common import Decision, GeneratedAnswer, RetrievalHit  # noqa: E402
 
 
 class Engine:

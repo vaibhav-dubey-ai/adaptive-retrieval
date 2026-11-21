@@ -28,14 +28,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from adaptive_qa.config import load_config, resolve_path  # noqa: E402
-from adaptive_qa.dataset import load_records_jsonl  # noqa: E402
-from adaptive_qa.experiment import ExperimentRunner  # noqa: E402
-from adaptive_qa.answering.parametric_store import load_parametric_store  # noqa: E402
-from adaptive_qa.decision.features import extract_features, FEATURE_NAMES  # noqa: E402
-from adaptive_qa.types import Decision  # noqa: E402
-from adaptive_qa.pipeline import Pipeline  # noqa: E402
-from adaptive_qa.eval.outcome import label_outcome  # noqa: E402
+from adaptive_qa.common import load_config, resolve_path  # noqa: E402
+from adaptive_qa.hotpot.data import load_records_jsonl  # noqa: E402
+from adaptive_qa.hotpot.experiment import ExperimentRunner  # noqa: E402
+from adaptive_qa.answering.simulated import load_parametric_store  # noqa: E402
+from adaptive_qa.decision.engines import extract_features, FEATURE_NAMES  # noqa: E402
+from adaptive_qa.common import Decision  # noqa: E402
+from adaptive_qa.hotpot.pipeline import Pipeline  # noqa: E402
+from adaptive_qa.eval.metrics import label_outcome  # noqa: E402
 
 
 def derive_labels(runner: ExperimentRunner, questions) -> dict:
@@ -96,7 +96,7 @@ def main() -> None:
     print(f"[labels] done in {time.time() - t0:.1f}s; train counts: {train_data['label_counts']}")
 
     if args.engine == "heuristic":
-        from adaptive_qa.decision.heuristic import HeuristicDecisionEngine
+        from adaptive_qa.decision.engines import HeuristicDecisionEngine
 
         store = runner.familiarity_store()
         eng = HeuristicDecisionEngine(cfg["decision"].get("heuristic", {}), None)
@@ -132,7 +132,7 @@ def main() -> None:
         print(f"    tuned threshold {best_thr}; validation RETRIEVE-F1 {best_f1:.3f}")
 
     else:
-        from adaptive_qa.decision.learned import LearnedDecisionEngine
+        from adaptive_qa.decision.engines import LearnedDecisionEngine
 
         eng = LearnedDecisionEngine(cfg.get("decision", {}))
         tuning = eng.fit(

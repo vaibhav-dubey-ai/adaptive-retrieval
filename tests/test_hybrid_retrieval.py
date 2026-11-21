@@ -20,7 +20,7 @@ from adaptive_qa.retrieval.hybrid import (
     HybridRetriever,
     reciprocal_rank_fusion,
 )
-from adaptive_qa.types import CorpusDoc
+from adaptive_qa.common import CorpusDoc
 
 
 class FakeEmbedder:

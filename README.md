@@ -141,17 +141,24 @@ fallback to BM25.
 
 ### Project layout
 
+The project is two systems sharing one toolbox:
+
+- **Live app**: upload documents, ask a question, see the router decide, compare answers (`live/`, `api/`, `dashboard/`).
+- **Offline research**: the HotpotQA four-policy experiment with a simulated closed-book model (`hotpot/`, `answering/simulated.py`).
+
 | Path | Role |
 |---|---|
-| `adaptive_qa/decision/` | heuristic and learned decision engines, features |
-| `adaptive_qa/retrieval/` | BM25, dense, hybrid retrievers |
-| `adaptive_qa/answering/` | closed-book engine, grounded reader, LLM backend, answer cache |
-| `adaptive_qa/eval/` | metrics, outcome labels, policy and routing evaluation, charts |
-| `adaptive_qa/documents.py` | upload, extraction, chunking, document store |
-| `api/main.py` | FastAPI backend |
+| `adaptive_qa/common.py` | shared types (`Decision`, `RetrievalHit`, ...), config loading, timing, JSON IO, cost |
+| `adaptive_qa/retrieval/` | `bm25.py`, `dense.py`, `hybrid.py` (RRF), `compare.py` (side-by-side) |
+| `adaptive_qa/decision/` | `engines.py` (features, heuristic, learned) and `preflight.py` (document-relevance probe) |
+| `adaptive_qa/answering/` | `llm_backend.py` (real LLM, cache in `cache.py`) and `simulated.py` (offline answerers) |
+| `adaptive_qa/eval/` | `metrics.py` (EM/F1, outcomes, policy metrics), `retrieval_eval.py`, `policy.py`, `routing.py`, `charts.py` |
+| `adaptive_qa/live/` | `documents.py` (upload, chunk, store), `serve.py` (ServeFlow), `experiments_view.py` (saved results) |
+| `adaptive_qa/hotpot/` | `data.py` (corpus + questions), `pipeline.py`, `experiment.py` |
+| `api/` | FastAPI backend: `main.py` (app), `deps.py` (shared state), `routes_ask.py`, `routes_documents.py`, `routes_results.py` |
 | `dashboard/index.html` | single-page dashboard |
-| `eval_data/` | labelled question sets |
-| `configs/default.json` | experiment configuration |
+| `scripts/` | one command per experiment (see "Run the experiments") |
+| `eval_data/`, `configs/default.json` | labelled question sets, experiment configuration |
 
 ## Results (retrieval, Chapter 6 corpus)
 

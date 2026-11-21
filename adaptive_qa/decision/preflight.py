@@ -59,8 +59,8 @@ from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Optional, Sequence
 
 from ..retrieval.bm25 import BM25Retriever, tokenize
-from ..timeutil import now_ns
-from ..types import CorpusDoc
+from ..common import now_ns
+from ..common import CorpusDoc
 
 # Signal combination weights (documented, fixed, not tuned per question).
 CORPUS_WEIGHT = 0.50

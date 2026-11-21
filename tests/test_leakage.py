@@ -8,7 +8,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from adaptive_qa.types import Decision  # noqa: E402,E401
+from adaptive_qa.common import Decision  # noqa: E402,E401
 
 
 def test_oracle_evaluation_module_is_not_deleted_or_imported_by_decision():
@@ -47,7 +47,7 @@ def test_pipeline_never_feeds_reference_to_decision_engine():
             )
             return Decision.RETRIEVE, 0.99, {}
 
-    from adaptive_qa.pipeline import Pipeline
+    from adaptive_qa.hotpot.pipeline import Pipeline
     from tests.test_pipeline import SpyRetriever, SpyMethod
 
     Pipe = Pipeline(SpyRetriever(), SpyMethod("A"), SpyMethod("B"), ProbeDecision())
@@ -58,7 +58,7 @@ def test_pipeline_never_feeds_reference_to_decision_engine():
 
 
 def test_run_record_never_contains_gold_answer_in_decision_fields():
-    from adaptive_qa.pipeline import Pipeline
+    from adaptive_qa.hotpot.pipeline import Pipeline
     from tests.test_pipeline import SpyRetriever, SpyMethod
 
     spy = SpyDecisionRecordingMethods()
@@ -80,7 +80,7 @@ class SpyDecisionRecordingMethods:
 
 
 def test_corpus_manifest_evaluation_only_note_is_written(tmp_path: Path):
-    from adaptive_qa.corpus import build_corpus, save_eval_manifest
+    from adaptive_qa.hotpot.data import build_corpus, save_eval_manifest
 
     docs, meta = build_corpus([
         {

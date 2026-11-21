@@ -3,10 +3,10 @@ from pathlib import Path
 
 import numpy as np
 
-from adaptive_qa.decision.heuristic import HeuristicDecisionEngine
-from adaptive_qa.decision.learned import LearnedDecisionEngine
-from adaptive_qa.decision.features import extract_features, FEATURE_NAMES
-from adaptive_qa.types import Decision
+from adaptive_qa.decision.engines import HeuristicDecisionEngine
+from adaptive_qa.decision.engines import LearnedDecisionEngine
+from adaptive_qa.decision.engines import extract_features, FEATURE_NAMES
+from adaptive_qa.common import Decision
 
 
 def title_cov_fam(cov: float, titles: int = 3, rel: float = 0.8) -> dict:

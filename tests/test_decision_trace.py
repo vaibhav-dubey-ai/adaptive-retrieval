@@ -14,9 +14,9 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from adaptive_qa.decision.heuristic import HeuristicDecisionEngine  # noqa: E402
+from adaptive_qa.decision.engines import HeuristicDecisionEngine  # noqa: E402
 from adaptive_qa.decision.preflight import CollectionPreflight, content_terms  # noqa: E402
-from adaptive_qa.types import CorpusDoc, Decision  # noqa: E402
+from adaptive_qa.common import CorpusDoc, Decision  # noqa: E402
 
 
 class FakeProber:

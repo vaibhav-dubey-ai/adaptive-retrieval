@@ -11,9 +11,6 @@ from __future__ import annotations
 
 from typing import Optional
 
-from . import learned  # noqa: F401
-from . import heuristic as _heuristic  # noqa: F401
-
 
 def build_decision_engine(cfg: dict, familiarity_prober=None, collection_prober=None):
     """Factory.
@@ -28,13 +25,13 @@ def build_decision_engine(cfg: dict, familiarity_prober=None, collection_prober=
     """
     engine_name = cfg["decision"]["engine"]
     if engine_name == "heuristic":
-        from .heuristic import HeuristicDecisionEngine
+        from .engines import HeuristicDecisionEngine
 
         return HeuristicDecisionEngine(
             cfg["decision"].get("heuristic", {}), familiarity_prober, collection_prober
         )
     if engine_name == "learned":
-        from .learned import LearnedDecisionEngine
+        from .engines import LearnedDecisionEngine
 
         return LearnedDecisionEngine(cfg, familiarity_prober)
     raise ValueError(f"unknown decision engine {engine_name!r}")

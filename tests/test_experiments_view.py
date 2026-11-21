@@ -13,13 +13,13 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from adaptive_qa.eval.policy import evaluate_policies  # noqa: E402
 from adaptive_qa.eval.retrieval_eval import EvalExample  # noqa: E402
-from adaptive_qa.experiments_view import (  # noqa: E402
+from adaptive_qa.live.experiments_view import (  # noqa: E402
     build_retrieval_view,
     list_retrieval_runs,
     load_policy_view,
     load_retrieval_view,
 )
-from adaptive_qa.types import Decision, GeneratedAnswer, RetrievalHit  # noqa: E402
+from adaptive_qa.common import Decision, GeneratedAnswer, RetrievalHit  # noqa: E402
 
 
 def _write_run(root: Path, run_id: str, table, methods):
@@ -109,8 +109,10 @@ def test_api_experiments_retrieval_and_question_inspector(monkeypatch, tmp_path:
 
     import api.main as api_main
 
+    from api import deps
+
     _write_run(tmp_path, "r1", _table(), _methods())
-    monkeypatch.setattr(api_main, "RESULTS_RETRIEVAL_DIR", tmp_path)
+    monkeypatch.setattr(deps, "RESULTS_RETRIEVAL_DIR", tmp_path)
 
     class FakeStore:
         def get(self, doc_id):
@@ -122,7 +124,7 @@ def test_api_experiments_retrieval_and_question_inspector(monkeypatch, tmp_path:
                 {"chunk_id": "c:2", "page": 17, "text": "Composite attributes have subparts."},
             ]
 
-    monkeypatch.setattr(api_main, "_docs", lambda: FakeStore())
+    monkeypatch.setattr(deps, "_docs", lambda: FakeStore())
     client = TestClient(api_main.app)
 
     resp = client.get("/experiments/retrieval")
@@ -147,10 +149,12 @@ def test_labels_are_only_in_the_experiments_payload(monkeypatch, tmp_path: Path)
     from fastapi.testclient import TestClient
 
     import api.main as api_main
-    from adaptive_qa.types import RetrievalHit
+
+    from api import deps
+    from adaptive_qa.common import RetrievalHit
 
     _write_run(tmp_path, "r1", _table(), _methods())
-    monkeypatch.setattr(api_main, "RESULTS_RETRIEVAL_DIR", tmp_path)
+    monkeypatch.setattr(deps, "RESULTS_RETRIEVAL_DIR", tmp_path)
 
     class FakeRetriever:
         method = "bm25"
@@ -165,9 +169,9 @@ def test_labels_are_only_in_the_experiments_payload(monkeypatch, tmp_path: Path)
         def active_documents(self):
             return [{"filename": "ch6.pdf", "n_chunks": 1}]
 
-    monkeypatch.setattr(api_main, "_docs", lambda: FakeStore())
-    monkeypatch.setattr(api_main, "_collection_info", lambda m, k: {})
-    monkeypatch.setattr(api_main, "_collection_retriever", lambda m: FakeRetriever())
+    monkeypatch.setattr(deps, "_docs", lambda: FakeStore())
+    monkeypatch.setattr(deps, "_collection_info", lambda m, k: {})
+    monkeypatch.setattr(deps, "_collection_retriever", lambda m: FakeRetriever())
     client = TestClient(api_main.app)
     body = client.post("/retrieval/compare", json={"question": "What is X?"}).json()
     assert "relevant_chunk_ids" not in json.dumps(body)
@@ -182,6 +186,8 @@ def test_demo_examples_cover_the_categories_without_reference_answers(
 
     import api.main as api_main
 
+    from api import deps
+
     lines = [
         {"question_id": "q1", "category": "exact_terminology", "question": "What is a diamond?",
          "relevant_chunk_ids": ["c:1"], "reference_answer": "SECRET GOLD"},
@@ -193,7 +199,7 @@ def test_demo_examples_cover_the_categories_without_reference_answers(
     (tmp_path / "tiny.jsonl").write_text(
         "\n".join(json.dumps(x) for x in lines), encoding="utf-8"
     )
-    monkeypatch.setattr(api_main, "EVAL_SET_DIR", tmp_path)
+    monkeypatch.setattr(deps, "EVAL_SET_DIR", tmp_path)
     client = TestClient(api_main.app)
     body = client.get("/demo/examples").json()
     assert body["available"] is True

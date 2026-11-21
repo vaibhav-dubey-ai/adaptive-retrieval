@@ -21,7 +21,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 from . import Retriever
 from .bm25 import BM25Retriever
 from .dense import DEFAULT_MODEL_NAME, DenseRetriever, Embedder
-from ..types import CorpusDoc, RetrievalHit
+from ..common import CorpusDoc, RetrievalHit
 
 DEFAULT_RRF_K = 60
 DEFAULT_CANDIDATE_K = 50

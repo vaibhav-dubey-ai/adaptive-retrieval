@@ -1,6 +1,6 @@
 import time
 
-from adaptive_qa.timeutil import Timer, now_ns
+from adaptive_qa.common import Timer, now_ns
 
 
 def test_nanosecond_clock_is_monotonic():

@@ -16,7 +16,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-from ..types import CorpusDoc, RetrievalHit
+from ..common import CorpusDoc, RetrievalHit
 
 RETRIEVAL_METHODS: Tuple[str, ...] = ("bm25", "dense", "hybrid")
 DEFAULT_METHOD = "bm25"

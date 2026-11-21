@@ -6,8 +6,8 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from adaptive_qa.cost import cost_summary
-from adaptive_qa.types import Decision
+from adaptive_qa.common import cost_summary
+from adaptive_qa.common import Decision
 
 
 def _row(decision, retrieval_better, no_retrieval_better):
@@ -54,8 +54,8 @@ def test_llm_calls_counted_per_policy():
 # ---------------------------------------------------------------- leakage
 def test_parametric_store_built_without_eval_gold_paragraphs():
     """The store must not contain eval-question gold evidence (requirement 10)."""
-    from adaptive_qa.config import load_config
-    from adaptive_qa.serialization import read_jsonl
+    from adaptive_qa.common import load_config
+    from adaptive_qa.common import read_jsonl
 
     cfg = load_config("configs/default.json")
     assert cfg["parametric_store"]["include_eval_gold_paragraphs"] is False
@@ -95,8 +95,10 @@ def test_api_document_endpoints_end_to_end(monkeypatch, tmp_path):
 
     import api.main as api_main
 
-    monkeypatch.setattr(api_main, "DOCUMENT_ROOT", tmp_path / "documents")
-    api_main._STATE["docs"] = None
+    from api import deps, routes_ask
+
+    monkeypatch.setattr(deps, "DOCUMENT_ROOT", tmp_path / "documents")
+    deps._STATE["docs"] = None
 
     client = TestClient(api_main.app)
     payload = ("Persistently stored custom doc. " * 30).encode()
@@ -134,8 +136,10 @@ def test_api_compare_and_adaptive_modes_with_mocks(monkeypatch):
     from fastapi.testclient import TestClient
 
     import api.main as api_main
-    from adaptive_qa.serve import ServeFlow
-    from adaptive_qa.types import Decision, GeneratedAnswer, RetrievalHit
+
+    from api import deps, routes_ask
+    from adaptive_qa.live.serve import ServeFlow
+    from adaptive_qa.common import Decision, GeneratedAnswer, RetrievalHit
 
     order = []
     engine_calls = []
@@ -171,7 +175,7 @@ def test_api_compare_and_adaptive_modes_with_mocks(monkeypatch):
         def decide_first(self, question): return super().decide_first(question)
 
     # the flow factory now takes an optional retrieval_method; the fake ignores it
-    monkeypatch.setattr(api_main, "_serve_flow", lambda **kw: FakeFlow())
+    monkeypatch.setattr(deps, "_serve_flow", lambda **kw: FakeFlow())
     client = TestClient(api_main.app)
 
     rec = client.post("/ask?mode=compare", json={"question": "Where is the lab?"})
@@ -200,15 +204,17 @@ def test_api_benchmark_endpoint_preserved(monkeypatch):
 
     import api.main as api_main
 
+    from api import deps, routes_ask
+
     class FakePipeline:
         def __init__(self, **kw):
             pass
         def run_cross_verify(self, qid, question, split="", include_decision=True):
-            from adaptive_qa.pipeline import QuestionRunRecord
+            from adaptive_qa.hotpot.pipeline import QuestionRunRecord
 
             return QuestionRunRecord(question_id=qid, question=question, answer_a={"text": "a", "abstained": False, "backend": "x", "meta": {}}, answer_b={"text": "b", "abstained": False, "backend": "y", "meta": {}})
         def run_adaptive(self, qid, question):
-            from adaptive_qa.pipeline import QuestionRunRecord
+            from adaptive_qa.hotpot.pipeline import QuestionRunRecord
 
             return QuestionRunRecord(question_id=qid, question=question, answer_a={"text": "a", "abstained": False, "backend": "x", "meta": {}}, primary_method="A")
 
@@ -216,10 +222,10 @@ def test_api_benchmark_endpoint_preserved(monkeypatch):
         retriever = method_a = method_b = decision_engine = top_k = None
         records_eval = []
 
-    monkeypatch.setattr(api_main, "_runner", lambda: FakeRunner())
+    monkeypatch.setattr(deps, "_runner", lambda: FakeRunner())
     class MonkeyPipeline:
         """api.main.builds Pipeline directly; patch the Pipeline symbol."""
-    monkeypatch.setattr(api_main, "Pipeline", FakePipeline)
+    monkeypatch.setattr(routes_ask, "Pipeline", FakePipeline)
 
     client = TestClient(api_main.app)
     j = client.post("/ask/benchmark?mode=cross", json={"question": "benchmark q?"}).json()
@@ -229,7 +235,8 @@ def test_api_benchmark_endpoint_preserved(monkeypatch):
 def test_llm_backends_reused_so_cold_flag_is_not_always_true(monkeypatch):
     """A fresh backend per request made generation_cold True for every live answer."""
     import api.main as api_main
+    from api import deps, routes_ask
 
-    monkeypatch.setitem(api_main._STATE, "llm", None)
-    bundle = api_main._LLMBundle({"answering": {"llm": {}}})
+    monkeypatch.setitem(deps._STATE, "llm", None)
+    bundle = deps._LLMBundle({"answering": {"llm": {}}})
     assert bundle.backends() is bundle.backends()

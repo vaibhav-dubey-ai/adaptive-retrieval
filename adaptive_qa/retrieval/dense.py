@@ -32,8 +32,8 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 from . import Retriever
-from ..config import PROJECT_ROOT
-from ..types import CorpusDoc, RetrievalHit
+from ..common import PROJECT_ROOT
+from ..common import CorpusDoc, RetrievalHit
 
 DEFAULT_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 DEFAULT_CACHE_DIR = PROJECT_ROOT / "data" / "embeddings"

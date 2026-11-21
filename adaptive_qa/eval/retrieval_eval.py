@@ -1,45 +1,184 @@
-"""Reproducible retrieval evaluation over a labelled question set.
-
-The harness runs one or more retrievers over the *same* corpus and the *same*
-labelled questions, records per-question rankings and per-query latency, and
-writes machine-readable JSON/CSV so the numbers in the report can be re-derived
-by anyone.
-
-What is measured
-----------------
-* Ranking quality: Recall@5, MRR@10, nDCG@10 (see ``retrieval_metrics``).
-* Retrieval latency only. LLM answer generation is NOT part of this harness;
-  those timings live in the serve/experiment pipeline. Keeping them apart is
-  required for a fair "retrieval cost" claim.
-* Cold-start vs steady-state: the model/embedding build time and the first
-  query are reported separately from the steady-state per-query median, because
-  a dense retriever pays a one-off model load + corpus encode cost.
-
-Reproducibility
----------------
-Every result file records the dataset path and its SHA-256, the number of
-questions, the corpus size, the retriever name, the embedding model name (when
-relevant), k values, and a UTC timestamp.
-"""
+"""Retrieval evaluation: ranking metrics (recall/MRR/nDCG) and the labelled-question evaluation harness."""
 
 from __future__ import annotations
 
 import csv
 import hashlib
 import json
+import math
 import time
+from ..common import now_ns
 from dataclasses import dataclass
 from pathlib import Path
+from statistics import mean, median
 from typing import Any, Dict, Iterable, List, Optional, Sequence
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Set
 
-from ..timeutil import now_ns
-from .retrieval_metrics import (
-    aggregate,
-    latency_stats,
-    ndcg_at_k,
-    recall_at_k,
-    reciprocal_rank_at_k,
-)
+
+# ======================================================================
+# Retrieval quality metrics: Recall@k, MRR@k, nDCG@k.
+# ======================================================================
+
+def _top(retrieved: Sequence[str], k: int) -> List[str]:
+    return list(retrieved)[: max(0, int(k))]
+
+
+def recall_at_k(retrieved: Sequence[str], relevant: Iterable[str], k: int) -> Optional[float]:
+    rel: Set[str] = set(relevant)
+    if not rel:
+        return None
+    found = rel.intersection(_top(retrieved, k))
+    return len(found) / len(rel)
+
+
+def reciprocal_rank_at_k(
+    retrieved: Sequence[str], relevant: Iterable[str], k: int = 10
+) -> Optional[float]:
+    rel: Set[str] = set(relevant)
+    if not rel:
+        return None
+    for rank, doc_id in enumerate(_top(retrieved, k), start=1):
+        if doc_id in rel:
+            return 1.0 / rank
+    return 0.0
+
+
+def ndcg_at_k(
+    retrieved: Sequence[str], relevant: Iterable[str], k: int = 10
+) -> Optional[float]:
+    rel: Set[str] = set(relevant)
+    if not rel:
+        return None
+    hits = _top(retrieved, k)
+    dcg = sum(
+        1.0 / math.log2(rank + 1)
+        for rank, doc_id in enumerate(hits, start=1)
+        if doc_id in rel
+    )
+    ideal_n = min(len(rel), max(0, int(k)))
+    idcg = sum(1.0 / math.log2(rank + 1) for rank in range(1, ideal_n + 1))
+    if idcg == 0.0:
+        return 0.0
+    return dcg / idcg
+
+
+def percentile(values: Sequence[float], q: float) -> Optional[float]:
+    """Linear-interpolated percentile (0 <= q <= 100); None for empty input."""
+    if not values:
+        return None
+    ordered = sorted(values)
+    if len(ordered) == 1:
+        return float(ordered[0])
+    pos = (len(ordered) - 1) * (q / 100.0)
+    lo = int(math.floor(pos))
+    hi = min(len(ordered) - 1, lo + 1)
+    frac = pos - lo
+    return float(ordered[lo] * (1 - frac) + ordered[hi] * frac)
+
+
+def latency_stats(values: Sequence[float]) -> Dict[str, Optional[float]]:
+    """Mean/median/min/max/p95 over millisecond timings."""
+    vals = [float(v) for v in values]
+    if not vals:
+        return {"n": 0, "mean_ms": None, "median_ms": None, "min_ms": None,
+                "max_ms": None, "p95_ms": None}
+    return {
+        "n": len(vals),
+        "mean_ms": round(mean(vals), 3),
+        "median_ms": round(float(median(vals)), 3),
+        "min_ms": round(min(vals), 3),
+        "max_ms": round(max(vals), 3),
+        "p95_ms": round(percentile(vals, 95) or 0.0, 3),
+    }
+
+
+def aggregate(
+    rows: Sequence[Dict[str, Any]],
+    k_recall: int = 5,
+    k_rank: int = 10,
+) -> Dict[str, Any]:
+    """Aggregate per-question rows into headline metrics.
+
+    Each row must provide ``retrieved`` (ordered chunk ids) and ``relevant``
+    (labelled chunk ids); ``category`` is optional and used for breakdowns.
+    """
+    scored = [r for r in rows if r.get("relevant")]
+    unscored = [r for r in rows if not r.get("relevant")]
+
+    def _mean(vals: Iterable[Optional[float]]) -> Optional[float]:
+        ok = [v for v in vals if v is not None]
+        return round(mean(ok), 4) if ok else None
+
+    out: Dict[str, Any] = {
+        "n_questions": len(rows),
+        "n_scored_questions": len(scored),
+        "n_unanswerable_questions": len(unscored),
+        f"recall_at_{k_recall}": _mean(
+            recall_at_k(r["retrieved"], r["relevant"], k_recall) for r in scored
+        ),
+        f"mrr_at_{k_rank}": _mean(
+            reciprocal_rank_at_k(r["retrieved"], r["relevant"], k_rank) for r in scored
+        ),
+        f"ndcg_at_{k_rank}": _mean(
+            ndcg_at_k(r["retrieved"], r["relevant"], k_rank) for r in scored
+        ),
+        "hit_rate_at_1": _mean(
+            1.0 if (r["relevant"] and r["retrieved"] and r["retrieved"][0] in set(r["relevant"])) else 0.0
+            for r in scored
+        ),
+        "no_evidence_rate": _mean(
+            1.0 if not r.get("retrieved") else 0.0 for r in unscored
+        ),
+        "mean_relevant_chunks": round(
+            mean(len(r["relevant"]) for r in scored), 3
+        ) if scored else None,
+        "metrics_note": (
+            "Binary relevance against hand-verified chunk ids. Questions with no "
+            "labelled evidence (unanswerable) are excluded from Recall/MRR/nDCG and "
+            "reported separately via no_evidence_rate."
+        ),
+    }
+    by_cat: Dict[str, Dict[str, Any]] = {}
+    for cat in sorted({r.get("category", "uncategorised") for r in rows}):
+        sub = [r for r in rows if r.get("category", "uncategorised") == cat]
+        by_cat[cat] = aggregate_basic(sub, k_recall, k_rank)
+    out["by_category"] = by_cat
+    return out
+
+
+def aggregate_basic(
+    rows: Sequence[Dict[str, Any]], k_recall: int = 5, k_rank: int = 10
+) -> Dict[str, Any]:
+    """Same metrics without the recursive category breakdown."""
+    scored = [r for r in rows if r.get("relevant")]
+
+    def _mean(vals: Iterable[Optional[float]]) -> Optional[float]:
+        ok = [v for v in vals if v is not None]
+        return round(mean(ok), 4) if ok else None
+
+    return {
+        "n_questions": len(rows),
+        "n_scored_questions": len(scored),
+        f"recall_at_{k_recall}": _mean(
+            recall_at_k(r["retrieved"], r["relevant"], k_recall) for r in scored
+        ),
+        f"mrr_at_{k_rank}": _mean(
+            reciprocal_rank_at_k(r["retrieved"], r["relevant"], k_rank) for r in scored
+        ),
+        f"ndcg_at_{k_rank}": _mean(
+            ndcg_at_k(r["retrieved"], r["relevant"], k_rank) for r in scored
+        ),
+        "no_evidence_rate": _mean(
+            1.0 if not r.get("retrieved") else 0.0
+            for r in rows
+            if not r.get("relevant")
+        ),
+    }
+
+
+# ======================================================================
+# Reproducible retrieval evaluation over a labelled question set.
+# ======================================================================
 
 REQUIRED_KEYS = ("question_id", "question")
 

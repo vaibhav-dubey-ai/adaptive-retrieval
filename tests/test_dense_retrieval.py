@@ -28,7 +28,7 @@ from adaptive_qa.retrieval.dense import (
     cosine_similarity,
     l2_normalize,
 )
-from adaptive_qa.types import CorpusDoc
+from adaptive_qa.common import CorpusDoc
 
 
 class FakeEmbedder:

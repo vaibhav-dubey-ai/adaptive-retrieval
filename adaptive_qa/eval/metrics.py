@@ -1,18 +1,154 @@
-"""Per-policy metric aggregation.
-
-All aggregations come from the per-question run records (machine-readable
-JSONL) so every number in a summary can be recomputed from the artifact.
-``ambiguous`` oracle cases are excluded from binary decision accuracy and
-reported separately (both options from the brief are honored).
-"""
+"""Answer scoring (EM/F1), per-question outcome labels, and policy-level metrics."""
 
 from __future__ import annotations
 
+import re
 import statistics
+import string
+from ..common import Decision
+from ..common import GeneratedAnswer
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
+from typing import Any, Optional
+from typing import List, Sequence
 
-from ..types import Decision
 
+# ======================================================================
+# Exact-match and token-F1 (SQuAD-style normalization).
+# ======================================================================
+
+_PUNCT_TABLE = str.maketrans("", "", string.punctuation)
+
+
+def normalize_answer(text: str) -> str:
+    text = text.lower()
+    text = text.translate(_PUNCT_TABLE)
+    text = re.sub(r"\b(a|an|the)\b", " ", text)
+    return " ".join(text.split())
+
+
+def f1_score(gold: str, pred: str) -> float:
+    gold_tokens = normalize_answer(gold).split()
+    pred_tokens = normalize_answer(pred).split()
+    if not gold_tokens or not pred_tokens:
+        return 1.0 if gold_tokens == pred_tokens else 0.0
+    from collections import Counter
+
+    common = Counter(gold_tokens) & Counter(pred_tokens)
+    same = sum(common.values())
+    if same == 0:
+        return 0.0
+    precision = same / len(pred_tokens)
+    recall = same / len(gold_tokens)
+    return 2 * precision * recall / (precision + recall)
+
+
+def em_score(gold: str, pred: str) -> float:
+    return float(normalize_answer(gold) == normalize_answer(pred))
+
+
+def composite_score(gold: str, pred: str) -> float:
+    return 0.5 * em_score(gold, pred) + 0.5 * f1_score(gold, pred)
+
+
+def recall_score(gold: str, pred: str) -> float:
+    """Fraction of the reference tokens that appear in the prediction.
+
+    Token-F1 punishes a correct but wordy answer (low precision); recall alone
+    rewards rambling. ``quality_score`` blends both for free-form LLM answers.
+    """
+    from collections import Counter
+
+    gold_tokens = normalize_answer(gold).split()
+    pred_tokens = normalize_answer(pred).split()
+    if not gold_tokens:
+        return 1.0 if not pred_tokens else 0.0
+    common = Counter(gold_tokens) & Counter(pred_tokens)
+    return sum(common.values()) / len(gold_tokens)
+
+
+def quality_score(gold: str, pred: str) -> float:
+    """Answer quality for free-form LLM output: mean of token-F1 and token-recall."""
+    return 0.5 * f1_score(gold, pred) + 0.5 * recall_score(gold, pred)
+
+
+# ======================================================================
+# Cross-verification outcome labeling (the offline oracle).
+# ======================================================================
+
+def _answer_fields(answer):
+    """Accept a GeneratedAnswer OR its serialized dict form (records)."""
+    if isinstance(answer, GeneratedAnswer):
+        return answer.text, bool(answer.abstained)
+    if isinstance(answer, dict):
+        return (answer.get("text") or ""), bool(answer.get("abstained", False))
+    return "", True
+
+
+@dataclass
+class Outcome:
+    label: str                    # one of the four class names
+    quality_a: float              # composite quality of Method A
+    quality_b: float              # composite quality of Method B
+    delta: float                  # quality_b - quality_a
+    em_a: float
+    f1_a: float
+    em_b: float
+    f1_b: float
+
+
+def label_outcome(
+    question_record,
+    answer_a: GeneratedAnswer,
+    answer_b: GeneratedAnswer,
+    gap_threshold: float = 0.10,
+) -> Outcome:
+    """Score both answers and classify the cross-verification outcome.
+
+    ``question_record`` carries the reference answer. The answers must come
+    from executing the respective methods, not from any cached guess.
+
+    Notice that citations or passages attached to Method B do NOT influence
+    the label: only answer quality does.
+    """
+    text_a, abstained_a = _answer_fields(answer_a)
+    text_b, abstained_b = _answer_fields(answer_b)
+    empty_a = answer_a is None or abstained_a or not text_a.strip()
+    empty_b = answer_b is None or abstained_b or not text_b.strip()
+
+    gold = question_record.answer
+    em_a = em_score(gold, text_a) if (answer_a and not empty_a) else 0.0
+    f1_a = f1_score(gold, text_a) if (answer_a and not empty_a) else 0.0
+    em_b = em_score(gold, text_b) if (answer_b and not empty_b) else 0.0
+    f1_b = f1_score(gold, text_b) if (answer_b and not empty_b) else 0.0
+
+    quality_a = 0.5 * em_a + 0.5 * f1_a
+    quality_b = 0.5 * em_b + 0.5 * f1_b
+    delta = quality_b - quality_a
+
+    if not gold.strip() or (empty_a and empty_b):
+        label = "ambiguous"
+    elif delta >= gap_threshold:
+        label = "retrieval_better"
+    elif delta <= -gap_threshold:
+        label = "no_retrieval_better"
+    else:
+        label = "similar"
+    return Outcome(
+        label=label,
+        quality_a=quality_a,
+        quality_b=quality_b,
+        delta=round(delta, 4),
+        em_a=em_a,
+        f1_a=f1_a,
+        em_b=em_b,
+        f1_b=f1_b,
+    )
+
+
+# ======================================================================
+# Per-policy metric aggregation.
+# ======================================================================
 
 def mean(xs) -> float:
     xs = [x for x in xs if x is not None]

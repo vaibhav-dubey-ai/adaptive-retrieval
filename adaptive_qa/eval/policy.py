@@ -44,8 +44,8 @@ from __future__ import annotations
 
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence
 
-from ..timeutil import now_ns
-from .em_f1 import composite_score, em_score, f1_score
+from ..common import now_ns
+from .metrics import composite_score, em_score, f1_score
 
 POLICIES = ("never_retrieve", "always_retrieve", "adaptive", "oracle")
 
@@ -79,10 +79,10 @@ def evaluate_policies(
     """Run the four-policy experiment over ``examples``.
 
     ``decide_fn(question)`` must return ``(decision, score, meta)`` where
-    ``decision`` is a :class:`~adaptive_qa.types.Decision` (or its string
+    ``decision`` is a :class:`~adaptive_qa.common.Decision` (or its string
     value). ``retriever`` has ``retrieve(question, top_k)``.
     """
-    from ..types import Decision
+    from ..common import Decision
 
     rows: List[Dict[str, Any]] = []
     answers_used = 0

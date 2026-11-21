@@ -26,8 +26,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from .config import PROJECT_ROOT
-from .types import CorpusDoc, RetrievalHit
+from ..common import PROJECT_ROOT
+from ..common import CorpusDoc, RetrievalHit
 
 DOCUMENT_ROOT = PROJECT_ROOT / "data" / "documents"
 
@@ -364,7 +364,7 @@ class DocumentStore:
         ``hybrid`` are selected per request. Only chunks of active documents
         are loaded here, so inactive/deleted documents can never be retrieved.
         """
-        from .retrieval import load_retriever, normalize_method
+        from ..retrieval import load_retriever, normalize_method
 
         chunks = self.load_chunks(doc_id)
         docs: List[CorpusDoc] = []

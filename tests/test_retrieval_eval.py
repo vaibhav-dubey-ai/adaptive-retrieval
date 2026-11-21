@@ -24,7 +24,7 @@ from adaptive_qa.eval.retrieval_eval import (  # noqa: E402
     validate_labels,
     write_results,
 )
-from adaptive_qa.types import RetrievalHit  # noqa: E402
+from adaptive_qa.common import RetrievalHit  # noqa: E402
 
 DATASET = PROJECT_ROOT / "eval_data" / "retrieval_eval" / "ch6_er_model_questions.jsonl"
 

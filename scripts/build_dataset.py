@@ -22,16 +22,16 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from adaptive_qa.config import load_config, resolve_path  # noqa: E402
-from adaptive_qa.corpus import build_corpus, save_corpus, save_eval_manifest  # noqa: E402
-from adaptive_qa.dataset import (  # noqa: E402
+from adaptive_qa.common import load_config, resolve_path  # noqa: E402
+from adaptive_qa.hotpot.data import build_corpus, save_corpus, save_eval_manifest  # noqa: E402
+from adaptive_qa.hotpot.data import (  # noqa: E402
     assign_splits,
     choose_offset,
     fetch_hotpotqa_rows,
     normalize_hotpot_row,
     save_records_jsonl,
 )
-from adaptive_qa.answering.parametric_store import (  # noqa: E402
+from adaptive_qa.answering.simulated import (  # noqa: E402
     build_parametric_store,
     save_parametric_store,
 )

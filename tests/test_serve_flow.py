@@ -13,8 +13,8 @@ import pytest
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from adaptive_qa.serve import BranchResult, ServeFlow, _compare_metrics
-from adaptive_qa.types import Decision, GeneratedAnswer, RetrievalHit
+from adaptive_qa.live.serve import BranchResult, ServeFlow, _compare_metrics
+from adaptive_qa.common import Decision, GeneratedAnswer, RetrievalHit
 
 
 class SpyEngine:

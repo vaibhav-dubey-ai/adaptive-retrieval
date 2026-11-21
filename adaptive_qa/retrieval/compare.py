@@ -22,8 +22,8 @@ from __future__ import annotations
 from collections import Counter
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence
 
-from ..timeutil import now_ns
-from ..types import RetrievalHit
+from ..common import now_ns
+from ..common import RetrievalHit
 
 SCORE_KIND = {
     "bm25": "BM25 score (unbounded)",

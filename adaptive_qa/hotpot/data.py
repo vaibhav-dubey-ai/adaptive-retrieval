@@ -1,37 +1,143 @@
-"""Dataset interface for HotpotQA (distractor configuration).
-
-- ``fetch_hotpotqa_rows`` pulls paged rows from the Hugging Face
-  ``datasets-server`` REST API. Sampling is deterministic: a fixed row offset
-  (derived from a seed) and ``n`` consecutive rows are taken, so re-running the
-  download script reproduces the same dataset byte-for-byte.
-- ``load_records_jsonl`` reads normalized question JSONL files.
-- ``assign_splits`` performs question-level train/validation/test splitting
-  with a seeded shuffle, so one question, its answer or its paragraphs never
-  appear in more than one split.
-
-The default sample uses 200 questions from the ``validation`` split (the eval
-sample that drives corpus construction and all experiments). A separate slice
-of ``train``-split rows is the source of the answering engine's simulated
-parametric knowledge (Stage 2: ``build_parametric_store``); because HotpotQA
-train and validation rows are disjoint, the closed-book engine's memory is
-disjoint from the eval sample, mirroring how a real LLM was pretrained on text
-that is disjoint from benchmark questions.
-"""
+"""HotpotQA data preparation: build the corpus and question records used by the offline experiment."""
 
 from __future__ import annotations
 
+import hashlib
 import json
 import random
+import requests
 import time
+from ..common import CorpusDoc
+from ..common import QuestionRecord
+from ..common import resolve_path
 from pathlib import Path
+from typing import Any, Dict, Iterable, List, Sequence, Tuple
 from typing import Any, Dict, Iterator, List, Optional, Tuple
 from urllib.parse import quote
 
-import requests
 
-from .config import resolve_path
-from .types import QuestionRecord
+# ======================================================================
+# Corpus construction for retrieval.
+# ======================================================================
 
+def _doc_hash(title: str, text: str) -> str:
+    h = hashlib.sha1()
+    h.update(title.encode("utf-8"))
+    h.update(b"\x00")
+    h.update(text.encode("utf-8"))
+    return h.hexdigest()[:12]
+
+
+def _paragraph_text(sentences: Sequence[str]) -> str:
+    return " ".join(s.strip() for s in sentences if s and s.strip())
+
+
+def build_corpus(records: Iterable[Dict[str, Any]]) -> Tuple[List[CorpusDoc], Dict[str, Any]]:
+    """Build the shared document corpus (plus evaluation-only metadata).
+
+    Returns ``(docs, evaluation_meta)`` where ``evaluation_meta`` contains the
+    per-question list of gold doc ids. ``evaluation_meta`` must be persisted
+    only to the corpus *evaluation manifest*, never handed to retrieval-time
+    components.
+    """
+    docs: List[CorpusDoc] = []
+    seen: Dict[str, int] = {}
+    gold_doc_ids_by_question: Dict[str, List[str]] = {}
+
+    for rec in records:
+        qid = rec["question_id"]
+        paragraphs = rec["paragraphs"]
+        gold_title_set = set(rec.get("gold_titles", []))
+
+        found_gold: List[str] = []
+        for para in paragraphs:
+            title = para["title"]
+            sentences = [s for s in para["sentences"] if s and s.strip()]
+            text = _paragraph_text(sentences)
+            if not text:
+                continue
+            key = _doc_hash(title, text)
+            if key not in seen:
+                seen[key] = len(docs)
+                docs.append(
+                    CorpusDoc(
+                        doc_id=f"doc_{key}",
+                        title=title,
+                        text=text,
+                        sentences=tuple(sentences),
+                        source_questions=(),
+                    )
+                )
+            if title in gold_title_set:
+                found_gold.append(docs[seen[key]].doc_id)
+
+        if found_gold:
+            gold_doc_ids_by_question[qid] = sorted(set(found_gold))
+
+    evaluation_meta = {
+        "gold_doc_ids_by_question": gold_doc_ids_by_question,
+        "n_documents": len(docs),
+    }
+    return docs, evaluation_meta
+
+
+def save_corpus(docs: List[CorpusDoc], jsonl_path: str) -> None:
+    p = resolve_path(jsonl_path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with p.open("w", encoding="utf-8") as f:
+        for doc in docs:
+            f.write(
+                json.dumps(
+                    {
+                        "doc_id": doc.doc_id,
+                        "title": doc.title,
+                        "text": doc.text,
+                        "sentences": list(doc.sentences),
+                        "source_questions": list(doc.source_questions),
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
+
+
+def save_eval_manifest(evaluation_meta: Dict[str, Any], manifest_path: str) -> None:
+    """Persist the evaluation-only gold map to a separate manifest file."""
+    p = resolve_path(manifest_path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    payload = dict(evaluation_meta)
+    payload["_note"] = (
+        "EVALUATION ONLY: gold_doc_ids_by_question names reference evidence "
+        "per question. Retrieval components and the decision engine must never "
+        "read this file."
+    )
+    p.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def load_corpus(jsonl_path: str) -> List[CorpusDoc]:
+    p = resolve_path(jsonl_path)
+    docs: List[CorpusDoc] = []
+    with p.open("r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            obj = json.loads(line)
+            docs.append(
+                CorpusDoc(
+                    doc_id=obj["doc_id"],
+                    title=obj["title"],
+                    text=obj["text"],
+                    sentences=tuple(obj.get("sentences", [])),
+                    source_questions=tuple(obj.get("source_questions", [])),
+                )
+            )
+    return docs
+
+
+# ======================================================================
+# Dataset interface for HotpotQA (distractor configuration).
+# ======================================================================
 
 def fetch_hotpotqa_rows(
     hf_rows_api: str,

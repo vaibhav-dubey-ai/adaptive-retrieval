@@ -19,9 +19,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Sequence
 
-from .timeutil import now_ns
-from .types import Decision, GeneratedAnswer, RetrievalHit
-from .retrieval.bm25 import STOPWORDS  # noqa: F401  (imported for type-independence)
+from ..common import now_ns
+from ..common import Decision, GeneratedAnswer, RetrievalHit
 
 ABSTAIN_TEXT = "I don't know (abstained from answering from memory)."
 

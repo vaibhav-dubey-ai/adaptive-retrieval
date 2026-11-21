@@ -24,7 +24,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from adaptive_qa.answering.llm_backend import resolve_chat_kwargs  # noqa: E402
-from adaptive_qa.documents import DocumentStore  # noqa: E402
+from adaptive_qa.live.documents import DocumentStore  # noqa: E402
 
 BOILERPLATE = re.compile(
     r"table of contents|exhibit|signature|pursuant to|commission file|incorporated by reference|"

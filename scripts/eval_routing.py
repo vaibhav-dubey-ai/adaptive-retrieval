@@ -25,14 +25,14 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from adaptive_qa.answering.cache import AnswerCache  # noqa: E402
 from adaptive_qa.answering.llm_backend import LLMBackend, resolve_chat_kwargs  # noqa: E402
-from adaptive_qa.config import load_config, resolve_path  # noqa: E402
+from adaptive_qa.common import load_config, resolve_path  # noqa: E402
 from adaptive_qa.decision import build_decision_engine  # noqa: E402
 from adaptive_qa.decision.preflight import CollectionPreflight  # noqa: E402
-from adaptive_qa.documents import DocumentStore  # noqa: E402
+from adaptive_qa.live.documents import DocumentStore  # noqa: E402
 from adaptive_qa.eval.retrieval_eval import load_eval_examples, validate_labels  # noqa: E402
 from adaptive_qa.eval.routing import label_rows, repeated_splits  # noqa: E402
 from adaptive_qa.retrieval import normalize_method  # noqa: E402
-from adaptive_qa.types import CorpusDoc  # noqa: E402
+from adaptive_qa.common import CorpusDoc  # noqa: E402
 
 DATASETS = [
     "eval_data/retrieval_eval/ch6_er_model_questions.jsonl",

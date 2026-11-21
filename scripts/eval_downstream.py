@@ -45,12 +45,12 @@ from adaptive_qa.answering.llm_backend import (  # noqa: E402
     ModelNotConfiguredError,
     resolve_chat_kwargs,
 )
-from adaptive_qa.config import load_config  # noqa: E402
-from adaptive_qa.documents import DocumentStore  # noqa: E402
-from adaptive_qa.eval.em_f1 import em_score, f1_score  # noqa: E402
+from adaptive_qa.common import load_config  # noqa: E402
+from adaptive_qa.live.documents import DocumentStore  # noqa: E402
+from adaptive_qa.eval.metrics import em_score, f1_score  # noqa: E402
 from adaptive_qa.eval.retrieval_eval import load_eval_examples  # noqa: E402
 from adaptive_qa.retrieval import RETRIEVAL_METHODS  # noqa: E402
-from adaptive_qa.timeutil import now_ns  # noqa: E402
+from adaptive_qa.common import now_ns  # noqa: E402
 
 CONDITIONS = ("closed_book",) + RETRIEVAL_METHODS
 

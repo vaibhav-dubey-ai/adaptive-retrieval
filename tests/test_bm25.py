@@ -1,4 +1,4 @@
-from adaptive_qa.corpus import CorpusDoc
+from adaptive_qa.hotpot.data import CorpusDoc
 from adaptive_qa.retrieval.bm25 import BM25Retriever, tokenize
 
 

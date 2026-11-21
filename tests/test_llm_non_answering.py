@@ -20,7 +20,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import adaptive_qa.answering.llm_backend as L
 from adaptive_qa.answering.llm_backend import AnswerBackendError, LLMBackend
-from adaptive_qa.types import RetrievalHit
+from adaptive_qa.common import RetrievalHit
 
 
 class FakeResponse:

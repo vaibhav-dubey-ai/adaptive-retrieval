@@ -1,4 +1,4 @@
-from adaptive_qa.answering.span_extraction import extract_answer_span, question_type
+from adaptive_qa.answering.simulated import extract_answer_span, question_type
 
 
 def test_question_types():

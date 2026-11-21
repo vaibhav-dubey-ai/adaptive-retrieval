@@ -15,7 +15,7 @@ from adaptive_qa.answering.llm_backend import (
     LLMBackend,
     ModelNotConfiguredError,
 )
-from adaptive_qa.types import RetrievalHit
+from adaptive_qa.common import RetrievalHit
 
 
 class FakeResponse:

@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from adaptive_qa.documents import (
+from adaptive_qa.live.documents import (
     DocumentStore,
     DocumentUploadError,
     chunk_pages,

@@ -11,7 +11,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from adaptive_qa.retrieval.compare import compare_methods  # noqa: E402
-from adaptive_qa.types import RetrievalHit  # noqa: E402
+from adaptive_qa.common import RetrievalHit  # noqa: E402
 
 
 def _hit(cid, score, method, text="passage text", ranks=None):
@@ -146,6 +146,8 @@ def test_api_retrieval_compare_uses_all_methods(monkeypatch):
 
     import api.main as api_main
 
+    from api import deps
+
     retrievers = {
         "bm25": FakeRetriever("bm25", [_hit("c:0010", 4.0, "bm25")]),
         "dense": FakeRetriever("dense", [_hit("c:0017", 0.8, "dense")]),
@@ -156,9 +158,9 @@ def test_api_retrieval_compare_uses_all_methods(monkeypatch):
         def active_documents(self):
             return [{"filename": "ch6.pdf", "n_chunks": 80}]
 
-    monkeypatch.setattr(api_main, "_docs", lambda: FakeStore())
-    monkeypatch.setattr(api_main, "_collection_info", lambda method, k: {"n_chunks": 80})
-    monkeypatch.setattr(api_main, "_collection_retriever", _provider(retrievers))
+    monkeypatch.setattr(deps, "_docs", lambda: FakeStore())
+    monkeypatch.setattr(deps, "_collection_info", lambda method, k: {"n_chunks": 80})
+    monkeypatch.setattr(deps, "_collection_retriever", _provider(retrievers))
 
     client = TestClient(api_main.app)
     resp = client.post("/retrieval/compare", json={"question": "What is a diamond?", "top_k": 5})
@@ -175,6 +177,8 @@ def test_api_compare_requires_a_question(monkeypatch):
 
     import api.main as api_main
 
+    from api import deps
+
     client = TestClient(api_main.app)
     assert client.post("/retrieval/compare", json={"question": " "}).status_code == 400
 
@@ -184,11 +188,13 @@ def test_api_compare_validates_top_k(monkeypatch):
 
     import api.main as api_main
 
+    from api import deps
+
     class FakeStore:
         def active_documents(self):
             return [{"filename": "x.pdf", "n_chunks": 1}]
 
-    monkeypatch.setattr(api_main, "_docs", lambda: FakeStore())
+    monkeypatch.setattr(deps, "_docs", lambda: FakeStore())
     client = TestClient(api_main.app)
     assert client.post("/retrieval/compare", json={"question": "q", "top_k": 0}).status_code == 400
     assert client.post("/retrieval/compare", json={"question": "q", "top_k": 99}).status_code == 400

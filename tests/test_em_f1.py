@@ -1,6 +1,6 @@
 import pytest
 
-from adaptive_qa.eval.em_f1 import em_score, f1_score
+from adaptive_qa.eval.metrics import em_score, f1_score
 
 
 def test_em_perfect_and_empty():

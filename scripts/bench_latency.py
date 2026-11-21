@@ -38,7 +38,7 @@ from typing import Any, Dict, List, Optional
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from adaptive_qa.config import load_config, resolve_path  # noqa: E402
+from adaptive_qa.common import load_config, resolve_path  # noqa: E402
 
 
 def median(values: List[Optional[float]]) -> Optional[float]:
@@ -109,7 +109,7 @@ def _cold(result) -> Optional[bool]:
 
 
 def build_flow():
-    from adaptive_qa.serve import ServeFlow  # noqa: F401 (import check only)
+    from adaptive_qa.live.serve import ServeFlow  # noqa: F401 (import check only)
     from api.main import _serve_flow  # reuses the exact dashboard flow
 
     return _serve_flow()

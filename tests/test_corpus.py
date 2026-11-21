@@ -1,10 +1,10 @@
 import json
 
-from adaptive_qa.corpus import build_corpus, load_corpus
+from adaptive_qa.hotpot.data import build_corpus, load_corpus
 
 import pathlib
 
-from adaptive_qa.corpus import save_corpus, save_eval_manifest
+from adaptive_qa.hotpot.data import save_corpus, save_eval_manifest
 
 
 def _records():

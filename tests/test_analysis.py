@@ -8,7 +8,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from adaptive_qa.analysis import (  # noqa: E402
+from adaptive_qa.live.serve import (  # noqa: E402
     assign_citations,
     citation_map,
     compare_answers,

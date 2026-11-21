@@ -1,9 +1,9 @@
 import pytest
 
-from adaptive_qa.answering.finite_engine import FiniteEngine
-from adaptive_qa.answering.parametric_store import ParametricStore
-from adaptive_qa.answering.span_absorber import SpanAbsorber
-from adaptive_qa.types import RetrievalHit
+from adaptive_qa.answering.simulated import FiniteEngine
+from adaptive_qa.answering.simulated import ParametricStore
+from adaptive_qa.answering.simulated import SpanAbsorber
+from adaptive_qa.common import RetrievalHit
 
 
 def _store() -> ParametricStore:

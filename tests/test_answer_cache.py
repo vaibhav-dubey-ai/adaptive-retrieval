@@ -9,7 +9,7 @@ from typing import Dict, List
 from adaptive_qa.answering.cache import AnswerCache, _cache_key
 from adaptive_qa.eval.policy import _per_class_metrics, evaluate_policies
 from adaptive_qa.eval.retrieval_eval import EvalExample
-from adaptive_qa.types import GeneratedAnswer
+from adaptive_qa.common import GeneratedAnswer
 
 
 def test_answer_cache_put_get_persistence(tmp_path: Path):
@@ -77,7 +77,7 @@ def test_evaluate_policies_with_cache(tmp_path: Path):
 
     class FakeRetriever:
         def retrieve(self, q, k):
-            from adaptive_qa.types import RetrievalHit
+            from adaptive_qa.common import RetrievalHit
             return [RetrievalHit(doc_id="c:1", score=1.0, rank=1, text="Text 1")]
 
     call_count = {"a": 0, "b": 0}

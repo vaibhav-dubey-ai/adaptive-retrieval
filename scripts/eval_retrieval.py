@@ -26,8 +26,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from adaptive_qa.config import load_config  # noqa: E402
-from adaptive_qa.documents import DocumentStore  # noqa: E402
+from adaptive_qa.common import load_config  # noqa: E402
+from adaptive_qa.live.documents import DocumentStore  # noqa: E402
 from adaptive_qa.eval.retrieval_eval import (  # noqa: E402
     compare_methods,
     load_eval_examples,

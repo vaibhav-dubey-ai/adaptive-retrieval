@@ -22,14 +22,14 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
-from .config import load_config, resolve_path
-from .corpus import load_corpus
-from .dataset import load_records_jsonl, to_question_records
+from ..common import load_config, resolve_path
+from .data import load_corpus
+from .data import load_records_jsonl, to_question_records
 from .pipeline import Pipeline, QuestionRunRecord
-from .retrieval import build_retriever_from_config
-from .types import Decision, QuestionRecord
-from .eval.outcome import label_outcome
-from .eval import metrics as M
+from ..retrieval import build_retriever_from_config
+from ..common import Decision, QuestionRecord
+from ..eval.metrics import label_outcome
+from ..eval import metrics as M
 
 
 @dataclass
@@ -44,12 +44,12 @@ class ExperimentRunner:
         self.top_k = int(cfg["retrieval"].get("top_k", 8))
         docs = load_corpus(cfg["corpus"]["jsonl_path"])
         self.retriever = build_retriever_from_config(cfg, docs)
-        from .answering import build_method_a, build_method_b
+        from ..answering import build_method_a, build_method_b
 
         self.method_a = build_method_a(cfg)
         self.method_b = build_method_b(cfg)
         self.decision_engine = None
-        from .decision import build_decision_engine
+        from ..decision import build_decision_engine
 
         self.decision_engine = build_decision_engine(cfg)
 
@@ -133,7 +133,7 @@ class ExperimentRunner:
         return d
 
     def _build_summary(self, rows: List[Dict[str, Any]], run_dir: Path) -> Dict[str, Any]:
-        from .cost import cost_summary
+        from ..common import cost_summary
 
         per_retrieval = self._cost_per_retrieval_usd()
         summary: Dict[str, Any] = {
@@ -155,7 +155,7 @@ class ExperimentRunner:
         The store supplies only model-side uncertainty signals for the
         decision engine's features - never reference answers or gold docs.
         """
-        from .answering.parametric_store import load_parametric_store
+        from ..answering.simulated import load_parametric_store
 
         if getattr(self, "_familiarity_store", None) is None:
             self._familiarity_store = load_parametric_store(

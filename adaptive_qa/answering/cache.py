@@ -15,7 +15,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
-from ..config import PROJECT_ROOT
+from ..common import PROJECT_ROOT
 
 
 DEFAULT_CACHE_PATH = PROJECT_ROOT / "data" / "eval_answer_cache.jsonl"

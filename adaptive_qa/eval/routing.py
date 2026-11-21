@@ -28,7 +28,7 @@ import math
 import random
 from typing import Any, Dict, List, Optional, Sequence
 
-from .em_f1 import quality_score
+from .metrics import quality_score
 
 FEATURES = (
     "corpus_coverage",

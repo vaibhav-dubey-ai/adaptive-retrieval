@@ -11,7 +11,7 @@ import pytest
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from adaptive_qa.eval.retrieval_metrics import (  # noqa: E402
+from adaptive_qa.eval.retrieval_eval import (  # noqa: E402
     aggregate,
     latency_stats,
     ndcg_at_k,

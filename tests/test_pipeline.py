@@ -2,9 +2,9 @@ import types
 
 import pytest
 
-from adaptive_qa.pipeline import Pipeline, QuestionRunRecord
-from adaptive_qa.eval.outcome import label_outcome
-from adaptive_qa.types import Decision, GeneratedAnswer, RetrievalHit, QuestionRecord
+from adaptive_qa.hotpot.pipeline import Pipeline, QuestionRunRecord
+from adaptive_qa.eval.metrics import label_outcome
+from adaptive_qa.common import Decision, GeneratedAnswer, RetrievalHit, QuestionRecord
 
 
 class SpyRetriever:
